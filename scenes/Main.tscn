@@ -40,53 +40,337 @@ theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 14
 theme_override_constants/margin_bottom = 14
 
-[node name="BoardLabel" type="Label" parent="Board/BoardMargin"]
-layout_mode = 2
-text = "Board (Placeholder Grid)"
-horizontal_alignment = 1
-
-[node name="Units" type="HBoxContainer" parent="Board/BoardMargin"]
+[node name="BoardContent" type="VBoxContainer" parent="Board/BoardMargin"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
-[node name="UnitA" type="Panel" parent="Board/BoardMargin/Units"]
-custom_minimum_size = Vector2(120, 180)
+[node name="BoardLabel" type="Label" parent="Board/BoardMargin/BoardContent"]
 layout_mode = 2
+text = "Player Board (5x3)"
+horizontal_alignment = 1
 
-[node name="UnitALabel" type="Label" parent="Board/BoardMargin/Units/UnitA"]
+[node name="TileGrid" type="GridContainer" parent="Board/BoardMargin/BoardContent"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 5
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="Tile01" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile01"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -44.5
+offset_left = -22.0
 offset_top = -11.5
-offset_right = 44.5
+offset_right = 22.0
 offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
-text = "Unit A"
+text = "Empty"
+horizontal_alignment = 1
 
-[node name="UnitB" type="Panel" parent="Board/BoardMargin/Units"]
-custom_minimum_size = Vector2(120, 180)
+[node name="Tile02" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
 layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
 
-[node name="UnitBLabel" type="Label" parent="Board/BoardMargin/Units/UnitB"]
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile02"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -44.5
+offset_left = -22.0
 offset_top = -11.5
-offset_right = 44.5
+offset_right = 22.0
 offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
-text = "Unit B"
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile03" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile03"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile04" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile04"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile05" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile05"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile06" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile06"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile07" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile07"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile08" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile08"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile09" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile09"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile10" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile10"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile11" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile11"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile12" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile12"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile13" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile13"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile14" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile14"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Tile15" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+self_modulate = Color(0.22, 0.24, 0.31, 1)
+
+[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile15"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -11.5
+offset_right = 22.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+horizontal_alignment = 1
 
 [node name="EnemyLane" type="VBoxContainer" parent="."]
 layout_mode = 2
