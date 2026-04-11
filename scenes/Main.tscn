@@ -1,0 +1,181 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2h37t7i6k2ty"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_1a2b3"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_1a2b3")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0784314, 0.0980392, 0.141176, 1)
+
+[node name="Board" type="Panel" parent="."]
+custom_minimum_size = Vector2(760, 500)
+layout_mode = 2
+offset_left = 30.0
+offset_top = 120.0
+offset_right = 790.0
+offset_bottom = 620.0
+
+[node name="BoardMargin" type="MarginContainer" parent="Board"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="BoardLabel" type="Label" parent="Board/BoardMargin"]
+layout_mode = 2
+text = "Board (Placeholder Grid)"
+horizontal_alignment = 1
+
+[node name="Units" type="HBoxContainer" parent="Board/BoardMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="UnitA" type="Panel" parent="Board/BoardMargin/Units"]
+custom_minimum_size = Vector2(120, 180)
+layout_mode = 2
+
+[node name="UnitALabel" type="Label" parent="Board/BoardMargin/Units/UnitA"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -44.5
+offset_top = -11.5
+offset_right = 44.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Unit A"
+
+[node name="UnitB" type="Panel" parent="Board/BoardMargin/Units"]
+custom_minimum_size = Vector2(120, 180)
+layout_mode = 2
+
+[node name="UnitBLabel" type="Label" parent="Board/BoardMargin/Units/UnitB"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -44.5
+offset_top = -11.5
+offset_right = 44.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Unit B"
+
+[node name="EnemyLane" type="VBoxContainer" parent="."]
+layout_mode = 2
+offset_left = 850.0
+offset_top = 120.0
+offset_right = 1230.0
+offset_bottom = 620.0
+theme_override_constants/separation = 10
+
+[node name="EnemyTitle" type="Label" parent="EnemyLane"]
+layout_mode = 2
+text = "Incoming Enemies"
+horizontal_alignment = 1
+
+[node name="Enemy1" type="Panel" parent="EnemyLane"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Enemy1Label" type="Label" parent="EnemyLane/Enemy1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -75.5
+offset_top = -11.5
+offset_right = 75.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Enemy Placeholder 1"
+
+[node name="Enemy2" type="Panel" parent="EnemyLane"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Enemy2Label" type="Label" parent="EnemyLane/Enemy2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -75.5
+offset_top = -11.5
+offset_right = 75.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Enemy Placeholder 2"
+
+[node name="TopBar" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+offset_left = 30.0
+offset_top = 20.0
+offset_right = 1230.0
+offset_bottom = 90.0
+
+[node name="TopRow" type="HBoxContainer" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="WaveLabel" type="Label" parent="TopBar/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Wave: 1"
+
+[node name="GateLabel" type="Label" parent="TopBar/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Gate HP: 100"
+
+[node name="SummonButton" type="Button" parent="TopBar/TopRow"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+text = "Summon Unit"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 2
+offset_left = 30.0
+offset_top = 640.0
+offset_right = 1230.0
+offset_bottom = 700.0
+text = "Press Summon Unit to cycle placeholder units."
+vertical_alignment = 1

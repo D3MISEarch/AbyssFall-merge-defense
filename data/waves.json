@@ -1,0 +1,9 @@
+{
+  "prototype": {
+    "starting_gate_hp": 100,
+    "waves": [
+      {"wave": 1, "enemies": ["Slime", "Bat"]},
+      {"wave": 2, "enemies": ["Goblin", "Goblin Archer"]}
+    ]
+  }
+}
