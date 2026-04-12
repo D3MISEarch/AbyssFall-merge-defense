@@ -374,20 +374,36 @@ func _build_strip_u_route(
 	var spawn_rect: Rect2 = _rect_in_local_space(strip_panel, spawn_panel)
 	var board_rect: Rect2 = _rect_in_local_space(strip_panel, center_board_panel)
 	var gate_rect: Rect2 = _rect_in_local_space(strip_panel, gate_panel)
-	var lane_thickness: float = 18.0
-	var board_padding: float = 12.0
+	var lane_thickness: float = 20.0
+	var board_padding: float = 14.0
+	var left_lane_x: float = max(6.0, board_rect.position.x - lane_thickness - board_padding)
+	var right_lane_x: float = min(
+		strip_panel.size.x - lane_thickness - 6.0,
+		board_rect.position.x + board_rect.size.x + board_padding
+	)
 	var top_lane_y: float = max(6.0, board_rect.position.y - lane_thickness - board_padding)
 	var bottom_lane_y: float = min(
 		strip_panel.size.y - lane_thickness - 6.0,
 		board_rect.position.y + board_rect.size.y + board_padding
 	)
-	var entry_x: float = spawn_rect.position.x + spawn_rect.size.x - 8.0
-	var right_lane_x: float = board_rect.position.x + board_rect.size.x + board_padding
-	var gate_entry_x: float = gate_rect.position.x + 8.0
-	var top_lane_width: float = max(40.0, right_lane_x + lane_thickness - entry_x)
-	var right_lane_height: float = max(40.0, bottom_lane_y + lane_thickness - top_lane_y)
-	var bottom_lane_start: float = board_rect.position.x + 10.0
-	var bottom_lane_width: float = max(50.0, gate_entry_x - bottom_lane_start)
+	var vertical_height: float = max(42.0, (bottom_lane_y + lane_thickness) - top_lane_y)
+	var horizontal_width: float = max(60.0, (right_lane_x + lane_thickness) - left_lane_x)
+	var spawn_top_entry_y: float = clamp(spawn_rect.position.y + 10.0, 4.0, strip_panel.size.y - lane_thickness - 4.0)
+	var spawn_bottom_entry_y: float = clamp(
+		spawn_rect.position.y + spawn_rect.size.y - lane_thickness - 10.0,
+		4.0,
+		strip_panel.size.y - lane_thickness - 4.0
+	)
+	var gate_top_entry_y: float = clamp(gate_rect.position.y + 10.0, 4.0, strip_panel.size.y - lane_thickness - 4.0)
+	var gate_bottom_entry_y: float = clamp(
+		gate_rect.position.y + gate_rect.size.y - lane_thickness - 10.0,
+		4.0,
+		strip_panel.size.y - lane_thickness - 4.0
+	)
+	var spawn_connector_start_x: float = spawn_rect.position.x + spawn_rect.size.x - 8.0
+	var gate_connector_end_x: float = gate_rect.position.x + 8.0
+	var spawn_connector_width: float = max(16.0, left_lane_x - spawn_connector_start_x)
+	var gate_connector_width: float = max(16.0, gate_connector_end_x - (right_lane_x + lane_thickness))
 	var lane_color: Color = Color(0.36, 0.48, 0.58, 0.82)
 	var edging_color: Color = Color(0.70, 0.78, 0.86, 0.90)
 	var glow_color: Color = Color(0.43, 0.62, 0.78, 0.22)
@@ -397,34 +413,99 @@ func _build_strip_u_route(
 		edging_color = Color(0.73, 0.41, 0.74, 0.91)
 		glow_color = Color(0.59, 0.27, 0.72, 0.24)
 		fog_color = Color(0.57, 0.28, 0.68, 0.16)
-
-	_add_route_segment(
-		strip_overlay,
-		Rect2(entry_x, top_lane_y, top_lane_width, lane_thickness),
-		lane_color,
-		edging_color,
-		glow_color,
-		fog_color,
-		false
-	)
-	_add_route_segment(
-		strip_overlay,
-		Rect2(right_lane_x, top_lane_y, lane_thickness, right_lane_height),
-		lane_color,
-		edging_color,
-		glow_color,
-		fog_color,
-		true
-	)
-	_add_route_segment(
-		strip_overlay,
-		Rect2(bottom_lane_start, bottom_lane_y, bottom_lane_width, lane_thickness),
-		lane_color,
-		edging_color,
-		glow_color,
-		fog_color,
-		false
-	)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(spawn_connector_start_x, spawn_top_entry_y, spawn_connector_width, lane_thickness),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			false
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(left_lane_x, top_lane_y, lane_thickness, vertical_height),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			true
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(left_lane_x, bottom_lane_y, horizontal_width, lane_thickness),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			false
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(right_lane_x, top_lane_y, lane_thickness, vertical_height),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			true
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(right_lane_x + lane_thickness, gate_top_entry_y, gate_connector_width, lane_thickness),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			false
+		)
+	else:
+		lane_color = lane_color.lightened(0.08)
+		glow_color = glow_color.lightened(0.12)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(spawn_connector_start_x, spawn_bottom_entry_y, spawn_connector_width, lane_thickness),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			false
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(left_lane_x, top_lane_y, lane_thickness, vertical_height),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			true
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(left_lane_x, top_lane_y, horizontal_width, lane_thickness),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			false
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(right_lane_x, top_lane_y, lane_thickness, vertical_height),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			true
+		)
+		_add_route_segment(
+			strip_overlay,
+			Rect2(right_lane_x + lane_thickness, gate_bottom_entry_y, gate_connector_width, lane_thickness),
+			lane_color,
+			edging_color,
+			glow_color,
+			fog_color,
+			false
+		)
 
 func _rect_in_local_space(local_root: Control, target: Control) -> Rect2:
 	var target_rect: Rect2 = target.get_global_rect()
