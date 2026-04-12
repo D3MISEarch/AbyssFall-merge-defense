@@ -126,6 +126,7 @@ var lane_portal_core_rects: Array[ColorRect] = []
 var lane_portal_ring_rects: Array[ColorRect] = []
 var opponent_tile_panels: Array[Panel] = []
 var opponent_tile_labels: Array[Label] = []
+var route_visual_layers: Array[Control] = []
 
 @onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -316,6 +317,9 @@ func _ready() -> void:
 	loss_label.visible = false
 	status_label.text = "Prototype loaded. Summon units and hold the gate."
 	_update_selection_detail()
+	enemy_strip_panel.resized.connect(_on_battlefield_strip_resized)
+	player_strip_panel.resized.connect(_on_battlefield_strip_resized)
+	call_deferred("_build_u_route_overlays")
 
 func _apply_dark_fantasy_theme() -> void:
 	background_rect.color = Color(0.05, 0.05, 0.07, 1.0)
@@ -329,6 +333,183 @@ func _apply_dark_fantasy_theme() -> void:
 	_style_enemy_lanes()
 	_style_unit_detail_panel()
 	_style_status_labels()
+
+func _on_battlefield_strip_resized() -> void:
+	call_deferred("_build_u_route_overlays")
+
+func _build_u_route_overlays() -> void:
+	_clear_route_overlays()
+	_build_strip_u_route(enemy_strip_panel, enemy_spawn_panel, opponent_board_panel, enemy_gate_panel, true)
+	_build_strip_u_route(player_strip_panel, player_spawn_panel, board_panel, player_gate_panel, false)
+
+func _clear_route_overlays() -> void:
+	for route_layer in route_visual_layers:
+		if is_instance_valid(route_layer):
+			route_layer.queue_free()
+	route_visual_layers.clear()
+
+func _build_strip_u_route(
+	strip_panel: Panel,
+	spawn_panel: Panel,
+	center_board_panel: Panel,
+	gate_panel: Panel,
+	is_hostile_strip: bool
+) -> void:
+	if not is_instance_valid(strip_panel):
+		return
+	if not is_instance_valid(spawn_panel):
+		return
+	if not is_instance_valid(center_board_panel):
+		return
+	if not is_instance_valid(gate_panel):
+		return
+
+	var strip_overlay: Control = Control.new()
+	strip_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	strip_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	strip_panel.add_child(strip_overlay)
+	strip_panel.move_child(strip_overlay, strip_panel.get_child_count() - 1)
+	route_visual_layers.append(strip_overlay)
+
+	var spawn_rect: Rect2 = _rect_in_local_space(strip_panel, spawn_panel)
+	var board_rect: Rect2 = _rect_in_local_space(strip_panel, center_board_panel)
+	var gate_rect: Rect2 = _rect_in_local_space(strip_panel, gate_panel)
+	var lane_thickness: float = 18.0
+	var board_padding: float = 12.0
+	var top_lane_y: float = max(6.0, board_rect.position.y - lane_thickness - board_padding)
+	var bottom_lane_y: float = min(
+		strip_panel.size.y - lane_thickness - 6.0,
+		board_rect.position.y + board_rect.size.y + board_padding
+	)
+	var entry_x: float = spawn_rect.position.x + spawn_rect.size.x - 8.0
+	var right_lane_x: float = board_rect.position.x + board_rect.size.x + board_padding
+	var gate_entry_x: float = gate_rect.position.x + 8.0
+	var top_lane_width: float = max(40.0, right_lane_x + lane_thickness - entry_x)
+	var right_lane_height: float = max(40.0, bottom_lane_y + lane_thickness - top_lane_y)
+	var bottom_lane_start: float = board_rect.position.x + 10.0
+	var bottom_lane_width: float = max(50.0, gate_entry_x - bottom_lane_start)
+	var lane_color: Color = Color(0.36, 0.48, 0.58, 0.82)
+	var edging_color: Color = Color(0.70, 0.78, 0.86, 0.90)
+	var glow_color: Color = Color(0.43, 0.62, 0.78, 0.22)
+	var fog_color: Color = Color(0.36, 0.46, 0.57, 0.12)
+	if is_hostile_strip:
+		lane_color = Color(0.39, 0.21, 0.46, 0.84)
+		edging_color = Color(0.73, 0.41, 0.74, 0.91)
+		glow_color = Color(0.59, 0.27, 0.72, 0.24)
+		fog_color = Color(0.57, 0.28, 0.68, 0.16)
+
+	_add_route_segment(
+		strip_overlay,
+		Rect2(entry_x, top_lane_y, top_lane_width, lane_thickness),
+		lane_color,
+		edging_color,
+		glow_color,
+		fog_color,
+		false
+	)
+	_add_route_segment(
+		strip_overlay,
+		Rect2(right_lane_x, top_lane_y, lane_thickness, right_lane_height),
+		lane_color,
+		edging_color,
+		glow_color,
+		fog_color,
+		true
+	)
+	_add_route_segment(
+		strip_overlay,
+		Rect2(bottom_lane_start, bottom_lane_y, bottom_lane_width, lane_thickness),
+		lane_color,
+		edging_color,
+		glow_color,
+		fog_color,
+		false
+	)
+
+func _rect_in_local_space(local_root: Control, target: Control) -> Rect2:
+	var target_rect: Rect2 = target.get_global_rect()
+	var local_position: Vector2 = local_root.to_local(target_rect.position)
+	return Rect2(local_position, target_rect.size)
+
+func _add_route_segment(
+	host: Control,
+	segment_rect: Rect2,
+	lane_color: Color,
+	edging_color: Color,
+	glow_color: Color,
+	fog_color: Color,
+	is_vertical: bool
+) -> void:
+	var segment: Panel = Panel.new()
+	segment.position = segment_rect.position
+	segment.size = segment_rect.size
+	segment.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var segment_style: StyleBoxFlat = StyleBoxFlat.new()
+	segment_style.bg_color = lane_color
+	segment_style.corner_radius_top_left = 10
+	segment_style.corner_radius_top_right = 10
+	segment_style.corner_radius_bottom_left = 10
+	segment_style.corner_radius_bottom_right = 10
+	segment_style.border_width_left = 2
+	segment_style.border_width_top = 2
+	segment_style.border_width_right = 2
+	segment_style.border_width_bottom = 2
+	segment_style.border_color = edging_color
+	segment_style.shadow_size = 8
+	segment_style.shadow_offset = Vector2(0.0, 2.0)
+	segment_style.shadow_color = Color(0.0, 0.0, 0.0, 0.30)
+	segment.add_theme_stylebox_override("panel", segment_style)
+	host.add_child(segment)
+
+	var path_panel: ColorRect = ColorRect.new()
+	path_panel.anchors_preset = Control.PRESET_FULL_RECT
+	path_panel.offset_left = 3.0
+	path_panel.offset_top = 3.0
+	path_panel.offset_right = -3.0
+	path_panel.offset_bottom = -3.0
+	path_panel.color = lane_color.lightened(0.07)
+	path_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	segment.add_child(path_panel)
+
+	var glow_panel: ColorRect = ColorRect.new()
+	glow_panel.anchors_preset = Control.PRESET_FULL_RECT
+	glow_panel.offset_left = 2.0
+	glow_panel.offset_top = 2.0
+	glow_panel.offset_right = -2.0
+	glow_panel.offset_bottom = -2.0
+	glow_panel.color = glow_color
+	glow_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	segment.add_child(glow_panel)
+
+	var fog_panel: ColorRect = ColorRect.new()
+	fog_panel.anchors_preset = Control.PRESET_FULL_RECT
+	fog_panel.offset_left = 1.0
+	fog_panel.offset_top = 1.0
+	fog_panel.offset_right = -1.0
+	fog_panel.offset_bottom = -1.0
+	fog_panel.color = fog_color
+	fog_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	segment.add_child(fog_panel)
+
+	_add_stone_edging(segment, edging_color, is_vertical)
+
+func _add_stone_edging(segment: Control, edging_color: Color, is_vertical: bool) -> void:
+	var stone_count: int = 6
+	if is_vertical:
+		stone_count = 5
+	for stone_index in stone_count:
+		var stone: ColorRect = ColorRect.new()
+		stone.custom_minimum_size = Vector2(7.0, 7.0)
+		stone.size = Vector2(7.0, 7.0)
+		stone.color = edging_color.darkened(0.22)
+		stone.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if is_vertical:
+			var y_offset: float = (float(stone_index + 1) * segment.size.y) / float(stone_count + 1)
+			stone.position = Vector2(1.0, y_offset - 3.0)
+		else:
+			var x_offset: float = (float(stone_index + 1) * segment.size.x) / float(stone_count + 1)
+			stone.position = Vector2(x_offset - 3.0, 1.0)
+		segment.add_child(stone)
 
 func _apply_background_atmosphere() -> void:
 	var forest_shadow: ColorRect = ColorRect.new()
