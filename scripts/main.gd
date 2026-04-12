@@ -70,9 +70,9 @@ const UNIT_DEFINITIONS: Dictionary = {
 }
 
 const SUPPORT_PANEL_COLOR: Color = Color(0.33, 0.33, 0.54, 1.0)
-const ATTACK_PANEL_COLOR: Color = Color(0.22, 0.30, 0.33, 1.0)
-const EMPTY_PANEL_COLOR: Color = Color(0.13, 0.14, 0.18, 1.0)
-const SELECTED_PANEL_COLOR: Color = Color(0.58, 0.47, 0.76, 1.0)
+const ATTACK_PANEL_COLOR: Color = Color(0.23, 0.28, 0.30, 1.0)
+const EMPTY_PANEL_COLOR: Color = Color(0.11, 0.12, 0.15, 1.0)
+const SELECTED_PANEL_COLOR: Color = Color(0.48, 0.39, 0.66, 1.0)
 const MERGE_FLASH_COLOR: Color = Color(0.98, 0.97, 0.72, 1.0)
 const LANE_HIT_FLASH_COLOR: Color = Color(0.78, 0.28, 0.28, 1.0)
 const LANE_SPLASH_FLASH_COLOR: Color = Color(0.92, 0.62, 0.25, 1.0)
@@ -108,6 +108,9 @@ var tile_aura_glow_rects: Array[ColorRect] = []
 var tile_aura_core_rects: Array[ColorRect] = []
 var tile_aura_ring_panels: Array[Panel] = []
 var tile_aura_marker_labels: Array[Label] = []
+var tile_ritual_slab_rects: Array[ColorRect] = []
+var tile_ritual_glyph_rects: Array[ColorRect] = []
+var tile_ritual_crack_rects: Array[ColorRect] = []
 var selected_tile_index: int = -1
 
 var gate_hp: int = BASE_GATE_HP
@@ -119,6 +122,8 @@ var spawn_timer: float = 0.0
 var advance_timer: float = 0.0
 var enemy_lanes: Array[Array] = []
 var support_feedback_lines: Array[String] = []
+var lane_portal_core_rects: Array[ColorRect] = []
+var lane_portal_ring_rects: Array[ColorRect] = []
 
 @onready var summon_button: Button = $TopBar/TopRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -163,6 +168,39 @@ func _ready() -> void:
 		if panel == null:
 			continue
 		tile_panels.append(panel)
+		var ritual_slab: ColorRect = ColorRect.new()
+		ritual_slab.anchors_preset = Control.PRESET_FULL_RECT
+		ritual_slab.offset_left = 5.0
+		ritual_slab.offset_top = 5.0
+		ritual_slab.offset_right = -5.0
+		ritual_slab.offset_bottom = -5.0
+		ritual_slab.color = Color(0.09, 0.10, 0.12, 0.72)
+		ritual_slab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(ritual_slab)
+		panel.move_child(ritual_slab, 0)
+		tile_ritual_slab_rects.append(ritual_slab)
+		var ritual_glyph: ColorRect = ColorRect.new()
+		ritual_glyph.anchors_preset = Control.PRESET_FULL_RECT
+		ritual_glyph.offset_left = 14.0
+		ritual_glyph.offset_top = 14.0
+		ritual_glyph.offset_right = -14.0
+		ritual_glyph.offset_bottom = -88.0
+		ritual_glyph.color = Color(0.57, 0.35, 0.68, 0.15)
+		ritual_glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(ritual_glyph)
+		panel.move_child(ritual_glyph, 1)
+		tile_ritual_glyph_rects.append(ritual_glyph)
+		var ritual_crack: ColorRect = ColorRect.new()
+		ritual_crack.anchors_preset = Control.PRESET_FULL_RECT
+		ritual_crack.offset_left = 20.0
+		ritual_crack.offset_top = 76.0
+		ritual_crack.offset_right = -16.0
+		ritual_crack.offset_bottom = -42.0
+		ritual_crack.color = Color(0.03, 0.04, 0.05, 0.45)
+		ritual_crack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(ritual_crack)
+		panel.move_child(ritual_crack, 2)
+		tile_ritual_crack_rects.append(ritual_crack)
 		var aura_underlay: ColorRect = ColorRect.new()
 		aura_underlay.anchors_preset = Control.PRESET_FULL_RECT
 		aura_underlay.offset_left = 6.0
@@ -262,22 +300,44 @@ func _apply_dark_fantasy_theme() -> void:
 func _apply_background_atmosphere() -> void:
 	var forest_shadow: ColorRect = ColorRect.new()
 	forest_shadow.anchors_preset = Control.PRESET_FULL_RECT
-	forest_shadow.offset_top = 110.0
-	forest_shadow.color = Color(0.05, 0.10, 0.09, 0.62)
+	forest_shadow.offset_top = 100.0
+	forest_shadow.color = Color(0.04, 0.09, 0.07, 0.76)
 	forest_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(forest_shadow)
 	move_child(forest_shadow, get_child_count() - 1)
 
+	var forest_depth: ColorRect = ColorRect.new()
+	forest_depth.anchors_preset = Control.PRESET_FULL_RECT
+	forest_depth.offset_left = -100.0
+	forest_depth.offset_top = 170.0
+	forest_depth.offset_right = 250.0
+	forest_depth.offset_bottom = -160.0
+	forest_depth.color = Color(0.03, 0.08, 0.06, 0.56)
+	forest_depth.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(forest_depth)
+	move_child(forest_depth, get_child_count() - 1)
+
 	var abyss_haze: ColorRect = ColorRect.new()
 	abyss_haze.anchors_preset = Control.PRESET_FULL_RECT
-	abyss_haze.offset_left = 420.0
+	abyss_haze.offset_left = 380.0
 	abyss_haze.offset_top = 130.0
-	abyss_haze.offset_right = -170.0
-	abyss_haze.offset_bottom = -80.0
-	abyss_haze.color = Color(0.28, 0.12, 0.38, 0.18)
+	abyss_haze.offset_right = -120.0
+	abyss_haze.offset_bottom = -40.0
+	abyss_haze.color = Color(0.22, 0.10, 0.33, 0.26)
 	abyss_haze.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(abyss_haze)
 	move_child(abyss_haze, get_child_count() - 1)
+
+	var abyss_mist: ColorRect = ColorRect.new()
+	abyss_mist.anchors_preset = Control.PRESET_FULL_RECT
+	abyss_mist.offset_left = 0.0
+	abyss_mist.offset_top = 500.0
+	abyss_mist.offset_right = 0.0
+	abyss_mist.offset_bottom = 0.0
+	abyss_mist.color = Color(0.13, 0.14, 0.19, 0.38)
+	abyss_mist.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(abyss_mist)
+	move_child(abyss_mist, get_child_count() - 1)
 
 	var gate_glow: ColorRect = ColorRect.new()
 	gate_glow.anchors_preset = Control.PRESET_FULL_RECT
@@ -285,26 +345,40 @@ func _apply_background_atmosphere() -> void:
 	gate_glow.offset_top = 20.0
 	gate_glow.offset_right = -16.0
 	gate_glow.offset_bottom = -600.0
-	gate_glow.color = Color(0.54, 0.17, 0.71, 0.17)
+	gate_glow.color = Color(0.48, 0.18, 0.66, 0.24)
 	gate_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(gate_glow)
 	move_child(gate_glow, get_child_count() - 1)
 
+	var ritual_ambience: ColorRect = ColorRect.new()
+	ritual_ambience.anchors_preset = Control.PRESET_FULL_RECT
+	ritual_ambience.offset_left = 240.0
+	ritual_ambience.offset_top = 70.0
+	ritual_ambience.offset_right = -240.0
+	ritual_ambience.offset_bottom = -620.0
+	ritual_ambience.color = Color(0.61, 0.24, 0.78, 0.15)
+	ritual_ambience.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(ritual_ambience)
+	move_child(ritual_ambience, get_child_count() - 1)
+
 func _style_board_panel() -> void:
 	var board_style: StyleBoxFlat = StyleBoxFlat.new()
-	board_style.bg_color = Color(0.08, 0.08, 0.12, 0.94)
-	board_style.border_width_left = 2
-	board_style.border_width_top = 2
-	board_style.border_width_right = 2
-	board_style.border_width_bottom = 2
-	board_style.border_color = Color(0.35, 0.26, 0.46, 0.78)
+	board_style.bg_color = Color(0.06, 0.07, 0.09, 0.96)
+	board_style.border_width_left = 3
+	board_style.border_width_top = 3
+	board_style.border_width_right = 3
+	board_style.border_width_bottom = 3
+	board_style.border_color = Color(0.29, 0.26, 0.33, 0.88)
 	board_style.corner_radius_top_left = 12
 	board_style.corner_radius_top_right = 12
 	board_style.corner_radius_bottom_left = 12
 	board_style.corner_radius_bottom_right = 12
+	board_style.shadow_size = 10
+	board_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
+	board_style.shadow_offset = Vector2(0.0, 4.0)
 	board_panel.add_theme_stylebox_override("panel", board_style)
 	board_label.text = "Ritual Board (5x3)"
-	board_label.modulate = Color(0.84, 0.82, 0.91, 1.0)
+	board_label.modulate = Color(0.83, 0.81, 0.89, 1.0)
 
 func _style_top_bar() -> void:
 	var top_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -344,22 +418,27 @@ func _style_top_bar() -> void:
 func _style_enemy_lanes() -> void:
 	enemy_lane_box.add_theme_constant_override("separation", 12)
 	enemy_title_label.text = "Voidbound Approach"
-	enemy_title_label.modulate = Color(0.88, 0.82, 0.94, 1.0)
-	for lane_panel in enemy_panels:
+	enemy_title_label.modulate = Color(0.86, 0.82, 0.92, 1.0)
+	for lane_index in enemy_panels.size():
+		var lane_panel: Panel = enemy_panels[lane_index]
 		var lane_style: StyleBoxFlat = StyleBoxFlat.new()
-		lane_style.bg_color = Color(0.10, 0.10, 0.14, 0.95)
-		lane_style.border_width_left = 1
-		lane_style.border_width_top = 1
-		lane_style.border_width_right = 1
-		lane_style.border_width_bottom = 1
-		lane_style.border_color = Color(0.39, 0.29, 0.50, 0.76)
+		lane_style.bg_color = Color(0.06, 0.06, 0.10, 0.94)
+		lane_style.border_width_left = 2
+		lane_style.border_width_top = 2
+		lane_style.border_width_right = 2
+		lane_style.border_width_bottom = 2
+		lane_style.border_color = Color(0.35, 0.18, 0.43, 0.86)
 		lane_style.corner_radius_top_left = 8
 		lane_style.corner_radius_top_right = 8
 		lane_style.corner_radius_bottom_left = 8
 		lane_style.corner_radius_bottom_right = 8
+		lane_style.shadow_size = 7
+		lane_style.shadow_color = Color(0.0, 0.0, 0.0, 0.38)
+		lane_style.shadow_offset = Vector2(0.0, 2.0)
 		lane_panel.add_theme_stylebox_override("panel", lane_style)
+		_apply_lane_portal_ambience(lane_panel, lane_index)
 	for lane_label in enemy_labels:
-		lane_label.modulate = Color(0.88, 0.88, 0.93, 1.0)
+		lane_label.modulate = Color(0.86, 0.86, 0.91, 1.0)
 
 func _style_unit_detail_panel() -> void:
 	var detail_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -381,19 +460,68 @@ func _style_status_labels() -> void:
 	loss_label.modulate = Color(0.97, 0.52, 0.67, 1.0)
 
 func _style_tile_panels_base() -> void:
-	for panel in tile_panels:
+	for tile_index in tile_panels.size():
+		var panel: Panel = tile_panels[tile_index]
 		var tile_style: StyleBoxFlat = StyleBoxFlat.new()
-		tile_style.bg_color = Color(0.06, 0.07, 0.10, 0.96)
-		tile_style.border_width_left = 1
-		tile_style.border_width_top = 1
-		tile_style.border_width_right = 1
-		tile_style.border_width_bottom = 1
-		tile_style.border_color = Color(0.34, 0.31, 0.40, 0.75)
+		tile_style.bg_color = Color(0.07, 0.08, 0.10, 0.97)
+		tile_style.border_width_left = 2
+		tile_style.border_width_top = 2
+		tile_style.border_width_right = 2
+		tile_style.border_width_bottom = 2
+		tile_style.border_color = Color(0.30, 0.28, 0.32, 0.88)
 		tile_style.corner_radius_top_left = 10
 		tile_style.corner_radius_top_right = 10
 		tile_style.corner_radius_bottom_left = 10
 		tile_style.corner_radius_bottom_right = 10
+		tile_style.shadow_size = 5
+		tile_style.shadow_color = Color(0.0, 0.0, 0.0, 0.36)
+		tile_style.shadow_offset = Vector2(0.0, 2.0)
 		panel.add_theme_stylebox_override("panel", tile_style)
+		_apply_tile_ritual_ambience(tile_index)
+
+func _apply_lane_portal_ambience(lane_panel: Panel, lane_index: int) -> void:
+	var portal_core: ColorRect = ColorRect.new()
+	portal_core.anchors_preset = Control.PRESET_FULL_RECT
+	portal_core.offset_left = 12.0
+	portal_core.offset_top = 12.0
+	portal_core.offset_right = -12.0
+	portal_core.offset_bottom = -12.0
+	portal_core.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var lane_phase: float = float(lane_index) * 0.02
+	portal_core.color = Color(0.20 + lane_phase, 0.08, 0.27 + lane_phase, 0.24)
+	lane_panel.add_child(portal_core)
+	lane_panel.move_child(portal_core, 0)
+	lane_portal_core_rects.append(portal_core)
+
+	var portal_ring: ColorRect = ColorRect.new()
+	portal_ring.anchors_preset = Control.PRESET_FULL_RECT
+	portal_ring.offset_left = 22.0
+	portal_ring.offset_top = 22.0
+	portal_ring.offset_right = -22.0
+	portal_ring.offset_bottom = -22.0
+	portal_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portal_ring.color = Color(0.58, 0.25 + lane_phase, 0.73, 0.12)
+	lane_panel.add_child(portal_ring)
+	lane_panel.move_child(portal_ring, 1)
+	lane_portal_ring_rects.append(portal_ring)
+
+func _apply_tile_ritual_ambience(tile_index: int) -> void:
+	if tile_index < 0:
+		return
+	if tile_index >= tile_ritual_slab_rects.size():
+		return
+	if tile_index >= tile_ritual_glyph_rects.size():
+		return
+	if tile_index >= tile_ritual_crack_rects.size():
+		return
+	var slab_rect: ColorRect = tile_ritual_slab_rects[tile_index]
+	var glyph_rect: ColorRect = tile_ritual_glyph_rects[tile_index]
+	var crack_rect: ColorRect = tile_ritual_crack_rects[tile_index]
+	var row_index: int = int(tile_index / BOARD_COLUMNS)
+	var row_phase: float = float(row_index) * 0.015
+	slab_rect.color = Color(0.09 + row_phase, 0.10 + row_phase, 0.12 + row_phase, 0.72)
+	glyph_rect.color = Color(0.53 + row_phase, 0.31, 0.63, 0.15)
+	crack_rect.color = Color(0.03, 0.04, 0.05, 0.45 + row_phase)
 
 func _process(delta: float) -> void:
 	if game_over:
