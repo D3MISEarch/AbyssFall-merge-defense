@@ -73,11 +73,32 @@ const LANE_SPLASH_FLASH_COLOR: Color = Color(0.92, 0.62, 0.25, 1.0)
 const LANE_AURA_COLOR: Color = Color(0.28, 0.55, 0.84, 1.0)
 const LANE_IDLE_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
 const SUPPORT_AURA_TILE_COLOR: Color = Color(0.52, 0.74, 1.0, 1.0)
+const BUFF_TYPE_SUPPORT: String = "support_damage"
+const BUFF_TYPE_PROTECTION: String = "protection_holy"
+const BUFF_TYPE_ATTACK: String = "attack_rage"
+const BUFF_TYPE_HEALING: String = "healing_regen"
+const BUFF_TYPE_VOID: String = "void_corruption"
+const BUFF_TYPE_COLORS: Dictionary = {
+	BUFF_TYPE_SUPPORT: Color(0.36, 0.64, 0.98, 1.0),
+	BUFF_TYPE_PROTECTION: Color(0.95, 0.80, 0.34, 1.0),
+	BUFF_TYPE_ATTACK: Color(0.88, 0.31, 0.31, 1.0),
+	BUFF_TYPE_HEALING: Color(0.41, 0.79, 0.49, 1.0),
+	BUFF_TYPE_VOID: Color(0.62, 0.43, 0.84, 1.0)
+}
+const BUFF_TYPE_PRIORITY: Array[String] = [
+	BUFF_TYPE_SUPPORT,
+	BUFF_TYPE_PROTECTION,
+	BUFF_TYPE_ATTACK,
+	BUFF_TYPE_HEALING,
+	BUFF_TYPE_VOID
+]
 
 var next_unit: int = 0
 var board_units: Array[Dictionary] = []
 var tile_panels: Array[Panel] = []
 var tile_labels: Array[Label] = []
+var tile_aura_glow_rects: Array[ColorRect] = []
+var tile_aura_core_rects: Array[ColorRect] = []
 var selected_tile_index: int = -1
 
 var gate_hp: int = BASE_GATE_HP
@@ -125,6 +146,28 @@ func _ready() -> void:
 		if panel == null:
 			continue
 		tile_panels.append(panel)
+		var aura_glow: ColorRect = ColorRect.new()
+		aura_glow.anchors_preset = Control.PRESET_FULL_RECT
+		aura_glow.offset_left = 4.0
+		aura_glow.offset_top = 4.0
+		aura_glow.offset_right = -4.0
+		aura_glow.offset_bottom = -4.0
+		aura_glow.color = Color(1.0, 1.0, 1.0, 0.0)
+		aura_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(aura_glow)
+		panel.move_child(aura_glow, 0)
+		tile_aura_glow_rects.append(aura_glow)
+		var aura_core: ColorRect = ColorRect.new()
+		aura_core.anchors_preset = Control.PRESET_FULL_RECT
+		aura_core.offset_left = 7.0
+		aura_core.offset_top = 76.0
+		aura_core.offset_right = -7.0
+		aura_core.offset_bottom = -7.0
+		aura_core.color = Color(1.0, 1.0, 1.0, 0.0)
+		aura_core.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(aura_core)
+		panel.move_child(aura_core, 1)
+		tile_aura_core_rects.append(aura_core)
 		var label: Label = panel.get_node("TileLabel") as Label
 		tile_labels.append(label)
 		label.anchors_preset = Control.PRESET_FULL_RECT
@@ -392,6 +435,7 @@ func _render_board() -> void:
 	for i in board_units.size():
 		var occupied: bool = not _is_tile_empty(i)
 		tile_labels[i].text = _format_tile_unit(board_units[i]) if occupied else EMPTY_TILE_TEXT
+		_update_tile_buff_aura(i, occupied)
 
 		if i == selected_tile_index:
 			tile_panels[i].self_modulate = SELECTED_PANEL_COLOR
@@ -403,6 +447,76 @@ func _render_board() -> void:
 			else:
 				tile_panels[i].self_modulate = ATTACK_PANEL_COLOR
 	_update_board_power_ui()
+
+func _update_tile_buff_aura(tile_index: int, occupied: bool) -> void:
+	if tile_index < 0 or tile_index >= tile_aura_glow_rects.size() or tile_index >= tile_aura_core_rects.size():
+		return
+	var glow_rect: ColorRect = tile_aura_glow_rects[tile_index]
+	var core_rect: ColorRect = tile_aura_core_rects[tile_index]
+	if not occupied:
+		glow_rect.color = Color(1.0, 1.0, 1.0, 0.0)
+		core_rect.color = Color(1.0, 1.0, 1.0, 0.0)
+		return
+
+	var buff_types: Array[String] = _get_tile_active_buff_types(tile_index)
+	if buff_types.is_empty():
+		glow_rect.color = Color(1.0, 1.0, 1.0, 0.0)
+		core_rect.color = Color(1.0, 1.0, 1.0, 0.0)
+		return
+
+	var primary_type: String = _get_primary_buff_type(buff_types)
+	var buff_color: Color = _get_buff_color(primary_type)
+	var is_focus_recipient: bool = _is_tile_receiving_selected_support(tile_index)
+	var glow_alpha: float = 0.22
+	var core_alpha: float = 0.54
+	if is_focus_recipient:
+		glow_alpha = 0.40
+		core_alpha = 0.82
+	glow_rect.color = Color(buff_color.r, buff_color.g, buff_color.b, glow_alpha)
+	core_rect.color = Color(buff_color.r, buff_color.g, buff_color.b, core_alpha)
+
+func _get_tile_active_buff_types(tile_index: int) -> Array[String]:
+	var buff_types: Array[String] = []
+	if tile_index < 0 or tile_index >= board_units.size() or _is_tile_empty(tile_index):
+		return buff_types
+	var unit: Dictionary = board_units[tile_index]
+	var lane_index: int = int(tile_index / BOARD_COLUMNS)
+
+	if _get_unit_role(unit) != "support" and _get_lane_support_bonus(lane_index) > 0:
+		buff_types.append(BUFF_TYPE_SUPPORT)
+	return buff_types
+
+func _get_primary_buff_type(buff_types: Array[String]) -> String:
+	for buff_type in BUFF_TYPE_PRIORITY:
+		if buff_types.has(buff_type):
+			return buff_type
+	if buff_types.is_empty():
+		return ""
+	return str(buff_types[0])
+
+func _get_buff_color(buff_type: String) -> Color:
+	var fallback_color: Color = Color(0.72, 0.72, 0.78, 1.0)
+	var mapped_color: Variant = BUFF_TYPE_COLORS.get(buff_type, fallback_color)
+	if mapped_color is Color:
+		return mapped_color
+	return fallback_color
+
+func _is_tile_receiving_selected_support(tile_index: int) -> bool:
+	if selected_tile_index < 0 or selected_tile_index >= board_units.size():
+		return false
+	if _is_tile_empty(selected_tile_index) or _is_tile_empty(tile_index):
+		return false
+	var selected_unit: Dictionary = board_units[selected_tile_index]
+	if _get_unit_role(selected_unit) != "support":
+		return false
+	if tile_index == selected_tile_index:
+		return false
+	var target_unit: Dictionary = board_units[tile_index]
+	if _get_unit_role(target_unit) == "support":
+		return false
+	var selected_lane: int = int(selected_tile_index / BOARD_COLUMNS)
+	var tile_lane: int = int(tile_index / BOARD_COLUMNS)
+	return selected_lane == tile_lane
 
 func _update_wave_ui() -> void:
 	wave_label.text = "Wave: %d" % wave_number
