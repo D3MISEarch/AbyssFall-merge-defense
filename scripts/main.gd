@@ -68,6 +68,11 @@ const ATTACK_PANEL_COLOR: Color = Color(0.31, 0.47, 0.38, 1.0)
 const EMPTY_PANEL_COLOR: Color = Color(0.22, 0.24, 0.31, 1.0)
 const SELECTED_PANEL_COLOR: Color = Color(0.92, 0.75, 0.32, 1.0)
 const MERGE_FLASH_COLOR: Color = Color(0.98, 0.97, 0.72, 1.0)
+const LANE_HIT_FLASH_COLOR: Color = Color(0.78, 0.28, 0.28, 1.0)
+const LANE_SPLASH_FLASH_COLOR: Color = Color(0.92, 0.62, 0.25, 1.0)
+const LANE_AURA_COLOR: Color = Color(0.28, 0.55, 0.84, 1.0)
+const LANE_IDLE_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
+const SUPPORT_AURA_TILE_COLOR: Color = Color(0.52, 0.74, 1.0, 1.0)
 
 var next_unit: int = 0
 var board_units: Array[Dictionary] = []
@@ -98,6 +103,12 @@ var support_feedback_lines: Array[String] = []
 	$EnemyLane/Enemy2/Enemy2Label,
 	$EnemyLane/Enemy3/Enemy3Label
 ]
+@onready var enemy_panels: Array[Panel] = [
+	$EnemyLane/Enemy1,
+	$EnemyLane/Enemy2,
+	$EnemyLane/Enemy3
+]
+@onready var top_bar_panel: Panel = $TopBar
 
 func _ready() -> void:
 	board_units.resize(BOARD_COLUMNS * BOARD_ROWS)
@@ -292,6 +303,7 @@ func _apply_board_auto_damage() -> void:
 				continue
 
 			damage += lane_support_bonus
+			var support_contributed: bool = lane_support_bonus > 0
 			if role == "lane":
 				damage += int(_get_unit_stat(unit, "lane_bonus", 0))
 				if enemy_lanes[lane_index].size() >= int(_get_unit_stat(unit, "crowd_threshold", 99)):
@@ -302,21 +314,24 @@ func _apply_board_auto_damage() -> void:
 				if LANE_LENGTH - front_progress <= int(_get_unit_stat(unit, "execute_range", 0)):
 					damage += int(_get_unit_stat(unit, "execute_bonus", 0))
 
-			_damage_front_enemy(lane_index, damage)
+			_damage_front_enemy(lane_index, damage, support_contributed)
 			if role == "cleave":
 				var splash_ratio: float = float(_get_unit_stat(unit, "splash_ratio", 0.0))
 				var splash_damage: int = int(round(float(damage) * splash_ratio))
-				_damage_secondary_enemy(lane_index, splash_damage)
+				_damage_secondary_enemy(lane_index, splash_damage, support_contributed)
 	_update_support_feedback_ui()
 
-func _damage_front_enemy(lane_index: int, damage: int) -> void:
+func _damage_front_enemy(lane_index: int, damage: int, support_contributed: bool) -> void:
 	if damage <= 0 or enemy_lanes[lane_index].is_empty():
 		return
 
 	var front_index: int = _get_front_enemy_index(enemy_lanes[lane_index])
 	var enemy: Dictionary = enemy_lanes[lane_index][front_index]
 	enemy["hp"] = int(enemy["hp"]) - damage
-	_spawn_lane_popup(lane_index, "-%d" % damage, Color(1.0, 0.5, 0.5, 1.0))
+	_spawn_lane_popup(lane_index, "-%d" % damage, Color(1.0, 0.45, 0.45, 1.0), false)
+	_flash_lane_panel(lane_index, LANE_HIT_FLASH_COLOR)
+	if support_contributed:
+		_show_support_aura_feedback(lane_index)
 
 	if int(enemy["hp"]) <= 0:
 		enemy_lanes[lane_index].remove_at(front_index)
@@ -324,7 +339,7 @@ func _damage_front_enemy(lane_index: int, damage: int) -> void:
 	else:
 		enemy_lanes[lane_index][front_index] = enemy
 
-func _damage_secondary_enemy(lane_index: int, damage: int) -> void:
+func _damage_secondary_enemy(lane_index: int, damage: int, support_contributed: bool) -> void:
 	if damage <= 0 or enemy_lanes[lane_index].size() < 2:
 		return
 
@@ -332,7 +347,10 @@ func _damage_secondary_enemy(lane_index: int, damage: int) -> void:
 	var secondary_index: int = sorted_indices[1]
 	var enemy: Dictionary = enemy_lanes[lane_index][secondary_index]
 	enemy["hp"] = int(enemy["hp"]) - damage
-	_spawn_lane_popup(lane_index, "splash -%d" % damage, Color(1.0, 0.75, 0.4, 1.0))
+	_spawn_lane_popup(lane_index, "SPLASH -%d" % damage, Color(1.0, 0.72, 0.35, 1.0), true)
+	_flash_lane_panel(lane_index, LANE_SPLASH_FLASH_COLOR)
+	if support_contributed:
+		_show_support_aura_feedback(lane_index)
 
 	if int(enemy["hp"]) <= 0:
 		enemy_lanes[lane_index].remove_at(secondary_index)
@@ -398,6 +416,7 @@ func _update_board_power_ui() -> void:
 func _update_enemy_lane_ui() -> void:
 	for lane_index in LANE_COUNT:
 		var lane_text: String = "Lane %d: " % [lane_index + 1]
+		_set_lane_panel_base_visual(lane_index)
 		if enemy_lanes[lane_index].is_empty():
 			var clear_line: String = lane_text + "Clear"
 			if lane_index < support_feedback_lines.size():
@@ -600,30 +619,46 @@ func _show_merge_feedback(tile_index: int) -> void:
 		return
 	var panel: Panel = tile_panels[tile_index]
 	var base_color: Color = panel.self_modulate
+	var base_scale: Vector2 = panel.scale
 	var tween: Tween = create_tween()
 	tween.tween_property(panel, "self_modulate", MERGE_FLASH_COLOR, 0.12)
 	tween.tween_property(panel, "self_modulate", base_color, 0.20)
-	_spawn_floating_text(panel, "MERGED", Color(0.95, 0.95, 0.5, 1.0), Vector2(20.0, 8.0))
+	var pulse_up: Vector2 = Vector2(base_scale.x * 1.06, base_scale.y * 1.06)
+	var scale_tween: Tween = create_tween()
+	scale_tween.tween_property(panel, "scale", pulse_up, 0.10)
+	scale_tween.tween_property(panel, "scale", base_scale, 0.14)
+	_spawn_floating_text(panel, "LV UP!", Color(0.95, 0.95, 0.5, 1.0), Vector2(22.0, 10.0), 16)
 
 func _show_gate_hit_feedback(damage: int) -> void:
 	var tween: Tween = create_tween()
+	var base_scale: Vector2 = gate_label.scale
+	var hit_scale: Vector2 = Vector2(base_scale.x * 1.1, base_scale.y * 1.1)
 	tween.tween_property(gate_label, "modulate", Color(1.0, 0.45, 0.45, 1.0), 0.10)
 	tween.tween_property(gate_label, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.22)
-	_spawn_floating_text(gate_label, "-%d HP" % damage, Color(1.0, 0.45, 0.45, 1.0), Vector2(24.0, 0.0))
+	var scale_tween: Tween = create_tween()
+	scale_tween.tween_property(gate_label, "scale", hit_scale, 0.10)
+	scale_tween.tween_property(gate_label, "scale", base_scale, 0.16)
+	var bar_tween: Tween = create_tween()
+	bar_tween.tween_property(top_bar_panel, "self_modulate", Color(1.0, 0.63, 0.63, 1.0), 0.12)
+	bar_tween.tween_property(top_bar_panel, "self_modulate", Color(1.0, 1.0, 1.0, 1.0), 0.24)
+	_spawn_floating_text(gate_label, "-%d HP" % damage, Color(1.0, 0.45, 0.45, 1.0), Vector2(24.0, 0.0), 16)
 
-func _spawn_lane_popup(lane_index: int, text: String, color: Color) -> void:
+func _spawn_lane_popup(lane_index: int, text: String, color: Color, is_secondary_hit: bool) -> void:
 	if lane_index < 0 or lane_index >= enemy_labels.size():
 		return
 	var host: Label = enemy_labels[lane_index]
-	_spawn_floating_text(host, text, color, Vector2(host.size.x - 48.0, 0.0))
+	var x_offset: float = host.size.x - 82.0
+	var y_offset: float = 0.0 if not is_secondary_hit else 18.0
+	var font_size: int = 18 if not is_secondary_hit else 14
+	_spawn_floating_text(host, text, color, Vector2(x_offset, y_offset), font_size)
 
-func _spawn_floating_text(host: Control, text: String, color: Color, offset: Vector2) -> void:
+func _spawn_floating_text(host: Control, text: String, color: Color, offset: Vector2, font_size: int) -> void:
 	var popup: Label = Label.new()
 	popup.text = text
 	popup.modulate = color
 	popup.z_index = 50
 	popup.position = offset
-	popup.add_theme_font_size_override("font_size", 14)
+	popup.add_theme_font_size_override("font_size", font_size)
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	host.add_child(popup)
 
@@ -634,3 +669,31 @@ func _spawn_floating_text(host: Control, text: String, color: Color, offset: Vec
 		if is_instance_valid(popup):
 			popup.queue_free()
 	)
+
+func _flash_lane_panel(lane_index: int, flash_color: Color) -> void:
+	if lane_index < 0 or lane_index >= enemy_panels.size():
+		return
+	var lane_panel: Panel = enemy_panels[lane_index]
+	var base_color: Color = lane_panel.self_modulate
+	var tween: Tween = create_tween()
+	tween.tween_property(lane_panel, "self_modulate", flash_color, 0.08)
+	tween.tween_property(lane_panel, "self_modulate", base_color, 0.16)
+
+func _show_support_aura_feedback(lane_index: int) -> void:
+	if lane_index < 0 or lane_index >= enemy_panels.size():
+		return
+	var lane_bonus: int = _get_lane_support_bonus(lane_index)
+	if lane_bonus <= 0:
+		return
+	var lane_panel: Panel = enemy_panels[lane_index]
+	_spawn_floating_text(lane_panel, "AURA +%d" % lane_bonus, SUPPORT_AURA_TILE_COLOR, Vector2(10.0, 8.0), 13)
+
+func _set_lane_panel_base_visual(lane_index: int) -> void:
+	if lane_index < 0 or lane_index >= enemy_panels.size():
+		return
+	var lane_panel: Panel = enemy_panels[lane_index]
+	var lane_bonus: int = _get_lane_support_bonus(lane_index)
+	if lane_bonus > 0:
+		lane_panel.self_modulate = LANE_AURA_COLOR
+	else:
+		lane_panel.self_modulate = LANE_IDLE_COLOR
