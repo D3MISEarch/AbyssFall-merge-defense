@@ -4,6 +4,12 @@ const BOARD_COLUMNS := 5
 const BOARD_ROWS := 3
 const EMPTY_TILE_TEXT := "Empty"
 const MAX_LEVEL := 3
+const BASE_UNIT_DAMAGE := 1
+const LEVEL_DAMAGE_MULTIPLIER := {
+	1: 1,
+	2: 3,
+	3: 6
+}
 
 const LANE_COUNT := 3
 const LANE_LENGTH := 8
@@ -31,6 +37,7 @@ var enemy_lanes: Array[Array] = []
 @onready var status_label: Label = $StatusLabel
 @onready var wave_label: Label = $TopBar/TopRow/WaveLabel
 @onready var gate_label: Label = $TopBar/TopRow/GateLabel
+@onready var board_power_label: Label = $TopBar/TopRow/BoardPowerLabel
 @onready var loss_label: Label = $LossLabel
 @onready var tile_grid: GridContainer = $Board/BoardMargin/BoardContent/TileGrid
 @onready var enemy_labels: Array[Label] = [
@@ -63,6 +70,7 @@ func _ready() -> void:
 	_render_board()
 	_update_gate_ui()
 	_update_wave_ui()
+	_update_board_power_ui()
 	_update_enemy_lane_ui()
 	loss_label.visible = false
 	status_label.text = "Prototype loaded. Summon units and hold the gate."
@@ -187,21 +195,21 @@ func _tick_enemy_loop() -> void:
 	_update_enemy_lane_ui()
 
 func _apply_board_auto_damage() -> void:
-	var board_strength := _get_board_strength()
-	if board_strength <= 0:
-		return
-
 	for lane_index in LANE_COUNT:
 		if enemy_lanes[lane_index].is_empty():
 			continue
 
+		var lane_damage := _get_lane_damage(lane_index)
+		if lane_damage <= 0:
+			continue
+
 		var target_index := _get_front_enemy_index(enemy_lanes[lane_index])
 		var enemy := enemy_lanes[lane_index][target_index]
-		enemy["hp"] = int(enemy["hp"]) - board_strength
+		enemy["hp"] = int(enemy["hp"]) - lane_damage
 
 		if int(enemy["hp"]) <= 0:
 			enemy_lanes[lane_index].remove_at(target_index)
-			status_label.text = "Lane %d enemy defeated by board fire." % [lane_index + 1]
+			status_label.text = "Lane %d enemy defeated by %d board damage." % [lane_index + 1, lane_damage]
 		else:
 			enemy_lanes[lane_index][target_index] = enemy
 
@@ -242,12 +250,16 @@ func _render_board() -> void:
 			tile_panels[i].self_modulate = Color(0.92, 0.75, 0.32, 1.0)
 		else:
 			tile_panels[i].self_modulate = Color(0.31, 0.47, 0.38, 1.0) if occupied else Color(0.22, 0.24, 0.31, 1.0)
+	_update_board_power_ui()
 
 func _update_wave_ui() -> void:
 	wave_label.text = "Wave: %d" % wave_number
 
 func _update_gate_ui() -> void:
 	gate_label.text = "Gate HP: %d / %d" % [gate_hp, BASE_GATE_HP]
+
+func _update_board_power_ui() -> void:
+	board_power_label.text = "Board Power: %d" % _get_board_power()
 
 func _update_enemy_lane_ui() -> void:
 	for lane_index in LANE_COUNT:
@@ -275,13 +287,27 @@ func _get_front_enemy_index(lane_enemies: Array) -> int:
 
 	return selected_index
 
-func _get_board_strength() -> int:
-	var total_strength := 0
+func _get_lane_damage(lane_index: int) -> int:
+	var total_damage := 0
+	for column in BOARD_COLUMNS:
+		var tile_index := lane_index * BOARD_COLUMNS + column
+		if tile_index >= board_units.size() or _is_tile_empty(tile_index):
+			continue
+		total_damage += _get_unit_damage(board_units[tile_index])
+	return total_damage
+
+func _get_board_power() -> int:
+	var total_power := 0
 	for unit in board_units:
 		if unit.is_empty():
 			continue
-		total_strength += int(unit["level"])
-	return total_strength
+		total_power += _get_unit_damage(unit)
+	return total_power
+
+func _get_unit_damage(unit: Dictionary) -> int:
+	var level := int(unit["level"])
+	var multiplier := int(LEVEL_DAMAGE_MULTIPLIER.get(level, level))
+	return BASE_UNIT_DAMAGE * multiplier
 
 func _find_empty_tile() -> int:
 	for i in board_units.size():
@@ -293,4 +319,5 @@ func _is_tile_empty(tile_index: int) -> bool:
 	return board_units[tile_index].is_empty()
 
 func _format_unit(unit: Dictionary) -> String:
-	return "%s Lv%d" % [unit["name"], int(unit["level"])]
+	var damage := _get_unit_damage(unit)
+	return "%s Lv%d (%d DMG)" % [unit["name"], int(unit["level"]), damage]
