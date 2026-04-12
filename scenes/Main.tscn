@@ -469,6 +469,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Gate HP: 100"
 
+[node name="BoardPowerLabel" type="Label" parent="TopBar/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Board Power: 0"
+
 [node name="SummonButton" type="Button" parent="TopBar/TopRow"]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
