@@ -97,8 +97,11 @@ var next_unit: int = 0
 var board_units: Array[Dictionary] = []
 var tile_panels: Array[Panel] = []
 var tile_labels: Array[Label] = []
+var tile_aura_underlay_rects: Array[ColorRect] = []
 var tile_aura_glow_rects: Array[ColorRect] = []
 var tile_aura_core_rects: Array[ColorRect] = []
+var tile_aura_ring_panels: Array[Panel] = []
+var tile_aura_marker_labels: Array[Label] = []
 var selected_tile_index: int = -1
 
 var gate_hp: int = BASE_GATE_HP
@@ -146,28 +149,69 @@ func _ready() -> void:
 		if panel == null:
 			continue
 		tile_panels.append(panel)
+		var aura_underlay: ColorRect = ColorRect.new()
+		aura_underlay.anchors_preset = Control.PRESET_FULL_RECT
+		aura_underlay.offset_left = 6.0
+		aura_underlay.offset_top = 68.0
+		aura_underlay.offset_right = -6.0
+		aura_underlay.offset_bottom = -6.0
+		aura_underlay.color = Color(1.0, 1.0, 1.0, 0.0)
+		aura_underlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(aura_underlay)
+		panel.move_child(aura_underlay, 0)
+		tile_aura_underlay_rects.append(aura_underlay)
 		var aura_glow: ColorRect = ColorRect.new()
 		aura_glow.anchors_preset = Control.PRESET_FULL_RECT
 		aura_glow.offset_left = 4.0
-		aura_glow.offset_top = 4.0
+		aura_glow.offset_top = 56.0
 		aura_glow.offset_right = -4.0
 		aura_glow.offset_bottom = -4.0
 		aura_glow.color = Color(1.0, 1.0, 1.0, 0.0)
 		aura_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(aura_glow)
-		panel.move_child(aura_glow, 0)
+		panel.move_child(aura_glow, 1)
 		tile_aura_glow_rects.append(aura_glow)
 		var aura_core: ColorRect = ColorRect.new()
 		aura_core.anchors_preset = Control.PRESET_FULL_RECT
-		aura_core.offset_left = 7.0
+		aura_core.offset_left = 10.0
 		aura_core.offset_top = 76.0
-		aura_core.offset_right = -7.0
-		aura_core.offset_bottom = -7.0
+		aura_core.offset_right = -10.0
+		aura_core.offset_bottom = -10.0
 		aura_core.color = Color(1.0, 1.0, 1.0, 0.0)
 		aura_core.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(aura_core)
-		panel.move_child(aura_core, 1)
+		panel.move_child(aura_core, 2)
 		tile_aura_core_rects.append(aura_core)
+		var aura_ring: Panel = Panel.new()
+		aura_ring.anchors_preset = Control.PRESET_FULL_RECT
+		aura_ring.offset_left = 3.0
+		aura_ring.offset_top = 3.0
+		aura_ring.offset_right = -3.0
+		aura_ring.offset_bottom = -3.0
+		aura_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var aura_ring_style: StyleBoxFlat = StyleBoxFlat.new()
+		aura_ring_style.bg_color = Color(0.0, 0.0, 0.0, 0.0)
+		aura_ring_style.border_width_left = 3
+		aura_ring_style.border_width_top = 3
+		aura_ring_style.border_width_right = 3
+		aura_ring_style.border_width_bottom = 3
+		aura_ring_style.corner_radius_top_left = 8
+		aura_ring_style.corner_radius_top_right = 8
+		aura_ring_style.corner_radius_bottom_left = 8
+		aura_ring_style.corner_radius_bottom_right = 8
+		aura_ring_style.border_color = Color(1.0, 1.0, 1.0, 0.0)
+		aura_ring.add_theme_stylebox_override("panel", aura_ring_style)
+		panel.add_child(aura_ring)
+		panel.move_child(aura_ring, 3)
+		tile_aura_ring_panels.append(aura_ring)
+		var aura_marker: Label = Label.new()
+		aura_marker.text = ""
+		aura_marker.modulate = Color(1.0, 1.0, 1.0, 0.0)
+		aura_marker.position = Vector2(7.0, 7.0)
+		aura_marker.add_theme_font_size_override("font_size", 11)
+		aura_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(aura_marker)
+		tile_aura_marker_labels.append(aura_marker)
 		var label: Label = panel.get_node("TileLabel") as Label
 		tile_labels.append(label)
 		label.anchors_preset = Control.PRESET_FULL_RECT
@@ -449,31 +493,80 @@ func _render_board() -> void:
 	_update_board_power_ui()
 
 func _update_tile_buff_aura(tile_index: int, occupied: bool) -> void:
-	if tile_index < 0 or tile_index >= tile_aura_glow_rects.size() or tile_index >= tile_aura_core_rects.size():
+	if tile_index < 0:
 		return
+	if tile_index >= tile_aura_underlay_rects.size():
+		return
+	if tile_index >= tile_aura_glow_rects.size():
+		return
+	if tile_index >= tile_aura_core_rects.size():
+		return
+	if tile_index >= tile_aura_ring_panels.size():
+		return
+	if tile_index >= tile_aura_marker_labels.size():
+		return
+	var underlay_rect: ColorRect = tile_aura_underlay_rects[tile_index]
 	var glow_rect: ColorRect = tile_aura_glow_rects[tile_index]
 	var core_rect: ColorRect = tile_aura_core_rects[tile_index]
+	var ring_panel: Panel = tile_aura_ring_panels[tile_index]
+	var marker_label: Label = tile_aura_marker_labels[tile_index]
+	var ring_style: StyleBoxFlat = ring_panel.get_theme_stylebox("panel") as StyleBoxFlat
+	if ring_style == null:
+		return
 	if not occupied:
+		underlay_rect.color = Color(1.0, 1.0, 1.0, 0.0)
 		glow_rect.color = Color(1.0, 1.0, 1.0, 0.0)
 		core_rect.color = Color(1.0, 1.0, 1.0, 0.0)
+		ring_style.border_color = Color(1.0, 1.0, 1.0, 0.0)
+		marker_label.text = ""
+		marker_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
 		return
 
 	var buff_types: Array[String] = _get_tile_active_buff_types(tile_index)
 	if buff_types.is_empty():
+		underlay_rect.color = Color(1.0, 1.0, 1.0, 0.0)
 		glow_rect.color = Color(1.0, 1.0, 1.0, 0.0)
 		core_rect.color = Color(1.0, 1.0, 1.0, 0.0)
+		ring_style.border_color = Color(1.0, 1.0, 1.0, 0.0)
+		marker_label.text = ""
+		marker_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
 		return
 
 	var primary_type: String = _get_primary_buff_type(buff_types)
 	var buff_color: Color = _get_buff_color(primary_type)
 	var is_focus_recipient: bool = _is_tile_receiving_selected_support(tile_index)
-	var glow_alpha: float = 0.22
-	var core_alpha: float = 0.54
+	var underlay_alpha: float = 0.45
+	var glow_alpha: float = 0.36
+	var core_alpha: float = 0.74
+	var ring_alpha: float = 0.82
+	var marker_alpha: float = 0.86
 	if is_focus_recipient:
-		glow_alpha = 0.40
-		core_alpha = 0.82
+		underlay_alpha = 0.62
+		glow_alpha = 0.58
+		core_alpha = 0.90
+		ring_alpha = 0.98
+		marker_alpha = 1.0
+	underlay_rect.color = Color(buff_color.r * 0.55, buff_color.g * 0.55, buff_color.b * 0.55, underlay_alpha)
 	glow_rect.color = Color(buff_color.r, buff_color.g, buff_color.b, glow_alpha)
 	core_rect.color = Color(buff_color.r, buff_color.g, buff_color.b, core_alpha)
+	ring_style.border_color = Color(buff_color.r, buff_color.g, buff_color.b, ring_alpha)
+	marker_label.text = _get_buff_marker_text(primary_type, is_focus_recipient)
+	marker_label.modulate = Color(buff_color.r, buff_color.g, buff_color.b, marker_alpha)
+	ring_panel.add_theme_stylebox_override("panel", ring_style)
+
+func _get_buff_marker_text(buff_type: String, is_focus_recipient: bool) -> String:
+	var marker_map: Dictionary = {
+		BUFF_TYPE_SUPPORT: "+AURA",
+		BUFF_TYPE_PROTECTION: "+HOLY",
+		BUFF_TYPE_ATTACK: "+RAGE",
+		BUFF_TYPE_HEALING: "+REGEN",
+		BUFF_TYPE_VOID: "+VOID"
+	}
+	var marker_variant: Variant = marker_map.get(buff_type, "+BUFF")
+	var marker_text: String = str(marker_variant)
+	if is_focus_recipient:
+		return "%s *" % marker_text
+	return marker_text
 
 func _get_tile_active_buff_types(tile_index: int) -> Array[String]:
 	var buff_types: Array[String] = []
