@@ -1,30 +1,30 @@
 extends Control
 
-const BOARD_COLUMNS := 5
-const BOARD_ROWS := 3
-const EMPTY_TILE_TEXT := "Empty"
-const MAX_LEVEL := 3
+const BOARD_COLUMNS: int = 5
+const BOARD_ROWS: int = 3
+const EMPTY_TILE_TEXT: String = "Empty"
+const MAX_LEVEL: int = 3
 
-const LANE_COUNT := 3
-const LANE_LENGTH := 8
-const SPAWN_INTERVAL_SECONDS := 2.0
-const ADVANCE_INTERVAL_SECONDS := 1.0
-const BASE_GATE_HP := 100
+const LANE_COUNT: int = 3
+const LANE_LENGTH: int = 8
+const SPAWN_INTERVAL_SECONDS: float = 2.0
+const ADVANCE_INTERVAL_SECONDS: float = 1.0
+const BASE_GATE_HP: int = 100
 
-const UNIT_ROTATION := ["Lane Guard", "Hunter", "Cleave Bot", "Banner"]
-const ROLE_TAGS := {
+const UNIT_ROTATION: Array[String] = ["Lane Guard", "Hunter", "Cleave Bot", "Banner"]
+const ROLE_TAGS: Dictionary = {
 	"lane": "HOLD",
 	"single": "BURST",
 	"cleave": "AOE",
 	"support": "AURA"
 }
-const UNIT_SHORT_NAMES := {
+const UNIT_SHORT_NAMES: Dictionary = {
 	"Lane Guard": "Guard",
 	"Hunter": "Hunter",
 	"Cleave Bot": "Cleave",
 	"Banner": "Banner"
 }
-const UNIT_DEFINITIONS := {
+const UNIT_DEFINITIONS: Dictionary = {
 	"Lane Guard": {
 		"role": "lane",
 		"label": "Lane Holder",
@@ -63,20 +63,27 @@ const UNIT_DEFINITIONS := {
 	}
 }
 
-var next_unit := 0
+const SUPPORT_PANEL_COLOR: Color = Color(0.33, 0.33, 0.54, 1.0)
+const ATTACK_PANEL_COLOR: Color = Color(0.31, 0.47, 0.38, 1.0)
+const EMPTY_PANEL_COLOR: Color = Color(0.22, 0.24, 0.31, 1.0)
+const SELECTED_PANEL_COLOR: Color = Color(0.92, 0.75, 0.32, 1.0)
+const MERGE_FLASH_COLOR: Color = Color(0.98, 0.97, 0.72, 1.0)
+
+var next_unit: int = 0
 var board_units: Array[Dictionary] = []
 var tile_panels: Array[Panel] = []
 var tile_labels: Array[Label] = []
-var selected_tile_index := -1
+var selected_tile_index: int = -1
 
-var gate_hp := BASE_GATE_HP
-var wave_number := 1
-var spawned_enemies_total := 0
-var next_spawn_lane := 0
-var game_over := false
-var spawn_timer := 0.0
-var advance_timer := 0.0
+var gate_hp: int = BASE_GATE_HP
+var wave_number: int = 1
+var spawned_enemies_total: int = 0
+var next_spawn_lane: int = 0
+var game_over: bool = false
+var spawn_timer: float = 0.0
+var advance_timer: float = 0.0
 var enemy_lanes: Array[Array] = []
+var support_feedback_lines: Array[String] = []
 
 @onready var summon_button: Button = $TopBar/TopRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -102,12 +109,12 @@ func _ready() -> void:
 		enemy_lanes[lane_index] = []
 
 	for i in tile_grid.get_child_count():
-		var tile := tile_grid.get_child(i)
-		var panel := tile as Panel
+		var tile: Node = tile_grid.get_child(i)
+		var panel: Panel = tile as Panel
 		if panel == null:
 			continue
 		tile_panels.append(panel)
-		var label := panel.get_node("TileLabel") as Label
+		var label: Label = panel.get_node("TileLabel") as Label
 		tile_labels.append(label)
 		label.anchors_preset = Control.PRESET_FULL_RECT
 		label.offset_left = 8.0
@@ -150,22 +157,24 @@ func _on_summon_pressed() -> void:
 		status_label.text = "The gate has fallen. Restart the scene to try again."
 		return
 
-	var empty_index := _find_empty_tile()
+	var empty_index: int = _find_empty_tile()
 	if empty_index == -1:
 		status_label.text = "Board is full. Merge or clear a tile before summoning."
 		return
 
-	var summoned_name := UNIT_ROTATION[next_unit]
+	var summoned_name: String = UNIT_ROTATION[next_unit]
 	next_unit = (next_unit + 1) % UNIT_ROTATION.size()
 	board_units[empty_index] = {"name": summoned_name, "level": 1}
 	_render_board()
+	_update_support_feedback_ui()
+	_update_enemy_lane_ui()
 	status_label.text = "Summoned %s into tile %d." % [_format_unit(board_units[empty_index]), empty_index + 1]
 
 func _on_tile_gui_input(event: InputEvent, tile_index: int) -> void:
 	if game_over:
 		return
 
-	var mouse_button := event as InputEventMouseButton
+	var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 	if mouse_button == null:
 		return
 	if mouse_button.button_index != MOUSE_BUTTON_LEFT or not mouse_button.pressed:
@@ -197,8 +206,8 @@ func _on_tile_clicked(tile_index: int) -> void:
 	_attempt_merge(selected_tile_index, tile_index)
 
 func _attempt_merge(from_index: int, to_index: int) -> void:
-	var from_unit := board_units[from_index]
-	var to_unit := board_units[to_index]
+	var from_unit: Dictionary = board_units[from_index]
+	var to_unit: Dictionary = board_units[to_index]
 
 	if from_unit["name"] != to_unit["name"]:
 		status_label.text = "Invalid merge: unit names do not match."
@@ -224,17 +233,20 @@ func _attempt_merge(from_index: int, to_index: int) -> void:
 	board_units[from_index] = {}
 	board_units[to_index] = {"name": to_unit["name"], "level": int(to_unit["level"]) + 1}
 	status_label.text = "Merged into %s on tile %d." % [_format_unit(board_units[to_index]), to_index + 1]
+	_show_merge_feedback(to_index)
 	selected_tile_index = -1
 	_update_selection_detail()
 	_render_board()
+	_update_support_feedback_ui()
+	_update_enemy_lane_ui()
 
 func _spawn_enemy() -> void:
-	var lane_index := next_spawn_lane
+	var lane_index: int = next_spawn_lane
 	next_spawn_lane = (next_spawn_lane + 1) % LANE_COUNT
 
-	var enemy_hp := 2 + wave_number
-	var enemy_damage := 5 + wave_number
-	var enemy := {
+	var enemy_hp: int = 2 + wave_number
+	var enemy_damage: int = 5 + wave_number
+	var enemy: Dictionary = {
 		"name": "W%d Ghoul" % wave_number,
 		"hp": enemy_hp,
 		"max_hp": enemy_hp,
@@ -257,21 +269,24 @@ func _tick_enemy_loop() -> void:
 	_update_enemy_lane_ui()
 
 func _apply_board_auto_damage() -> void:
+	support_feedback_lines.clear()
 	for lane_index in LANE_COUNT:
 		if enemy_lanes[lane_index].is_empty():
 			continue
 
-		var lane_support_bonus := _get_lane_support_bonus(lane_index)
+		var lane_support_bonus: int = _get_lane_support_bonus(lane_index)
+		if lane_support_bonus > 0:
+			support_feedback_lines.append("L%d aura +%d" % [lane_index + 1, lane_support_bonus])
 		for column in BOARD_COLUMNS:
-			var tile_index := lane_index * BOARD_COLUMNS + column
+			var tile_index: int = lane_index * BOARD_COLUMNS + column
 			if tile_index >= board_units.size() or _is_tile_empty(tile_index):
 				continue
 			if enemy_lanes[lane_index].is_empty():
 				break
 
-			var unit := board_units[tile_index]
-			var role := _get_unit_role(unit)
-			var damage := _get_unit_base_damage(unit)
+			var unit: Dictionary = board_units[tile_index]
+			var role: String = _get_unit_role(unit)
+			var damage: int = _get_unit_base_damage(unit)
 
 			if role == "support":
 				continue
@@ -283,23 +298,25 @@ func _apply_board_auto_damage() -> void:
 					damage += int(_get_unit_stat(unit, "crowd_bonus", 0))
 			elif role == "single":
 				damage += int(_get_unit_stat(unit, "focus_bonus", 0))
-				var front_progress := _get_front_enemy_progress(lane_index)
+				var front_progress: int = _get_front_enemy_progress(lane_index)
 				if LANE_LENGTH - front_progress <= int(_get_unit_stat(unit, "execute_range", 0)):
 					damage += int(_get_unit_stat(unit, "execute_bonus", 0))
 
 			_damage_front_enemy(lane_index, damage)
 			if role == "cleave":
-				var splash_ratio := float(_get_unit_stat(unit, "splash_ratio", 0.0))
-				var splash_damage := int(round(float(damage) * splash_ratio))
+				var splash_ratio: float = float(_get_unit_stat(unit, "splash_ratio", 0.0))
+				var splash_damage: int = int(round(float(damage) * splash_ratio))
 				_damage_secondary_enemy(lane_index, splash_damage)
+	_update_support_feedback_ui()
 
 func _damage_front_enemy(lane_index: int, damage: int) -> void:
 	if damage <= 0 or enemy_lanes[lane_index].is_empty():
 		return
 
-	var front_index := _get_front_enemy_index(enemy_lanes[lane_index])
-	var enemy := enemy_lanes[lane_index][front_index]
+	var front_index: int = _get_front_enemy_index(enemy_lanes[lane_index])
+	var enemy: Dictionary = enemy_lanes[lane_index][front_index]
 	enemy["hp"] = int(enemy["hp"]) - damage
+	_spawn_lane_popup(lane_index, "-%d" % damage, Color(1.0, 0.5, 0.5, 1.0))
 
 	if int(enemy["hp"]) <= 0:
 		enemy_lanes[lane_index].remove_at(front_index)
@@ -311,10 +328,11 @@ func _damage_secondary_enemy(lane_index: int, damage: int) -> void:
 	if damage <= 0 or enemy_lanes[lane_index].size() < 2:
 		return
 
-	var sorted_indices := _get_enemy_indices_by_progress(enemy_lanes[lane_index])
-	var secondary_index := sorted_indices[1]
-	var enemy := enemy_lanes[lane_index][secondary_index]
+	var sorted_indices: Array[int] = _get_enemy_indices_by_progress(enemy_lanes[lane_index])
+	var secondary_index: int = sorted_indices[1]
+	var enemy: Dictionary = enemy_lanes[lane_index][secondary_index]
 	enemy["hp"] = int(enemy["hp"]) - damage
+	_spawn_lane_popup(lane_index, "splash -%d" % damage, Color(1.0, 0.75, 0.4, 1.0))
 
 	if int(enemy["hp"]) <= 0:
 		enemy_lanes[lane_index].remove_at(secondary_index)
@@ -328,13 +346,15 @@ func _advance_enemies_toward_gate() -> void:
 			continue
 
 		for enemy_index in range(enemy_lanes[lane_index].size() - 1, -1, -1):
-			var enemy := enemy_lanes[lane_index][enemy_index]
+			var enemy: Dictionary = enemy_lanes[lane_index][enemy_index]
 			enemy["progress"] = int(enemy["progress"]) + 1
 
 			if int(enemy["progress"]) >= LANE_LENGTH:
-				gate_hp = max(0, gate_hp - int(enemy["damage"]))
+				var gate_damage: int = int(enemy["damage"])
+				gate_hp = max(0, gate_hp - gate_damage)
 				enemy_lanes[lane_index].remove_at(enemy_index)
-				status_label.text = "The gate was hit from lane %d!" % [lane_index + 1]
+				status_label.text = "The gate was hit from lane %d for %d!" % [lane_index + 1, gate_damage]
+				_show_gate_hit_feedback(gate_damage)
 			else:
 				enemy_lanes[lane_index][enemy_index] = enemy
 
@@ -352,18 +372,18 @@ func _trigger_loss() -> void:
 
 func _render_board() -> void:
 	for i in board_units.size():
-		var occupied := not _is_tile_empty(i)
+		var occupied: bool = not _is_tile_empty(i)
 		tile_labels[i].text = _format_tile_unit(board_units[i]) if occupied else EMPTY_TILE_TEXT
 
 		if i == selected_tile_index:
-			tile_panels[i].self_modulate = Color(0.92, 0.75, 0.32, 1.0)
+			tile_panels[i].self_modulate = SELECTED_PANEL_COLOR
 		else:
 			if not occupied:
-				tile_panels[i].self_modulate = Color(0.22, 0.24, 0.31, 1.0)
+				tile_panels[i].self_modulate = EMPTY_PANEL_COLOR
 			elif _get_unit_role(board_units[i]) == "support":
-				tile_panels[i].self_modulate = Color(0.33, 0.33, 0.54, 1.0)
+				tile_panels[i].self_modulate = SUPPORT_PANEL_COLOR
 			else:
-				tile_panels[i].self_modulate = Color(0.31, 0.47, 0.38, 1.0)
+				tile_panels[i].self_modulate = ATTACK_PANEL_COLOR
 	_update_board_power_ui()
 
 func _update_wave_ui() -> void:
@@ -377,24 +397,33 @@ func _update_board_power_ui() -> void:
 
 func _update_enemy_lane_ui() -> void:
 	for lane_index in LANE_COUNT:
-		var lane_text := "Lane %d: " % [lane_index + 1]
+		var lane_text: String = "Lane %d: " % [lane_index + 1]
 		if enemy_lanes[lane_index].is_empty():
-			enemy_labels[lane_index].text = lane_text + "Clear"
+			var clear_line: String = lane_text + "Clear"
+			if lane_index < support_feedback_lines.size():
+				clear_line += " | " + support_feedback_lines[lane_index]
+			enemy_labels[lane_index].text = clear_line
 			continue
 
 		var segments: Array[String] = []
-		for enemy in enemy_lanes[lane_index]:
-			var progress := int(enemy["progress"])
-			var distance_to_gate := LANE_LENGTH - progress
+		for enemy_data in enemy_lanes[lane_index]:
+			var enemy: Dictionary = enemy_data
+			var progress: int = int(enemy["progress"])
+			var distance_to_gate: int = LANE_LENGTH - progress
 			segments.append("[%s HP:%d D:%d]" % [enemy["name"], int(enemy["hp"]), distance_to_gate])
-		enemy_labels[lane_index].text = lane_text + " ".join(segments)
+		var lane_line: String = lane_text + " ".join(segments)
+		if lane_index < support_feedback_lines.size():
+			lane_line += " | " + support_feedback_lines[lane_index]
+		enemy_labels[lane_index].text = lane_line
 
 func _get_front_enemy_index(lane_enemies: Array) -> int:
-	var selected_index := 0
-	var furthest_progress := int(lane_enemies[0]["progress"])
+	var selected_index: int = 0
+	var first_enemy: Dictionary = lane_enemies[0]
+	var furthest_progress: int = int(first_enemy["progress"])
 
 	for i in lane_enemies.size():
-		var candidate_progress := int(lane_enemies[i]["progress"])
+		var enemy: Dictionary = lane_enemies[i]
+		var candidate_progress: int = int(enemy["progress"])
 		if candidate_progress > furthest_progress:
 			furthest_progress = candidate_progress
 			selected_index = i
@@ -404,8 +433,9 @@ func _get_front_enemy_index(lane_enemies: Array) -> int:
 func _get_front_enemy_progress(lane_index: int) -> int:
 	if enemy_lanes[lane_index].is_empty():
 		return 0
-	var front_index := _get_front_enemy_index(enemy_lanes[lane_index])
-	return int(enemy_lanes[lane_index][front_index]["progress"])
+	var front_index: int = _get_front_enemy_index(enemy_lanes[lane_index])
+	var enemy: Dictionary = enemy_lanes[lane_index][front_index]
+	return int(enemy["progress"])
 
 func _get_enemy_indices_by_progress(lane_enemies: Array) -> Array[int]:
 	var ordered_indices: Array[int] = []
@@ -418,30 +448,30 @@ func _get_enemy_indices_by_progress(lane_enemies: Array) -> Array[int]:
 	return ordered_indices
 
 func _get_lane_support_bonus(lane_index: int) -> int:
-	var bonus := 0
+	var bonus: int = 0
 	for column in BOARD_COLUMNS:
-		var tile_index := lane_index * BOARD_COLUMNS + column
+		var tile_index: int = lane_index * BOARD_COLUMNS + column
 		if tile_index >= board_units.size() or _is_tile_empty(tile_index):
 			continue
-		var unit := board_units[tile_index]
+		var unit: Dictionary = board_units[tile_index]
 		if _get_unit_role(unit) != "support":
 			continue
 		bonus += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * int(unit["level"])
 	return bonus
 
 func _get_board_power() -> int:
-	var total_power := 0
+	var total_power: int = 0
 	for lane_index in LANE_COUNT:
-		var lane_support_bonus := _get_lane_support_bonus(lane_index)
+		var lane_support_bonus: int = _get_lane_support_bonus(lane_index)
 		for column in BOARD_COLUMNS:
-			var tile_index := lane_index * BOARD_COLUMNS + column
+			var tile_index: int = lane_index * BOARD_COLUMNS + column
 			if tile_index >= board_units.size() or _is_tile_empty(tile_index):
 				continue
-			var unit := board_units[tile_index]
-			var role := _get_unit_role(unit)
-			var unit_power := _get_unit_base_damage(unit)
+			var unit: Dictionary = board_units[tile_index]
+			var role: String = _get_unit_role(unit)
+			var unit_power: int = _get_unit_base_damage(unit)
 			if role == "support":
-				var ally_count := _get_lane_non_support_count(lane_index)
+				var ally_count: int = _get_lane_non_support_count(lane_index)
 				unit_power = int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * int(unit["level"]) * max(1, ally_count)
 			else:
 				unit_power += lane_support_bonus
@@ -457,9 +487,9 @@ func _get_board_power() -> int:
 	return total_power
 
 func _get_lane_non_support_count(lane_index: int) -> int:
-	var count := 0
+	var count: int = 0
 	for column in BOARD_COLUMNS:
-		var tile_index := lane_index * BOARD_COLUMNS + column
+		var tile_index: int = lane_index * BOARD_COLUMNS + column
 		if tile_index >= board_units.size() or _is_tile_empty(tile_index):
 			continue
 		if _get_unit_role(board_units[tile_index]) == "support":
@@ -468,17 +498,17 @@ func _get_lane_non_support_count(lane_index: int) -> int:
 	return count
 
 func _get_unit_base_damage(unit: Dictionary) -> int:
-	var level := int(unit["level"])
-	var unit_info := _get_unit_definition(unit)
-	var multipliers := unit_info.get("level_damage_multiplier", {})
-	var level_multiplier := int(multipliers.get(level, level))
+	var level: int = int(unit["level"])
+	var unit_info: Dictionary = _get_unit_definition(unit)
+	var multipliers: Dictionary = unit_info.get("level_damage_multiplier", {})
+	var level_multiplier: int = int(multipliers.get(level, level))
 	return int(unit_info.get("base_damage", 0)) * level_multiplier
 
 func _get_unit_role(unit: Dictionary) -> String:
 	return str(_get_unit_definition(unit).get("role", "single"))
 
 func _get_unit_definition(unit: Dictionary) -> Dictionary:
-	var unit_name := str(unit.get("name", ""))
+	var unit_name: String = str(unit.get("name", ""))
 	return UNIT_DEFINITIONS.get(unit_name, UNIT_DEFINITIONS["Hunter"])
 
 func _get_unit_stat(unit: Dictionary, stat_name: String, default_value: Variant) -> Variant:
@@ -494,15 +524,15 @@ func _is_tile_empty(tile_index: int) -> bool:
 	return board_units[tile_index].is_empty()
 
 func _format_unit(unit: Dictionary) -> String:
-	var role_label := str(_get_unit_definition(unit).get("label", "Role"))
-	var damage := _get_unit_base_damage(unit)
-	var effect_text := _get_unit_effect_text(unit)
+	var role_label: String = str(_get_unit_definition(unit).get("label", "Role"))
+	var damage: int = _get_unit_base_damage(unit)
+	var effect_text: String = _get_unit_effect_text(unit)
 	return "%s Lv%d | %s | %d ATK | %s" % [unit["name"], int(unit["level"]), role_label, damage, effect_text]
 
 func _format_tile_unit(unit: Dictionary) -> String:
-	var role_tag := _get_unit_role_tag(unit)
-	var unit_name := _get_unit_short_name(unit)
-	var atk_text := "%d ATK" % _get_unit_base_damage(unit)
+	var role_tag: String = _get_unit_role_tag(unit)
+	var unit_name: String = _get_unit_short_name(unit)
+	var atk_text: String = "%d ATK" % _get_unit_base_damage(unit)
 	if _get_unit_role(unit) == "support":
 		atk_text = "Buff +%d" % (int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * int(unit["level"]))
 	return "%s\nL%d %s\n%s" % [unit_name, int(unit["level"]), role_tag, atk_text]
@@ -514,8 +544,8 @@ func _get_unit_role_tag(unit: Dictionary) -> String:
 	return str(ROLE_TAGS.get(_get_unit_role(unit), ""))
 
 func _get_unit_effect_text(unit: Dictionary) -> String:
-	var role := _get_unit_role(unit)
-	var level := int(unit["level"])
+	var role: String = _get_unit_role(unit)
+	var level: int = int(unit["level"])
 	if role == "lane":
 		return "+%d flat, +%d when %d+ enemies in lane" % [
 			int(_get_unit_stat(unit, "lane_bonus", 0)),
@@ -529,10 +559,10 @@ func _get_unit_effect_text(unit: Dictionary) -> String:
 			int(_get_unit_stat(unit, "execute_range", 0))
 		]
 	if role == "cleave":
-		var splash_percent := int(round(float(_get_unit_stat(unit, "splash_ratio", 0.0)) * 100.0))
+		var splash_percent: int = int(round(float(_get_unit_stat(unit, "splash_ratio", 0.0)) * 100.0))
 		return "%d%% splash" % splash_percent
 	if role == "support":
-		var buff_total := int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * level
+		var buff_total: int = int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * level
 		return "Lane allies gain +%d damage each" % buff_total
 	return "No effect"
 
@@ -544,8 +574,8 @@ func _update_selection_detail() -> void:
 		unit_detail_label.text = "Tile Details\nSelect a unit tile to view role, effect, and tactical use."
 		return
 
-	var unit := board_units[selected_tile_index]
-	var role_label := str(_get_unit_definition(unit).get("label", "Role"))
+	var unit: Dictionary = board_units[selected_tile_index]
+	var role_label: String = str(_get_unit_definition(unit).get("label", "Role"))
 	unit_detail_label.text = "Tile %d • %s\nRole: %s (%s)\nEffect: %s\nWhy use it: %s" % [
 		selected_tile_index + 1,
 		_format_unit(unit),
@@ -554,3 +584,53 @@ func _update_selection_detail() -> void:
 		_get_unit_effect_text(unit),
 		_get_unit_why_text(unit)
 	]
+
+func _update_support_feedback_ui() -> void:
+	var lines: Array[String] = []
+	for lane_index in LANE_COUNT:
+		var lane_bonus: int = _get_lane_support_bonus(lane_index)
+		if lane_bonus > 0:
+			lines.append("L%d aura +%d" % [lane_index + 1, lane_bonus])
+		else:
+			lines.append("")
+	support_feedback_lines = lines
+
+func _show_merge_feedback(tile_index: int) -> void:
+	if tile_index < 0 or tile_index >= tile_panels.size():
+		return
+	var panel: Panel = tile_panels[tile_index]
+	var base_color: Color = panel.self_modulate
+	var tween: Tween = create_tween()
+	tween.tween_property(panel, "self_modulate", MERGE_FLASH_COLOR, 0.12)
+	tween.tween_property(panel, "self_modulate", base_color, 0.20)
+	_spawn_floating_text(panel, "MERGED", Color(0.95, 0.95, 0.5, 1.0), Vector2(20.0, 8.0))
+
+func _show_gate_hit_feedback(damage: int) -> void:
+	var tween: Tween = create_tween()
+	tween.tween_property(gate_label, "modulate", Color(1.0, 0.45, 0.45, 1.0), 0.10)
+	tween.tween_property(gate_label, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.22)
+	_spawn_floating_text(gate_label, "-%d HP" % damage, Color(1.0, 0.45, 0.45, 1.0), Vector2(24.0, 0.0))
+
+func _spawn_lane_popup(lane_index: int, text: String, color: Color) -> void:
+	if lane_index < 0 or lane_index >= enemy_labels.size():
+		return
+	var host: Label = enemy_labels[lane_index]
+	_spawn_floating_text(host, text, color, Vector2(host.size.x - 48.0, 0.0))
+
+func _spawn_floating_text(host: Control, text: String, color: Color, offset: Vector2) -> void:
+	var popup: Label = Label.new()
+	popup.text = text
+	popup.modulate = color
+	popup.z_index = 50
+	popup.position = offset
+	popup.add_theme_font_size_override("font_size", 14)
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	host.add_child(popup)
+
+	var tween: Tween = create_tween()
+	tween.tween_property(popup, "position:y", popup.position.y - 18.0, 0.35)
+	tween.parallel().tween_property(popup, "modulate:a", 0.0, 0.35)
+	tween.finished.connect(func() -> void:
+		if is_instance_valid(popup):
+			popup.queue_free()
+	)
