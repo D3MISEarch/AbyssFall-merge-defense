@@ -5,6 +5,12 @@ const BOARD_ROWS := 3
 const EMPTY_TILE_TEXT := "Empty"
 const MAX_LEVEL := 3
 
+const LANE_COUNT := 3
+const LANE_LENGTH := 8
+const SPAWN_INTERVAL_SECONDS := 2.0
+const ADVANCE_INTERVAL_SECONDS := 1.0
+const BASE_GATE_HP := 100
+
 var next_unit := 0
 var unit_names := ["Unit A", "Unit B", "Unit C", "Unit D"]
 var board_units: Array[Dictionary] = []
@@ -12,15 +18,35 @@ var tile_panels: Array[Panel] = []
 var tile_labels: Array[Label] = []
 var selected_tile_index := -1
 
+var gate_hp := BASE_GATE_HP
+var wave_number := 1
+var spawned_enemies_total := 0
+var next_spawn_lane := 0
+var game_over := false
+var spawn_timer := 0.0
+var advance_timer := 0.0
+var enemy_lanes: Array[Array] = []
+
 @onready var summon_button: Button = $TopBar/TopRow/SummonButton
 @onready var status_label: Label = $StatusLabel
 @onready var wave_label: Label = $TopBar/TopRow/WaveLabel
-@onready var tile_grid: GridContainer = $Board/BoardMargin/TileGrid
+@onready var gate_label: Label = $TopBar/TopRow/GateLabel
+@onready var loss_label: Label = $LossLabel
+@onready var tile_grid: GridContainer = $Board/BoardMargin/BoardContent/TileGrid
+@onready var enemy_labels: Array[Label] = [
+	$EnemyLane/Enemy1/Enemy1Label,
+	$EnemyLane/Enemy2/Enemy2Label,
+	$EnemyLane/Enemy3/Enemy3Label
+]
 
 func _ready() -> void:
 	board_units.resize(BOARD_COLUMNS * BOARD_ROWS)
 	for i in board_units.size():
 		board_units[i] = {}
+
+	enemy_lanes.resize(LANE_COUNT)
+	for lane_index in LANE_COUNT:
+		enemy_lanes[lane_index] = []
 
 	for i in tile_grid.get_child_count():
 		var tile := tile_grid.get_child(i)
@@ -35,9 +61,32 @@ func _ready() -> void:
 
 	summon_button.pressed.connect(_on_summon_pressed)
 	_render_board()
-	status_label.text = "Prototype loaded. Ready to summon."
+	_update_gate_ui()
+	_update_wave_ui()
+	_update_enemy_lane_ui()
+	loss_label.visible = false
+	status_label.text = "Prototype loaded. Summon units and hold the gate."
+
+func _process(delta: float) -> void:
+	if game_over:
+		return
+
+	spawn_timer += delta
+	advance_timer += delta
+
+	if spawn_timer >= SPAWN_INTERVAL_SECONDS:
+		spawn_timer -= SPAWN_INTERVAL_SECONDS
+		_spawn_enemy()
+
+	if advance_timer >= ADVANCE_INTERVAL_SECONDS:
+		advance_timer -= ADVANCE_INTERVAL_SECONDS
+		_tick_enemy_loop()
 
 func _on_summon_pressed() -> void:
+	if game_over:
+		status_label.text = "The gate has fallen. Restart the scene to try again."
+		return
+
 	var empty_index := _find_empty_tile()
 	if empty_index == -1:
 		status_label.text = "Board is full. Merge or clear a tile before summoning."
@@ -46,11 +95,13 @@ func _on_summon_pressed() -> void:
 	var summoned_name := unit_names[next_unit]
 	next_unit = (next_unit + 1) % unit_names.size()
 	board_units[empty_index] = {"name": summoned_name, "level": 1}
-	wave_label.text = "Wave: 1"
 	_render_board()
 	status_label.text = "Summoned %s into tile %d." % [_format_unit(board_units[empty_index]), empty_index + 1]
 
 func _on_tile_gui_input(event: InputEvent, tile_index: int) -> void:
+	if game_over:
+		return
+
 	var mouse_button := event as InputEventMouseButton
 	if mouse_button == null:
 		return
@@ -107,6 +158,81 @@ func _attempt_merge(from_index: int, to_index: int) -> void:
 	selected_tile_index = -1
 	_render_board()
 
+func _spawn_enemy() -> void:
+	var lane_index := next_spawn_lane
+	next_spawn_lane = (next_spawn_lane + 1) % LANE_COUNT
+
+	var enemy_hp := 2 + wave_number
+	var enemy_damage := 5 + wave_number
+	var enemy := {
+		"name": "W%d Ghoul" % wave_number,
+		"hp": enemy_hp,
+		"max_hp": enemy_hp,
+		"damage": enemy_damage,
+		"progress": 0
+	}
+	enemy_lanes[lane_index].append(enemy)
+	spawned_enemies_total += 1
+
+	if spawned_enemies_total % 6 == 0:
+		wave_number += 1
+		_update_wave_ui()
+
+	status_label.text = "Enemy spawned in lane %d." % [lane_index + 1]
+	_update_enemy_lane_ui()
+
+func _tick_enemy_loop() -> void:
+	_apply_board_auto_damage()
+	_advance_enemies_toward_gate()
+	_update_enemy_lane_ui()
+
+func _apply_board_auto_damage() -> void:
+	var board_strength := _get_board_strength()
+	if board_strength <= 0:
+		return
+
+	for lane_index in LANE_COUNT:
+		if enemy_lanes[lane_index].is_empty():
+			continue
+
+		var target_index := _get_front_enemy_index(enemy_lanes[lane_index])
+		var enemy := enemy_lanes[lane_index][target_index]
+		enemy["hp"] = int(enemy["hp"]) - board_strength
+
+		if int(enemy["hp"]) <= 0:
+			enemy_lanes[lane_index].remove_at(target_index)
+			status_label.text = "Lane %d enemy defeated by board fire." % [lane_index + 1]
+		else:
+			enemy_lanes[lane_index][target_index] = enemy
+
+func _advance_enemies_toward_gate() -> void:
+	for lane_index in LANE_COUNT:
+		if enemy_lanes[lane_index].is_empty():
+			continue
+
+		for enemy_index in range(enemy_lanes[lane_index].size() - 1, -1, -1):
+			var enemy := enemy_lanes[lane_index][enemy_index]
+			enemy["progress"] = int(enemy["progress"]) + 1
+
+			if int(enemy["progress"]) >= LANE_LENGTH:
+				gate_hp = max(0, gate_hp - int(enemy["damage"]))
+				enemy_lanes[lane_index].remove_at(enemy_index)
+				status_label.text = "The gate was hit from lane %d!" % [lane_index + 1]
+			else:
+				enemy_lanes[lane_index][enemy_index] = enemy
+
+	_update_gate_ui()
+	if gate_hp <= 0:
+		_trigger_loss()
+
+func _trigger_loss() -> void:
+	if game_over:
+		return
+
+	game_over = true
+	loss_label.visible = true
+	status_label.text = "Gate HP reached 0. You lost this run."
+
 func _render_board() -> void:
 	for i in board_units.size():
 		var occupied := not _is_tile_empty(i)
@@ -116,6 +242,46 @@ func _render_board() -> void:
 			tile_panels[i].self_modulate = Color(0.92, 0.75, 0.32, 1.0)
 		else:
 			tile_panels[i].self_modulate = Color(0.31, 0.47, 0.38, 1.0) if occupied else Color(0.22, 0.24, 0.31, 1.0)
+
+func _update_wave_ui() -> void:
+	wave_label.text = "Wave: %d" % wave_number
+
+func _update_gate_ui() -> void:
+	gate_label.text = "Gate HP: %d / %d" % [gate_hp, BASE_GATE_HP]
+
+func _update_enemy_lane_ui() -> void:
+	for lane_index in LANE_COUNT:
+		var lane_text := "Lane %d: " % [lane_index + 1]
+		if enemy_lanes[lane_index].is_empty():
+			enemy_labels[lane_index].text = lane_text + "Clear"
+			continue
+
+		var segments: Array[String] = []
+		for enemy in enemy_lanes[lane_index]:
+			var progress := int(enemy["progress"])
+			var distance_to_gate := LANE_LENGTH - progress
+			segments.append("[%s HP:%d D:%d]" % [enemy["name"], int(enemy["hp"]), distance_to_gate])
+		enemy_labels[lane_index].text = lane_text + " ".join(segments)
+
+func _get_front_enemy_index(lane_enemies: Array) -> int:
+	var selected_index := 0
+	var furthest_progress := int(lane_enemies[0]["progress"])
+
+	for i in lane_enemies.size():
+		var candidate_progress := int(lane_enemies[i]["progress"])
+		if candidate_progress > furthest_progress:
+			furthest_progress = candidate_progress
+			selected_index = i
+
+	return selected_index
+
+func _get_board_strength() -> int:
+	var total_strength := 0
+	for unit in board_units:
+		if unit.is_empty():
+			continue
+		total_strength += int(unit["level"])
+	return total_strength
 
 func _find_empty_tile() -> int:
 	for i in board_units.size():
