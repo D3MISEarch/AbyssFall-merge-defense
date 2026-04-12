@@ -129,6 +129,8 @@ var lane_portal_ring_rects: Array[ColorRect] = []
 @onready var status_label: Label = $StatusLabel
 @onready var background_rect: ColorRect = $Background
 @onready var board_panel: Panel = $Board
+@onready var opponent_board_panel: Panel = $OpponentBoard
+@onready var center_strip_panel: Panel = $CenterStrip
 @onready var wave_label: Label = $TopBar/TopRow/WaveLabel
 @onready var gate_label: Label = $TopBar/TopRow/GateLabel
 @onready var board_power_label: Label = $TopBar/TopRow/BoardPowerLabel
@@ -151,6 +153,17 @@ var lane_portal_ring_rects: Array[ColorRect] = []
 ]
 @onready var top_bar_panel: Panel = $TopBar
 @onready var top_row: HBoxContainer = $TopBar/TopRow
+@onready var opponent_title_label: Label = $OpponentBoard/OpponentMargin/OpponentContent/OpponentLabel
+@onready var opponent_slot_panels: Array[Panel] = [
+	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1,
+	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2,
+	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3
+]
+@onready var opponent_slot_labels: Array[Label] = [
+	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1/OppSlot1Label,
+	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2/OppSlot2Label,
+	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3/OppSlot3Label
+]
 
 func _ready() -> void:
 	_apply_dark_fantasy_theme()
@@ -292,6 +305,8 @@ func _apply_dark_fantasy_theme() -> void:
 	background_rect.color = Color(0.05, 0.05, 0.07, 1.0)
 	_apply_background_atmosphere()
 	_style_board_panel()
+	_style_opponent_board()
+	_style_center_strip()
 	_style_top_bar()
 	_style_enemy_lanes()
 	_style_unit_detail_panel()
@@ -377,8 +392,68 @@ func _style_board_panel() -> void:
 	board_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
 	board_style.shadow_offset = Vector2(0.0, 4.0)
 	board_panel.add_theme_stylebox_override("panel", board_style)
-	board_label.text = "Ritual Board (5x3)"
+	board_label.text = "Player Ritual Board (Interactive)"
 	board_label.modulate = Color(0.83, 0.81, 0.89, 1.0)
+
+func _style_opponent_board() -> void:
+	var opponent_style: StyleBoxFlat = StyleBoxFlat.new()
+	opponent_style.bg_color = Color(0.06, 0.06, 0.09, 0.94)
+	opponent_style.border_width_left = 2
+	opponent_style.border_width_top = 2
+	opponent_style.border_width_right = 2
+	opponent_style.border_width_bottom = 2
+	opponent_style.border_color = Color(0.42, 0.25, 0.51, 0.84)
+	opponent_style.corner_radius_top_left = 12
+	opponent_style.corner_radius_top_right = 12
+	opponent_style.corner_radius_bottom_left = 12
+	opponent_style.corner_radius_bottom_right = 12
+	opponent_style.shadow_size = 8
+	opponent_style.shadow_color = Color(0.0, 0.0, 0.0, 0.34)
+	opponent_style.shadow_offset = Vector2(0.0, 3.0)
+	opponent_board_panel.add_theme_stylebox_override("panel", opponent_style)
+	opponent_title_label.text = "Opponent Host (AI/Placeholder)"
+	opponent_title_label.modulate = Color(0.85, 0.81, 0.91, 1.0)
+	for slot_index in opponent_slot_panels.size():
+		var slot_panel: Panel = opponent_slot_panels[slot_index]
+		var slot_style: StyleBoxFlat = StyleBoxFlat.new()
+		slot_style.bg_color = Color(0.08, 0.09, 0.12, 0.95)
+		slot_style.border_width_left = 2
+		slot_style.border_width_top = 2
+		slot_style.border_width_right = 2
+		slot_style.border_width_bottom = 2
+		slot_style.border_color = Color(0.44, 0.31, 0.57, 0.86)
+		slot_style.corner_radius_top_left = 9
+		slot_style.corner_radius_top_right = 9
+		slot_style.corner_radius_bottom_left = 9
+		slot_style.corner_radius_bottom_right = 9
+		slot_panel.add_theme_stylebox_override("panel", slot_style)
+		var slot_underglow: ColorRect = ColorRect.new()
+		slot_underglow.anchors_preset = Control.PRESET_FULL_RECT
+		slot_underglow.offset_left = 8.0
+		slot_underglow.offset_top = 8.0
+		slot_underglow.offset_right = -8.0
+		slot_underglow.offset_bottom = -8.0
+		slot_underglow.color = Color(0.56, 0.24, 0.72, 0.18)
+		slot_underglow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot_panel.add_child(slot_underglow)
+		slot_panel.move_child(slot_underglow, 0)
+		opponent_slot_labels[slot_index].modulate = Color(0.89, 0.87, 0.95, 1.0)
+		opponent_slot_labels[slot_index].text = "Enemy Slot %d\nIcon • Lv?" % [slot_index + 1]
+		opponent_slot_labels[slot_index].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+func _style_center_strip() -> void:
+	var strip_style: StyleBoxFlat = StyleBoxFlat.new()
+	strip_style.bg_color = Color(0.08, 0.05, 0.12, 0.92)
+	strip_style.border_width_left = 2
+	strip_style.border_width_top = 2
+	strip_style.border_width_right = 2
+	strip_style.border_width_bottom = 2
+	strip_style.border_color = Color(0.56, 0.38, 0.71, 0.90)
+	strip_style.corner_radius_top_left = 10
+	strip_style.corner_radius_top_right = 10
+	strip_style.corner_radius_bottom_left = 10
+	strip_style.corner_radius_bottom_right = 10
+	center_strip_panel.add_theme_stylebox_override("panel", strip_style)
 
 func _style_top_bar() -> void:
 	var top_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -416,8 +491,8 @@ func _style_top_bar() -> void:
 	summon_button.modulate = Color(0.95, 0.92, 1.0, 1.0)
 
 func _style_enemy_lanes() -> void:
-	enemy_lane_box.add_theme_constant_override("separation", 12)
-	enemy_title_label.text = "Voidbound Approach"
+	enemy_lane_box.add_theme_constant_override("separation", 4)
+	enemy_title_label.text = "Contested Battle Strip"
 	enemy_title_label.modulate = Color(0.86, 0.82, 0.92, 1.0)
 	for lane_index in enemy_panels.size():
 		var lane_panel: Panel = enemy_panels[lane_index]
@@ -439,6 +514,8 @@ func _style_enemy_lanes() -> void:
 		_apply_lane_portal_ambience(lane_panel, lane_index)
 	for lane_label in enemy_labels:
 		lane_label.modulate = Color(0.86, 0.86, 0.91, 1.0)
+		lane_label.add_theme_font_size_override("font_size", 13)
+		lane_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 func _style_unit_detail_panel() -> void:
 	var detail_style: StyleBoxFlat = StyleBoxFlat.new()

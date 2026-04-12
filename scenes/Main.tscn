@@ -21,12 +21,12 @@ grow_vertical = 2
 color = Color(0.0784314, 0.0980392, 0.141176, 1)
 
 [node name="Board" type="Panel" parent="."]
-custom_minimum_size = Vector2(760, 500)
+custom_minimum_size = Vector2(0, 360)
 layout_mode = 2
-offset_left = 30.0
-offset_top = 120.0
-offset_right = 790.0
-offset_bottom = 620.0
+offset_left = 40.0
+offset_top = 444.0
+offset_right = 1240.0
+offset_bottom = 820.0
 
 [node name="BoardMargin" type="MarginContainer" parent="Board"]
 layout_mode = 1
@@ -47,7 +47,7 @@ theme_override_constants/separation = 10
 
 [node name="BoardLabel" type="Label" parent="Board/BoardMargin/BoardContent"]
 layout_mode = 2
-text = "Player Board (5x3)"
+text = "Player Ritual Board"
 horizontal_alignment = 1
 
 [node name="TileGrid" type="GridContainer" parent="Board/BoardMargin/BoardContent"]
@@ -55,10 +55,10 @@ layout_mode = 2
 size_flags_vertical = 3
 columns = 5
 theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
+theme_override_constants/v_separation = 8
 
 [node name="Tile01" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -79,7 +79,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile02" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -100,7 +100,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile03" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -121,7 +121,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile04" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -142,7 +142,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile05" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -163,7 +163,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile06" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -184,7 +184,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile07" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -205,7 +205,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile08" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -226,7 +226,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile09" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -247,7 +247,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile10" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -268,7 +268,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile11" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -289,7 +289,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile12" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -310,7 +310,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile13" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -331,7 +331,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile14" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -352,7 +352,7 @@ text = "Empty"
 horizontal_alignment = 1
 
 [node name="Tile15" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 96)
 layout_mode = 2
 self_modulate = Color(0.22, 0.24, 0.31, 1)
 
@@ -372,21 +372,111 @@ grow_vertical = 2
 text = "Empty"
 horizontal_alignment = 1
 
+[node name="OpponentBoard" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+offset_left = 40.0
+offset_top = 104.0
+offset_right = 1240.0
+offset_bottom = 340.0
+
+[node name="OpponentMargin" type="MarginContainer" parent="OpponentBoard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="OpponentContent" type="VBoxContainer" parent="OpponentBoard/OpponentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="OpponentLabel" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent"]
+layout_mode = 2
+text = "Opponent Board"
+horizontal_alignment = 1
+
+[node name="OpponentStrip" type="HBoxContainer" parent="OpponentBoard/OpponentMargin/OpponentContent"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="OppSlot1" type="Panel" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OppSlot1Label" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Slot 1\n--"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppSlot2" type="Panel" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OppSlot2Label" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Slot 2\n--"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppSlot3" type="Panel" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OppSlot3Label" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Slot 3\n--"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CenterStrip" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+offset_left = 40.0
+offset_top = 350.0
+offset_right = 1240.0
+offset_bottom = 436.0
+
 [node name="EnemyLane" type="VBoxContainer" parent="."]
 layout_mode = 2
-offset_left = 850.0
-offset_top = 120.0
-offset_right = 1230.0
-offset_bottom = 620.0
+offset_left = 56.0
+offset_top = 356.0
+offset_right = 1224.0
+offset_bottom = 430.0
 theme_override_constants/separation = 10
 
 [node name="EnemyTitle" type="Label" parent="EnemyLane"]
 layout_mode = 2
-text = "Incoming Enemies"
+text = "Contested Battle Strip"
 horizontal_alignment = 1
 
 [node name="Enemy1" type="Panel" parent="EnemyLane"]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
 
 [node name="Enemy1Label" type="Label" parent="EnemyLane/Enemy1"]
@@ -405,7 +495,7 @@ grow_vertical = 2
 text = "Enemy Placeholder 1"
 
 [node name="Enemy2" type="Panel" parent="EnemyLane"]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
 
 [node name="Enemy2Label" type="Label" parent="EnemyLane/Enemy2"]
@@ -424,7 +514,7 @@ grow_vertical = 2
 text = "Enemy Placeholder 2"
 
 [node name="Enemy3" type="Panel" parent="EnemyLane"]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 18)
 layout_mode = 2
 
 [node name="Enemy3Label" type="Label" parent="EnemyLane/Enemy3"]
@@ -445,9 +535,9 @@ text = "Enemy Placeholder 3"
 [node name="TopBar" type="Panel" parent="."]
 custom_minimum_size = Vector2(0, 70)
 layout_mode = 2
-offset_left = 30.0
+offset_left = 40.0
 offset_top = 20.0
-offset_right = 1230.0
+offset_right = 1240.0
 offset_bottom = 90.0
 
 [node name="TopRow" type="HBoxContainer" parent="TopBar"]
@@ -481,19 +571,19 @@ text = "Summon Unit"
 
 [node name="StatusLabel" type="Label" parent="."]
 layout_mode = 2
-offset_left = 30.0
-offset_top = 640.0
-offset_right = 820.0
-offset_bottom = 700.0
+offset_left = 40.0
+offset_top = 832.0
+offset_right = 840.0
+offset_bottom = 900.0
 text = "Press Summon Unit to cycle placeholder units."
 vertical_alignment = 1
 
 [node name="UnitDetailPanel" type="Panel" parent="."]
 layout_mode = 2
-offset_left = 850.0
-offset_top = 640.0
-offset_right = 1230.0
-offset_bottom = 760.0
+offset_left = 860.0
+offset_top = 832.0
+offset_right = 1240.0
+offset_bottom = 940.0
 
 [node name="UnitDetailLabel" type="Label" parent="UnitDetailPanel"]
 layout_mode = 1
@@ -513,10 +603,10 @@ vertical_alignment = 1
 [node name="LossLabel" type="Label" parent="."]
 visible = false
 layout_mode = 2
-offset_left = 340.0
-offset_top = 300.0
-offset_right = 920.0
-offset_bottom = 360.0
+offset_left = 260.0
+offset_top = 438.0
+offset_right = 1020.0
+offset_bottom = 498.0
 theme_override_font_sizes/font_size = 42
 text = "DEFEAT - GATE DESTROYED"
 horizontal_alignment = 1
