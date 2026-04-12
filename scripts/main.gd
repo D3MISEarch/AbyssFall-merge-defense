@@ -4,12 +4,6 @@ const BOARD_COLUMNS := 5
 const BOARD_ROWS := 3
 const EMPTY_TILE_TEXT := "Empty"
 const MAX_LEVEL := 3
-const BASE_UNIT_DAMAGE := 1
-const LEVEL_DAMAGE_MULTIPLIER := {
-	1: 1,
-	2: 3,
-	3: 6
-}
 
 const LANE_COUNT := 3
 const LANE_LENGTH := 8
@@ -17,8 +11,39 @@ const SPAWN_INTERVAL_SECONDS := 2.0
 const ADVANCE_INTERVAL_SECONDS := 1.0
 const BASE_GATE_HP := 100
 
+const UNIT_ROTATION := ["Lane Guard", "Hunter", "Cleave Bot", "Banner"]
+const UNIT_DEFINITIONS := {
+	"Lane Guard": {
+		"role": "lane",
+		"label": "Lane DPS",
+		"base_damage": 2,
+		"level_damage_multiplier": {1: 1, 2: 2, 3: 4},
+		"lane_bonus": 1
+	},
+	"Hunter": {
+		"role": "single",
+		"label": "Single Scale",
+		"base_damage": 1,
+		"level_damage_multiplier": {1: 1, 2: 3, 3: 6},
+		"focus_bonus": 2
+	},
+	"Cleave Bot": {
+		"role": "cleave",
+		"label": "Cleave",
+		"base_damage": 2,
+		"level_damage_multiplier": {1: 1, 2: 2, 3: 3},
+		"splash_ratio": 0.5
+	},
+	"Banner": {
+		"role": "support",
+		"label": "Support",
+		"base_damage": 0,
+		"level_damage_multiplier": {1: 0, 2: 0, 3: 0},
+		"lane_buff_per_level": 1
+	}
+}
+
 var next_unit := 0
-var unit_names := ["Unit A", "Unit B", "Unit C", "Unit D"]
 var board_units: Array[Dictionary] = []
 var tile_panels: Array[Panel] = []
 var tile_labels: Array[Label] = []
@@ -100,8 +125,8 @@ func _on_summon_pressed() -> void:
 		status_label.text = "Board is full. Merge or clear a tile before summoning."
 		return
 
-	var summoned_name := unit_names[next_unit]
-	next_unit = (next_unit + 1) % unit_names.size()
+	var summoned_name := UNIT_ROTATION[next_unit]
+	next_unit = (next_unit + 1) % UNIT_ROTATION.size()
 	board_units[empty_index] = {"name": summoned_name, "level": 1}
 	_render_board()
 	status_label.text = "Summoned %s into tile %d." % [_format_unit(board_units[empty_index]), empty_index + 1]
@@ -199,19 +224,61 @@ func _apply_board_auto_damage() -> void:
 		if enemy_lanes[lane_index].is_empty():
 			continue
 
-		var lane_damage := _get_lane_damage(lane_index)
-		if lane_damage <= 0:
-			continue
+		var lane_support_bonus := _get_lane_support_bonus(lane_index)
+		for column in BOARD_COLUMNS:
+			var tile_index := lane_index * BOARD_COLUMNS + column
+			if tile_index >= board_units.size() or _is_tile_empty(tile_index):
+				continue
+			if enemy_lanes[lane_index].is_empty():
+				break
 
-		var target_index := _get_front_enemy_index(enemy_lanes[lane_index])
-		var enemy := enemy_lanes[lane_index][target_index]
-		enemy["hp"] = int(enemy["hp"]) - lane_damage
+			var unit := board_units[tile_index]
+			var role := _get_unit_role(unit)
+			var damage := _get_unit_base_damage(unit)
 
-		if int(enemy["hp"]) <= 0:
-			enemy_lanes[lane_index].remove_at(target_index)
-			status_label.text = "Lane %d enemy defeated by %d board damage." % [lane_index + 1, lane_damage]
-		else:
-			enemy_lanes[lane_index][target_index] = enemy
+			if role == "support":
+				continue
+
+			damage += lane_support_bonus
+			if role == "lane":
+				damage += int(_get_unit_stat(unit, "lane_bonus", 0))
+			elif role == "single":
+				damage += int(_get_unit_stat(unit, "focus_bonus", 0))
+
+			_damage_front_enemy(lane_index, damage)
+			if role == "cleave":
+				var splash_ratio := float(_get_unit_stat(unit, "splash_ratio", 0.0))
+				var splash_damage := int(round(float(damage) * splash_ratio))
+				_damage_secondary_enemy(lane_index, splash_damage)
+
+func _damage_front_enemy(lane_index: int, damage: int) -> void:
+	if damage <= 0 or enemy_lanes[lane_index].is_empty():
+		return
+
+	var front_index := _get_front_enemy_index(enemy_lanes[lane_index])
+	var enemy := enemy_lanes[lane_index][front_index]
+	enemy["hp"] = int(enemy["hp"]) - damage
+
+	if int(enemy["hp"]) <= 0:
+		enemy_lanes[lane_index].remove_at(front_index)
+		status_label.text = "Lane %d enemy defeated by %d damage." % [lane_index + 1, damage]
+	else:
+		enemy_lanes[lane_index][front_index] = enemy
+
+func _damage_secondary_enemy(lane_index: int, damage: int) -> void:
+	if damage <= 0 or enemy_lanes[lane_index].size() < 2:
+		return
+
+	var sorted_indices := _get_enemy_indices_by_progress(enemy_lanes[lane_index])
+	var secondary_index := sorted_indices[1]
+	var enemy := enemy_lanes[lane_index][secondary_index]
+	enemy["hp"] = int(enemy["hp"]) - damage
+
+	if int(enemy["hp"]) <= 0:
+		enemy_lanes[lane_index].remove_at(secondary_index)
+		status_label.text = "Lane %d cleave splash defeated an enemy." % [lane_index + 1]
+	else:
+		enemy_lanes[lane_index][secondary_index] = enemy
 
 func _advance_enemies_toward_gate() -> void:
 	for lane_index in LANE_COUNT:
@@ -287,27 +354,68 @@ func _get_front_enemy_index(lane_enemies: Array) -> int:
 
 	return selected_index
 
-func _get_lane_damage(lane_index: int) -> int:
-	var total_damage := 0
+func _get_enemy_indices_by_progress(lane_enemies: Array) -> Array[int]:
+	var ordered_indices: Array[int] = []
+	for i in lane_enemies.size():
+		ordered_indices.append(i)
+
+	ordered_indices.sort_custom(func(a: int, b: int) -> bool:
+		return int(lane_enemies[a]["progress"]) > int(lane_enemies[b]["progress"])
+	)
+	return ordered_indices
+
+func _get_lane_support_bonus(lane_index: int) -> int:
+	var bonus := 0
 	for column in BOARD_COLUMNS:
 		var tile_index := lane_index * BOARD_COLUMNS + column
 		if tile_index >= board_units.size() or _is_tile_empty(tile_index):
 			continue
-		total_damage += _get_unit_damage(board_units[tile_index])
-	return total_damage
+		var unit := board_units[tile_index]
+		if _get_unit_role(unit) != "support":
+			continue
+		bonus += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * int(unit["level"])
+	return bonus
 
 func _get_board_power() -> int:
 	var total_power := 0
-	for unit in board_units:
-		if unit.is_empty():
-			continue
-		total_power += _get_unit_damage(unit)
+	for lane_index in LANE_COUNT:
+		var lane_support_bonus := _get_lane_support_bonus(lane_index)
+		for column in BOARD_COLUMNS:
+			var tile_index := lane_index * BOARD_COLUMNS + column
+			if tile_index >= board_units.size() or _is_tile_empty(tile_index):
+				continue
+			var unit := board_units[tile_index]
+			var role := _get_unit_role(unit)
+			var unit_power := _get_unit_base_damage(unit)
+			if role == "support":
+				unit_power = lane_support_bonus
+			else:
+				unit_power += lane_support_bonus
+				if role == "lane":
+					unit_power += int(_get_unit_stat(unit, "lane_bonus", 0))
+				elif role == "single":
+					unit_power += int(_get_unit_stat(unit, "focus_bonus", 0))
+				elif role == "cleave":
+					unit_power += int(round(float(unit_power) * float(_get_unit_stat(unit, "splash_ratio", 0.0)) * 0.5))
+			total_power += unit_power
 	return total_power
 
-func _get_unit_damage(unit: Dictionary) -> int:
+func _get_unit_base_damage(unit: Dictionary) -> int:
 	var level := int(unit["level"])
-	var multiplier := int(LEVEL_DAMAGE_MULTIPLIER.get(level, level))
-	return BASE_UNIT_DAMAGE * multiplier
+	var unit_info := _get_unit_definition(unit)
+	var multipliers := unit_info.get("level_damage_multiplier", {})
+	var level_multiplier := int(multipliers.get(level, level))
+	return int(unit_info.get("base_damage", 0)) * level_multiplier
+
+func _get_unit_role(unit: Dictionary) -> String:
+	return str(_get_unit_definition(unit).get("role", "single"))
+
+func _get_unit_definition(unit: Dictionary) -> Dictionary:
+	var unit_name := str(unit.get("name", ""))
+	return UNIT_DEFINITIONS.get(unit_name, UNIT_DEFINITIONS["Hunter"])
+
+func _get_unit_stat(unit: Dictionary, stat_name: String, default_value: Variant) -> Variant:
+	return _get_unit_definition(unit).get(stat_name, default_value)
 
 func _find_empty_tile() -> int:
 	for i in board_units.size():
@@ -319,5 +427,20 @@ func _is_tile_empty(tile_index: int) -> bool:
 	return board_units[tile_index].is_empty()
 
 func _format_unit(unit: Dictionary) -> String:
-	var damage := _get_unit_damage(unit)
-	return "%s Lv%d (%d DMG)" % [unit["name"], int(unit["level"]), damage]
+	var role_label := str(_get_unit_definition(unit).get("label", "Role"))
+	var damage := _get_unit_base_damage(unit)
+	var effect_text := _get_unit_effect_text(unit)
+	return "%s Lv%d | %s | %d ATK | %s" % [unit["name"], int(unit["level"]), role_label, damage, effect_text]
+
+func _get_unit_effect_text(unit: Dictionary) -> String:
+	var role := _get_unit_role(unit)
+	if role == "lane":
+		return "+%d lane" % int(_get_unit_stat(unit, "lane_bonus", 0))
+	if role == "single":
+		return "+%d focus" % int(_get_unit_stat(unit, "focus_bonus", 0))
+	if role == "cleave":
+		var splash_percent := int(round(float(_get_unit_stat(unit, "splash_ratio", 0.0)) * 100.0))
+		return "%d%% splash" % splash_percent
+	if role == "support":
+		return "+%d/lv buff" % int(_get_unit_stat(unit, "lane_buff_per_level", 0))
+	return "No effect"
