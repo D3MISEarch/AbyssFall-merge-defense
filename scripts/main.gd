@@ -58,8 +58,14 @@ const UNIT_DEFINITIONS: Dictionary = {
 		"label": "Lane Support",
 		"base_damage": 0,
 		"level_damage_multiplier": {1: 0, 2: 0, 3: 0},
+		"lane_buff_base": 1,
 		"lane_buff_per_level": 2,
-		"value_text": "Pure force multiplier for every ally in its lane."
+		"guard_bonus_per_level": 2,
+		"guard_wall_bonus": 1,
+		"hunter_bonus_per_level": 1,
+		"hunter_execute_bonus_per_level": 1,
+		"cleave_bonus_per_level": 1,
+		"value_text": "Best with Guard/Hunter lanes where every attack gets amplified."
 	}
 }
 
@@ -390,16 +396,28 @@ func _apply_board_auto_damage() -> void:
 				continue
 
 			damage += lane_support_bonus
+			var role_support_bonus: int = _get_lane_role_support_bonus(lane_index, role)
+			damage += role_support_bonus
 			var support_contributed: bool = lane_support_bonus > 0
+			if role_support_bonus > 0:
+				support_contributed = true
 			if role == "lane":
 				damage += int(_get_unit_stat(unit, "lane_bonus", 0))
 				if enemy_lanes[lane_index].size() >= int(_get_unit_stat(unit, "crowd_threshold", 99)):
 					damage += int(_get_unit_stat(unit, "crowd_bonus", 0))
+					var guard_wall_bonus: int = _get_lane_guard_wall_bonus(lane_index)
+					damage += guard_wall_bonus
+					if guard_wall_bonus > 0:
+						support_contributed = true
 			elif role == "single":
 				damage += int(_get_unit_stat(unit, "focus_bonus", 0))
 				var front_progress: int = _get_front_enemy_progress(lane_index)
 				if LANE_LENGTH - front_progress <= int(_get_unit_stat(unit, "execute_range", 0)):
 					damage += int(_get_unit_stat(unit, "execute_bonus", 0))
+					var hunter_execute_bonus: int = _get_lane_hunter_execute_bonus(lane_index)
+					damage += hunter_execute_bonus
+					if hunter_execute_bonus > 0:
+						support_contributed = true
 
 			_damage_front_enemy(lane_index, damage, support_contributed)
 			if role == "cleave":
@@ -682,7 +700,55 @@ func _get_lane_support_bonus(lane_index: int) -> int:
 		var unit: Dictionary = board_units[tile_index]
 		if _get_unit_role(unit) != "support":
 			continue
-		bonus += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * int(unit["level"])
+		var level: int = int(unit["level"])
+		bonus += int(_get_unit_stat(unit, "lane_buff_base", 0))
+		bonus += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * level
+	return bonus
+
+func _get_lane_role_support_bonus(lane_index: int, role: String) -> int:
+	var bonus: int = 0
+	var stat_name: String = ""
+	if role == "lane":
+		stat_name = "guard_bonus_per_level"
+	elif role == "single":
+		stat_name = "hunter_bonus_per_level"
+	elif role == "cleave":
+		stat_name = "cleave_bonus_per_level"
+	if stat_name == "":
+		return 0
+
+	for column in BOARD_COLUMNS:
+		var tile_index: int = lane_index * BOARD_COLUMNS + column
+		if tile_index >= board_units.size() or _is_tile_empty(tile_index):
+			continue
+		var unit: Dictionary = board_units[tile_index]
+		if _get_unit_role(unit) != "support":
+			continue
+		bonus += int(_get_unit_stat(unit, stat_name, 0)) * int(unit["level"])
+	return bonus
+
+func _get_lane_guard_wall_bonus(lane_index: int) -> int:
+	var bonus: int = 0
+	for column in BOARD_COLUMNS:
+		var tile_index: int = lane_index * BOARD_COLUMNS + column
+		if tile_index >= board_units.size() or _is_tile_empty(tile_index):
+			continue
+		var unit: Dictionary = board_units[tile_index]
+		if _get_unit_role(unit) != "support":
+			continue
+		bonus += int(_get_unit_stat(unit, "guard_wall_bonus", 0))
+	return bonus
+
+func _get_lane_hunter_execute_bonus(lane_index: int) -> int:
+	var bonus: int = 0
+	for column in BOARD_COLUMNS:
+		var tile_index: int = lane_index * BOARD_COLUMNS + column
+		if tile_index >= board_units.size() or _is_tile_empty(tile_index):
+			continue
+		var unit: Dictionary = board_units[tile_index]
+		if _get_unit_role(unit) != "support":
+			continue
+		bonus += int(_get_unit_stat(unit, "hunter_execute_bonus_per_level", 0)) * int(unit["level"])
 	return bonus
 
 func _get_board_power() -> int:
@@ -698,15 +764,27 @@ func _get_board_power() -> int:
 			var unit_power: int = _get_unit_base_damage(unit)
 			if role == "support":
 				var ally_count: int = _get_lane_non_support_count(lane_index)
-				unit_power = int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * int(unit["level"]) * max(1, ally_count)
+				var support_level: int = int(unit["level"])
+				var ally_scale: int = max(1, ally_count)
+				var aura_power: int = int(_get_unit_stat(unit, "lane_buff_base", 0))
+				aura_power += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * support_level
+				var role_power: int = int(_get_unit_stat(unit, "guard_bonus_per_level", 0)) * support_level
+				role_power += int(_get_unit_stat(unit, "hunter_bonus_per_level", 0)) * support_level
+				role_power += int(_get_unit_stat(unit, "cleave_bonus_per_level", 0)) * support_level
+				role_power += int(_get_unit_stat(unit, "hunter_execute_bonus_per_level", 0)) * support_level
+				role_power += int(_get_unit_stat(unit, "guard_wall_bonus", 0))
+				unit_power = (aura_power + role_power) * ally_scale
 			else:
 				unit_power += lane_support_bonus
+				unit_power += _get_lane_role_support_bonus(lane_index, role)
 				if role == "lane":
 					unit_power += int(_get_unit_stat(unit, "lane_bonus", 0))
 					unit_power += int(_get_unit_stat(unit, "crowd_bonus", 0))
+					unit_power += _get_lane_guard_wall_bonus(lane_index)
 				elif role == "single":
 					unit_power += int(_get_unit_stat(unit, "focus_bonus", 0))
 					unit_power += int(_get_unit_stat(unit, "execute_bonus", 0))
+					unit_power += _get_lane_hunter_execute_bonus(lane_index)
 				elif role == "cleave":
 					unit_power += int(round(float(unit_power) * float(_get_unit_stat(unit, "splash_ratio", 0.0))))
 			total_power += unit_power
@@ -760,7 +838,10 @@ func _format_tile_unit(unit: Dictionary) -> String:
 	var unit_name: String = _get_unit_short_name(unit)
 	var atk_text: String = "%d ATK" % _get_unit_base_damage(unit)
 	if _get_unit_role(unit) == "support":
-		atk_text = "Buff +%d" % (int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * int(unit["level"]))
+		var support_level: int = int(unit["level"])
+		var lane_buff_total: int = int(_get_unit_stat(unit, "lane_buff_base", 0))
+		lane_buff_total += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * support_level
+		atk_text = "Aura +%d" % lane_buff_total
 	return "%s\nL%d %s\n%s" % [unit_name, int(unit["level"]), role_tag, atk_text]
 
 func _get_unit_short_name(unit: Dictionary) -> String:
@@ -788,8 +869,11 @@ func _get_unit_effect_text(unit: Dictionary) -> String:
 		var splash_percent: int = int(round(float(_get_unit_stat(unit, "splash_ratio", 0.0)) * 100.0))
 		return "%d%% splash" % splash_percent
 	if role == "support":
-		var buff_total: int = int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * level
-		return "Lane allies gain +%d damage each" % buff_total
+		var lane_buff_total: int = int(_get_unit_stat(unit, "lane_buff_base", 0))
+		lane_buff_total += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * level
+		var guard_bonus: int = int(_get_unit_stat(unit, "guard_bonus_per_level", 0)) * level
+		var hunter_bonus: int = int(_get_unit_stat(unit, "hunter_bonus_per_level", 0)) * level
+		return "Aura +%d, Guard +%d, Hunter +%d" % [lane_buff_total, guard_bonus, hunter_bonus]
 	return "No effect"
 
 func _get_unit_why_text(unit: Dictionary) -> String:
@@ -815,8 +899,10 @@ func _update_support_feedback_ui() -> void:
 	var lines: Array[String] = []
 	for lane_index in LANE_COUNT:
 		var lane_bonus: int = _get_lane_support_bonus(lane_index)
+		var guard_bonus: int = _get_lane_role_support_bonus(lane_index, "lane")
+		var hunter_bonus: int = _get_lane_role_support_bonus(lane_index, "single")
 		if lane_bonus > 0:
-			lines.append("L%d aura +%d" % [lane_index + 1, lane_bonus])
+			lines.append("L%d A+%d G+%d H+%d" % [lane_index + 1, lane_bonus, guard_bonus, hunter_bonus])
 		else:
 			lines.append("")
 	support_feedback_lines = lines
