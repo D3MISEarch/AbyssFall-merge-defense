@@ -70,15 +70,15 @@ const UNIT_DEFINITIONS: Dictionary = {
 }
 
 const SUPPORT_PANEL_COLOR: Color = Color(0.33, 0.33, 0.54, 1.0)
-const ATTACK_PANEL_COLOR: Color = Color(0.31, 0.47, 0.38, 1.0)
-const EMPTY_PANEL_COLOR: Color = Color(0.22, 0.24, 0.31, 1.0)
-const SELECTED_PANEL_COLOR: Color = Color(0.92, 0.75, 0.32, 1.0)
+const ATTACK_PANEL_COLOR: Color = Color(0.22, 0.30, 0.33, 1.0)
+const EMPTY_PANEL_COLOR: Color = Color(0.13, 0.14, 0.18, 1.0)
+const SELECTED_PANEL_COLOR: Color = Color(0.58, 0.47, 0.76, 1.0)
 const MERGE_FLASH_COLOR: Color = Color(0.98, 0.97, 0.72, 1.0)
 const LANE_HIT_FLASH_COLOR: Color = Color(0.78, 0.28, 0.28, 1.0)
 const LANE_SPLASH_FLASH_COLOR: Color = Color(0.92, 0.62, 0.25, 1.0)
-const LANE_AURA_COLOR: Color = Color(0.28, 0.55, 0.84, 1.0)
-const LANE_IDLE_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
-const SUPPORT_AURA_TILE_COLOR: Color = Color(0.52, 0.74, 1.0, 1.0)
+const LANE_AURA_COLOR: Color = Color(0.49, 0.34, 0.64, 1.0)
+const LANE_IDLE_COLOR: Color = Color(0.80, 0.80, 0.88, 1.0)
+const SUPPORT_AURA_TILE_COLOR: Color = Color(0.67, 0.52, 0.90, 1.0)
 const BUFF_TYPE_SUPPORT: String = "support_damage"
 const BUFF_TYPE_PROTECTION: String = "protection_holy"
 const BUFF_TYPE_ATTACK: String = "attack_rage"
@@ -122,12 +122,18 @@ var support_feedback_lines: Array[String] = []
 
 @onready var summon_button: Button = $TopBar/TopRow/SummonButton
 @onready var status_label: Label = $StatusLabel
+@onready var background_rect: ColorRect = $Background
+@onready var board_panel: Panel = $Board
 @onready var wave_label: Label = $TopBar/TopRow/WaveLabel
 @onready var gate_label: Label = $TopBar/TopRow/GateLabel
 @onready var board_power_label: Label = $TopBar/TopRow/BoardPowerLabel
 @onready var loss_label: Label = $LossLabel
 @onready var tile_grid: GridContainer = $Board/BoardMargin/BoardContent/TileGrid
+@onready var board_label: Label = $Board/BoardMargin/BoardContent/BoardLabel
+@onready var enemy_lane_box: VBoxContainer = $EnemyLane
+@onready var enemy_title_label: Label = $EnemyLane/EnemyTitle
 @onready var unit_detail_label: Label = $UnitDetailPanel/UnitDetailLabel
+@onready var unit_detail_panel: Panel = $UnitDetailPanel
 @onready var enemy_labels: Array[Label] = [
 	$EnemyLane/Enemy1/Enemy1Label,
 	$EnemyLane/Enemy2/Enemy2Label,
@@ -139,8 +145,10 @@ var support_feedback_lines: Array[String] = []
 	$EnemyLane/Enemy3
 ]
 @onready var top_bar_panel: Panel = $TopBar
+@onready var top_row: HBoxContainer = $TopBar/TopRow
 
 func _ready() -> void:
+	_apply_dark_fantasy_theme()
 	board_units.resize(BOARD_COLUMNS * BOARD_ROWS)
 	for i in board_units.size():
 		board_units[i] = {}
@@ -231,6 +239,7 @@ func _ready() -> void:
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(_on_tile_gui_input.bind(i))
 
+	_style_tile_panels_base()
 	summon_button.pressed.connect(_on_summon_pressed)
 	_render_board()
 	_update_gate_ui()
@@ -240,6 +249,151 @@ func _ready() -> void:
 	loss_label.visible = false
 	status_label.text = "Prototype loaded. Summon units and hold the gate."
 	_update_selection_detail()
+
+func _apply_dark_fantasy_theme() -> void:
+	background_rect.color = Color(0.05, 0.05, 0.07, 1.0)
+	_apply_background_atmosphere()
+	_style_board_panel()
+	_style_top_bar()
+	_style_enemy_lanes()
+	_style_unit_detail_panel()
+	_style_status_labels()
+
+func _apply_background_atmosphere() -> void:
+	var forest_shadow: ColorRect = ColorRect.new()
+	forest_shadow.anchors_preset = Control.PRESET_FULL_RECT
+	forest_shadow.offset_top = 110.0
+	forest_shadow.color = Color(0.05, 0.10, 0.09, 0.62)
+	forest_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(forest_shadow)
+	move_child(forest_shadow, get_child_count() - 1)
+
+	var abyss_haze: ColorRect = ColorRect.new()
+	abyss_haze.anchors_preset = Control.PRESET_FULL_RECT
+	abyss_haze.offset_left = 420.0
+	abyss_haze.offset_top = 130.0
+	abyss_haze.offset_right = -170.0
+	abyss_haze.offset_bottom = -80.0
+	abyss_haze.color = Color(0.28, 0.12, 0.38, 0.18)
+	abyss_haze.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(abyss_haze)
+	move_child(abyss_haze, get_child_count() - 1)
+
+	var gate_glow: ColorRect = ColorRect.new()
+	gate_glow.anchors_preset = Control.PRESET_FULL_RECT
+	gate_glow.offset_left = 16.0
+	gate_glow.offset_top = 20.0
+	gate_glow.offset_right = -16.0
+	gate_glow.offset_bottom = -600.0
+	gate_glow.color = Color(0.54, 0.17, 0.71, 0.17)
+	gate_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(gate_glow)
+	move_child(gate_glow, get_child_count() - 1)
+
+func _style_board_panel() -> void:
+	var board_style: StyleBoxFlat = StyleBoxFlat.new()
+	board_style.bg_color = Color(0.08, 0.08, 0.12, 0.94)
+	board_style.border_width_left = 2
+	board_style.border_width_top = 2
+	board_style.border_width_right = 2
+	board_style.border_width_bottom = 2
+	board_style.border_color = Color(0.35, 0.26, 0.46, 0.78)
+	board_style.corner_radius_top_left = 12
+	board_style.corner_radius_top_right = 12
+	board_style.corner_radius_bottom_left = 12
+	board_style.corner_radius_bottom_right = 12
+	board_panel.add_theme_stylebox_override("panel", board_style)
+	board_label.text = "Ritual Board (5x3)"
+	board_label.modulate = Color(0.84, 0.82, 0.91, 1.0)
+
+func _style_top_bar() -> void:
+	var top_style: StyleBoxFlat = StyleBoxFlat.new()
+	top_style.bg_color = Color(0.09, 0.07, 0.12, 0.96)
+	top_style.border_width_left = 2
+	top_style.border_width_top = 2
+	top_style.border_width_right = 2
+	top_style.border_width_bottom = 2
+	top_style.border_color = Color(0.43, 0.29, 0.58, 0.88)
+	top_style.corner_radius_top_left = 10
+	top_style.corner_radius_top_right = 10
+	top_style.corner_radius_bottom_left = 10
+	top_style.corner_radius_bottom_right = 10
+	top_bar_panel.add_theme_stylebox_override("panel", top_style)
+	top_row.add_theme_constant_override("separation", 20)
+	wave_label.modulate = Color(0.88, 0.87, 0.94, 1.0)
+	gate_label.modulate = Color(0.93, 0.84, 0.97, 1.0)
+	board_power_label.modulate = Color(0.78, 0.87, 0.90, 1.0)
+
+	var summon_style: StyleBoxFlat = StyleBoxFlat.new()
+	summon_style.bg_color = Color(0.23, 0.12, 0.30, 1.0)
+	summon_style.border_width_left = 2
+	summon_style.border_width_top = 2
+	summon_style.border_width_right = 2
+	summon_style.border_width_bottom = 2
+	summon_style.border_color = Color(0.63, 0.46, 0.81, 0.95)
+	summon_style.corner_radius_top_left = 8
+	summon_style.corner_radius_top_right = 8
+	summon_style.corner_radius_bottom_left = 8
+	summon_style.corner_radius_bottom_right = 8
+	summon_button.add_theme_stylebox_override("normal", summon_style)
+	summon_button.add_theme_stylebox_override("hover", summon_style)
+	summon_button.add_theme_stylebox_override("pressed", summon_style)
+	summon_button.text = "Invoke Unit"
+	summon_button.modulate = Color(0.95, 0.92, 1.0, 1.0)
+
+func _style_enemy_lanes() -> void:
+	enemy_lane_box.add_theme_constant_override("separation", 12)
+	enemy_title_label.text = "Voidbound Approach"
+	enemy_title_label.modulate = Color(0.88, 0.82, 0.94, 1.0)
+	for lane_panel in enemy_panels:
+		var lane_style: StyleBoxFlat = StyleBoxFlat.new()
+		lane_style.bg_color = Color(0.10, 0.10, 0.14, 0.95)
+		lane_style.border_width_left = 1
+		lane_style.border_width_top = 1
+		lane_style.border_width_right = 1
+		lane_style.border_width_bottom = 1
+		lane_style.border_color = Color(0.39, 0.29, 0.50, 0.76)
+		lane_style.corner_radius_top_left = 8
+		lane_style.corner_radius_top_right = 8
+		lane_style.corner_radius_bottom_left = 8
+		lane_style.corner_radius_bottom_right = 8
+		lane_panel.add_theme_stylebox_override("panel", lane_style)
+	for lane_label in enemy_labels:
+		lane_label.modulate = Color(0.88, 0.88, 0.93, 1.0)
+
+func _style_unit_detail_panel() -> void:
+	var detail_style: StyleBoxFlat = StyleBoxFlat.new()
+	detail_style.bg_color = Color(0.08, 0.09, 0.12, 0.92)
+	detail_style.border_width_left = 1
+	detail_style.border_width_top = 1
+	detail_style.border_width_right = 1
+	detail_style.border_width_bottom = 1
+	detail_style.border_color = Color(0.37, 0.30, 0.51, 0.85)
+	detail_style.corner_radius_top_left = 8
+	detail_style.corner_radius_top_right = 8
+	detail_style.corner_radius_bottom_left = 8
+	detail_style.corner_radius_bottom_right = 8
+	unit_detail_panel.add_theme_stylebox_override("panel", detail_style)
+	unit_detail_label.modulate = Color(0.86, 0.88, 0.95, 1.0)
+
+func _style_status_labels() -> void:
+	status_label.modulate = Color(0.84, 0.83, 0.90, 1.0)
+	loss_label.modulate = Color(0.97, 0.52, 0.67, 1.0)
+
+func _style_tile_panels_base() -> void:
+	for panel in tile_panels:
+		var tile_style: StyleBoxFlat = StyleBoxFlat.new()
+		tile_style.bg_color = Color(0.06, 0.07, 0.10, 0.96)
+		tile_style.border_width_left = 1
+		tile_style.border_width_top = 1
+		tile_style.border_width_right = 1
+		tile_style.border_width_bottom = 1
+		tile_style.border_color = Color(0.34, 0.31, 0.40, 0.75)
+		tile_style.corner_radius_top_left = 10
+		tile_style.corner_radius_top_right = 10
+		tile_style.corner_radius_bottom_left = 10
+		tile_style.corner_radius_bottom_right = 10
+		panel.add_theme_stylebox_override("panel", tile_style)
 
 func _process(delta: float) -> void:
 	if game_over:
