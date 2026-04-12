@@ -18,596 +18,635 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0784314, 0.0980392, 0.141176, 1)
-
-[node name="Board" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 360)
-layout_mode = 2
-offset_left = 40.0
-offset_top = 444.0
-offset_right = 1240.0
-offset_bottom = 820.0
-
-[node name="BoardMargin" type="MarginContainer" parent="Board"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
-
-[node name="BoardContent" type="VBoxContainer" parent="Board/BoardMargin"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 10
-
-[node name="BoardLabel" type="Label" parent="Board/BoardMargin/BoardContent"]
-layout_mode = 2
-text = "Player Ritual Board"
-horizontal_alignment = 1
-
-[node name="TileGrid" type="GridContainer" parent="Board/BoardMargin/BoardContent"]
-layout_mode = 2
-size_flags_vertical = 3
-columns = 5
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 8
-
-[node name="Tile01" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile01"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile02" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile02"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile03" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile03"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile04" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile04"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile05" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile05"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile06" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile06"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile07" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile07"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile08" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile08"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile09" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile09"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile10" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile10"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile11" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile11"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile12" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile12"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile13" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile13"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile14" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile14"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="Tile15" type="Panel" parent="Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(130, 96)
-layout_mode = 2
-self_modulate = Color(0.22, 0.24, 0.31, 1)
-
-[node name="TileLabel" type="Label" parent="Board/BoardMargin/BoardContent/TileGrid/Tile15"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -11.5
-offset_right = 22.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Empty"
-horizontal_alignment = 1
-
-[node name="OpponentBoard" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 220)
-layout_mode = 2
-offset_left = 40.0
-offset_top = 104.0
-offset_right = 1240.0
-offset_bottom = 340.0
-
-[node name="OpponentMargin" type="MarginContainer" parent="OpponentBoard"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
-
-[node name="OpponentContent" type="VBoxContainer" parent="OpponentBoard/OpponentMargin"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="OpponentLabel" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent"]
-layout_mode = 2
-text = "Opponent Board"
-horizontal_alignment = 1
-
-[node name="OpponentStrip" type="HBoxContainer" parent="OpponentBoard/OpponentMargin/OpponentContent"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 10
-
-[node name="OppSlot1" type="Panel" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
-custom_minimum_size = Vector2(0, 84)
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="OppSlot1Label" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Slot 1\n--"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="OppSlot2" type="Panel" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
-custom_minimum_size = Vector2(0, 84)
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="OppSlot2Label" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Slot 2\n--"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="OppSlot3" type="Panel" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
-custom_minimum_size = Vector2(0, 84)
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="OppSlot3Label" type="Label" parent="OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Slot 3\n--"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="CenterStrip" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 84)
-layout_mode = 2
-offset_left = 40.0
-offset_top = 350.0
-offset_right = 1240.0
-offset_bottom = 436.0
-
-[node name="EnemyLane" type="VBoxContainer" parent="."]
-layout_mode = 2
-offset_left = 56.0
-offset_top = 356.0
-offset_right = 1224.0
-offset_bottom = 430.0
-theme_override_constants/separation = 10
-
-[node name="EnemyTitle" type="Label" parent="EnemyLane"]
-layout_mode = 2
-text = "Contested Battle Strip"
-horizontal_alignment = 1
-
-[node name="Enemy1" type="Panel" parent="EnemyLane"]
-custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
-
-[node name="Enemy1Label" type="Label" parent="EnemyLane/Enemy1"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -75.5
-offset_top = -11.5
-offset_right = 75.5
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Enemy Placeholder 1"
-
-[node name="Enemy2" type="Panel" parent="EnemyLane"]
-custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
-
-[node name="Enemy2Label" type="Label" parent="EnemyLane/Enemy2"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -75.5
-offset_top = -11.5
-offset_right = 75.5
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Enemy Placeholder 2"
-
-[node name="Enemy3" type="Panel" parent="EnemyLane"]
-custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
-
-[node name="Enemy3Label" type="Label" parent="EnemyLane/Enemy3"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -75.5
-offset_top = -11.5
-offset_right = 75.5
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Enemy Placeholder 3"
+color = Color(0.0705882, 0.0784314, 0.109804, 1)
 
 [node name="TopBar" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 70)
-layout_mode = 2
-offset_left = 40.0
-offset_top = 20.0
-offset_right = 1240.0
-offset_bottom = 90.0
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = 68.0
+grow_horizontal = 2
 
 [node name="TopRow" type="HBoxContainer" parent="TopBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+alignment = 1
 
 [node name="WaveLabel" type="Label" parent="TopBar/TopRow"]
 layout_mode = 2
-size_flags_horizontal = 3
 text = "Wave: 1"
 
 [node name="GateLabel" type="Label" parent="TopBar/TopRow"]
 layout_mode = 2
-size_flags_horizontal = 3
 text = "Gate HP: 100"
 
 [node name="BoardPowerLabel" type="Label" parent="TopBar/TopRow"]
 layout_mode = 2
-size_flags_horizontal = 3
 text = "Board Power: 0"
 
-[node name="SummonButton" type="Button" parent="TopBar/TopRow"]
-custom_minimum_size = Vector2(180, 0)
-layout_mode = 2
-text = "Summon Unit"
+[node name="BattlefieldStack" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 84.0
+offset_right = -20.0
+offset_bottom = -156.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
 
-[node name="StatusLabel" type="Label" parent="."]
+[node name="EnemyStrip" type="Panel" parent="BattlefieldStack"]
+custom_minimum_size = Vector2(0, 224)
 layout_mode = 2
-offset_left = 40.0
-offset_top = 832.0
-offset_right = 840.0
-offset_bottom = 900.0
-text = "Press Summon Unit to cycle placeholder units."
-vertical_alignment = 1
+size_flags_vertical = 3
 
-[node name="UnitDetailPanel" type="Panel" parent="."]
+[node name="EnemyFlow" type="HBoxContainer" parent="BattlefieldStack/EnemyStrip"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 12.0
+offset_right = -14.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="EnemySpawn" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-offset_left = 860.0
-offset_top = 832.0
-offset_right = 1240.0
-offset_bottom = 940.0
+size_flags_vertical = 3
 
-[node name="UnitDetailLabel" type="Label" parent="UnitDetailPanel"]
+[node name="EnemySpawnLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemySpawn"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
-text = "Tile Details"
-autowrap_mode = 3
+text = "Enemy Rift\nSpawn"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemyCenter" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="OpponentBoard" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter"]
+custom_minimum_size = Vector2(0, 98)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OpponentMargin" type="MarginContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="OpponentContent" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="OpponentLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent"]
+layout_mode = 2
+text = "Enemy Board"
+horizontal_alignment = 1
+
+[node name="OpponentStrip" type="HBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="OppSlot1" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OppSlot1Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppSlot2" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OppSlot2Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppSlot3" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OppSlot3Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Slot"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemyLane" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="EnemyTitle" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+layout_mode = 2
+text = "Enemy March Lanes"
+
+[node name="Enemy1" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="Enemy1Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Lane 1"
+vertical_alignment = 1
+
+[node name="Enemy2" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="Enemy2Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Lane 2"
+vertical_alignment = 1
+
+[node name="Enemy3" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="Enemy3Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Lane 3"
+vertical_alignment = 1
+
+[node name="EnemyGate" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
+custom_minimum_size = Vector2(166, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EnemyGateLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyGate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Enemy Gate\nCore"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CenterStrip" type="Panel" parent="BattlefieldStack"]
+custom_minimum_size = Vector2(0, 74)
+layout_mode = 2
+
+[node name="CenterLabel" type="Label" parent="BattlefieldStack/CenterStrip"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Abyssal Divide"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerStrip" type="Panel" parent="BattlefieldStack"]
+custom_minimum_size = Vector2(0, 292)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerFlow" type="HBoxContainer" parent="BattlefieldStack/PlayerStrip"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 12.0
+offset_right = -14.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="PlayerSpawn" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerSpawnLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/PlayerSpawn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Player Rift\nSpawn"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Board" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BoardMargin" type="MarginContainer" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="BoardContent" type="VBoxContainer" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="BoardLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent"]
+layout_mode = 2
+text = "Player Ritual Board"
+horizontal_alignment = 1
+
+[node name="TileGrid" type="GridContainer" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 5
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="Tile01" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile01"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile02" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile03" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile03"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile04" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile04"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile05" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile05"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile06" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile06"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile07" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile07"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile08" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile08"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile09" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile09"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile10" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile10"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile11" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile11"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile12" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile12"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile13" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile13"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile14" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile14"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="Tile15" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
+custom_minimum_size = Vector2(108, 78)
+layout_mode = 2
+
+[node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile15"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Empty"
+
+[node name="PlayerGate" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
+custom_minimum_size = Vector2(166, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerGateLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/PlayerGate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Your Gate\nCore"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomControls" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -132.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="BottomRow" type="HBoxContainer" parent="BottomControls"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 12.0
+offset_right = -14.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="SummonButton" type="Button" parent="BottomControls/BottomRow"]
+custom_minimum_size = Vector2(260, 74)
+layout_mode = 2
+text = "Invoke"
+
+[node name="ManaLabel" type="Label" parent="BottomControls/BottomRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+text = "Mana: 10/10"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RouletteButton" type="Button" parent="BottomControls/BottomRow"]
+custom_minimum_size = Vector2(170, 74)
+layout_mode = 2
+text = "Ritual Skill"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 674.0
+offset_right = -24.0
+offset_bottom = 708.0
+grow_horizontal = 2
+text = "Status"
+horizontal_alignment = 1
+
+[node name="UnitDetailPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -242.0
+offset_top = -172.0
+offset_right = 242.0
+offset_bottom = -134.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="UnitDetailLabel" type="Label" parent="UnitDetailPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Selected unit details"
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="LossLabel" type="Label" parent="."]
 visible = false
-layout_mode = 2
-offset_left = 260.0
-offset_top = 438.0
-offset_right = 1020.0
-offset_bottom = 498.0
-theme_override_font_sizes/font_size = 42
-text = "DEFEAT - GATE DESTROYED"
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -238.0
+offset_top = -36.0
+offset_right = 238.0
+offset_bottom = 36.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Defeat"
 horizontal_alignment = 1
 vertical_alignment = 1
