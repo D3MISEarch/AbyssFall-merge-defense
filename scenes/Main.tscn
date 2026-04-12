@@ -84,7 +84,7 @@ offset_right = -14.0
 offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="EnemySpawn" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
 custom_minimum_size = Vector2(150, 0)
@@ -102,18 +102,28 @@ text = "Enemy Rift\nSpawn"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EnemyCenter" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
+[node name="EnemyLeftPath" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EnemyLeftPathLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyLeftPath"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "March Route\nSpawn ⇒"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpponentBoard" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 8
 
-[node name="OpponentBoard" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter"]
-custom_minimum_size = Vector2(0, 98)
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="OpponentMargin" type="MarginContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard"]
+[node name="OpponentMargin" type="MarginContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -125,82 +135,264 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="OpponentContent" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin"]
+[node name="OpponentContent" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin"]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 6
 
-[node name="OpponentLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent"]
+[node name="OpponentLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent"]
 layout_mode = 2
-text = "Enemy Board"
+text = "Opponent Ritual Board"
 horizontal_alignment = 1
 
-[node name="OpponentStrip" type="HBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent"]
+[node name="OpponentTileGrid" type="GridContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+size_flags_vertical = 3
+columns = 5
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
 
-[node name="OppSlot1" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
-custom_minimum_size = Vector2(0, 48)
+[node name="OppTile01" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
 layout_mode = 2
-size_flags_horizontal = 3
 
-[node name="OppSlot1Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1"]
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile01"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Slot"
+text = "Rift"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OppSlot2" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
-custom_minimum_size = Vector2(0, 48)
+[node name="OppTile02" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
 layout_mode = 2
-size_flags_horizontal = 3
 
-[node name="OppSlot2Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2"]
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile02"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Slot"
+text = "Rift"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OppSlot3" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip"]
-custom_minimum_size = Vector2(0, 48)
+[node name="OppTile03" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
 layout_mode = 2
-size_flags_horizontal = 3
 
-[node name="OppSlot3Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3"]
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile03"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Slot"
+text = "Rift"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EnemyLane" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter"]
+[node name="OppTile04" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
 layout_mode = 2
-size_flags_horizontal = 3
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile04"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile05" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile05"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile06" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile06"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile07" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile07"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile08" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile08"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile09" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile09"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile10" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile10"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile11" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile11"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile12" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile12"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile13" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile13"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile14" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile14"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OppTile15" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
+custom_minimum_size = Vector2(108, 58)
+layout_mode = 2
+
+[node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile15"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rift"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemyRightPath" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 0)
+size_flags_vertical = 3
 theme_override_constants/separation = 5
 
-[node name="EnemyTitle" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+[node name="EnemyTitle" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath"]
 layout_mode = 2
-text = "Enemy March Lanes"
+text = "Route to Gate ⇒"
 
-[node name="Enemy1" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+[node name="Enemy1" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="Enemy1Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy1"]
+[node name="Enemy1Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy1"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -210,11 +402,11 @@ grow_vertical = 2
 text = "Lane 1"
 vertical_alignment = 1
 
-[node name="Enemy2" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+[node name="Enemy2" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="Enemy2Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy2"]
+[node name="Enemy2Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy2"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -224,11 +416,11 @@ grow_vertical = 2
 text = "Lane 2"
 vertical_alignment = 1
 
-[node name="Enemy3" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane"]
+[node name="Enemy3" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="Enemy3Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy3"]
+[node name="Enemy3Label" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy3"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -285,7 +477,7 @@ offset_right = -14.0
 offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="PlayerSpawn" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
 custom_minimum_size = Vector2(150, 0)
@@ -300,6 +492,23 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Player Rift\nSpawn"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+
+[node name="PlayerLeftPath" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerLeftPathLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/PlayerLeftPath"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "March Route\nSpawn ⇒"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -531,6 +740,23 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Empty"
+
+
+[node name="PlayerRightPath" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerRightPathLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/PlayerRightPath"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Route to Gate ⇒"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PlayerGate" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
 custom_minimum_size = Vector2(166, 0)

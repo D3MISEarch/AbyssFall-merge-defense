@@ -124,12 +124,14 @@ var enemy_lanes: Array[Array] = []
 var support_feedback_lines: Array[String] = []
 var lane_portal_core_rects: Array[ColorRect] = []
 var lane_portal_ring_rects: Array[ColorRect] = []
+var opponent_tile_panels: Array[Panel] = []
+var opponent_tile_labels: Array[Label] = []
 
 @onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
 @onready var background_rect: ColorRect = $Background
 @onready var board_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/Board
-@onready var opponent_board_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard
+@onready var opponent_board_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard
 @onready var center_strip_panel: Panel = $BattlefieldStack/CenterStrip
 @onready var wave_label: Label = $TopBar/TopRow/WaveLabel
 @onready var gate_label: Label = $TopBar/TopRow/GateLabel
@@ -137,19 +139,19 @@ var lane_portal_ring_rects: Array[ColorRect] = []
 @onready var loss_label: Label = $LossLabel
 @onready var tile_grid: GridContainer = $BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid
 @onready var board_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/BoardLabel
-@onready var enemy_lane_box: VBoxContainer = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane
-@onready var enemy_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/EnemyTitle
+@onready var enemy_lane_box: VBoxContainer = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath
+@onready var enemy_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/EnemyTitle
 @onready var unit_detail_label: Label = $UnitDetailPanel/UnitDetailLabel
 @onready var unit_detail_panel: Panel = $UnitDetailPanel
 @onready var enemy_labels: Array[Label] = [
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy1/Enemy1Label,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy2/Enemy2Label,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy3/Enemy3Label
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy1/Enemy1Label,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy2/Enemy2Label,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy3/Enemy3Label
 ]
 @onready var enemy_panels: Array[Panel] = [
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy1,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy2,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy3
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy1,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy2,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath/Enemy3
 ]
 @onready var top_bar_panel: Panel = $TopBar
 @onready var top_row: HBoxContainer = $TopBar/TopRow
@@ -161,19 +163,13 @@ var lane_portal_ring_rects: Array[ColorRect] = []
 @onready var player_strip_panel: Panel = $BattlefieldStack/PlayerStrip
 @onready var enemy_spawn_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemySpawn
 @onready var enemy_gate_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyGate
+@onready var enemy_left_path_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyLeftPath
 @onready var player_spawn_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerSpawn
 @onready var player_gate_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerGate
-@onready var opponent_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentLabel
-@onready var opponent_slot_panels: Array[Panel] = [
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3
-]
-@onready var opponent_slot_labels: Array[Label] = [
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1/OppSlot1Label,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2/OppSlot2Label,
-	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3/OppSlot3Label
-]
+@onready var player_left_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerLeftPath
+@onready var player_right_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerRightPath
+@onready var opponent_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentLabel
+@onready var opponent_tile_grid: GridContainer = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid
 
 func _ready() -> void:
 	_apply_dark_fantasy_theme()
@@ -300,6 +296,16 @@ func _ready() -> void:
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(_on_tile_gui_input.bind(i))
 
+	for i in opponent_tile_grid.get_child_count():
+		var tile: Node = opponent_tile_grid.get_child(i)
+		var panel: Panel = tile as Panel
+		if panel == null:
+			continue
+		opponent_tile_panels.append(panel)
+		var label: Label = panel.get_node("OppTileLabel") as Label
+		if label != null:
+			opponent_tile_labels.append(label)
+
 	_style_tile_panels_base()
 	summon_button.pressed.connect(_on_summon_pressed)
 	_render_board()
@@ -425,6 +431,9 @@ func _style_battlefield_strips() -> void:
 	_style_spawn_or_gate_panel(enemy_gate_panel, Color(0.11, 0.04, 0.12, 0.96), Color(0.74, 0.33, 0.58, 0.92))
 	_style_spawn_or_gate_panel(player_spawn_panel, Color(0.08, 0.11, 0.13, 0.96), Color(0.42, 0.54, 0.63, 0.90))
 	_style_spawn_or_gate_panel(player_gate_panel, Color(0.08, 0.10, 0.15, 0.96), Color(0.52, 0.66, 0.78, 0.93))
+	_style_spawn_or_gate_panel(enemy_left_path_panel, Color(0.10, 0.06, 0.12, 0.90), Color(0.58, 0.24, 0.54, 0.80))
+	_style_spawn_or_gate_panel(player_left_path_panel, Color(0.09, 0.11, 0.14, 0.90), Color(0.40, 0.50, 0.63, 0.80))
+	_style_spawn_or_gate_panel(player_right_path_panel, Color(0.09, 0.11, 0.14, 0.90), Color(0.46, 0.58, 0.69, 0.84))
 
 func _style_spawn_or_gate_panel(target_panel: Panel, bg_color: Color, border_color: Color) -> void:
 	var target_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -478,35 +487,41 @@ func _style_opponent_board() -> void:
 	opponent_style.shadow_color = Color(0.0, 0.0, 0.0, 0.34)
 	opponent_style.shadow_offset = Vector2(0.0, 3.0)
 	opponent_board_panel.add_theme_stylebox_override("panel", opponent_style)
-	opponent_title_label.text = "Opponent Host (AI/Placeholder)"
-	opponent_title_label.modulate = Color(0.85, 0.81, 0.91, 1.0)
-	for slot_index in opponent_slot_panels.size():
-		var slot_panel: Panel = opponent_slot_panels[slot_index]
-		var slot_style: StyleBoxFlat = StyleBoxFlat.new()
-		slot_style.bg_color = Color(0.08, 0.09, 0.12, 0.95)
-		slot_style.border_width_left = 2
-		slot_style.border_width_top = 2
-		slot_style.border_width_right = 2
-		slot_style.border_width_bottom = 2
-		slot_style.border_color = Color(0.44, 0.31, 0.57, 0.86)
-		slot_style.corner_radius_top_left = 9
-		slot_style.corner_radius_top_right = 9
-		slot_style.corner_radius_bottom_left = 9
-		slot_style.corner_radius_bottom_right = 9
-		slot_panel.add_theme_stylebox_override("panel", slot_style)
-		var slot_underglow: ColorRect = ColorRect.new()
-		slot_underglow.anchors_preset = Control.PRESET_FULL_RECT
-		slot_underglow.offset_left = 8.0
-		slot_underglow.offset_top = 8.0
-		slot_underglow.offset_right = -8.0
-		slot_underglow.offset_bottom = -8.0
-		slot_underglow.color = Color(0.56, 0.24, 0.72, 0.18)
-		slot_underglow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot_panel.add_child(slot_underglow)
-		slot_panel.move_child(slot_underglow, 0)
-		opponent_slot_labels[slot_index].modulate = Color(0.89, 0.87, 0.95, 1.0)
-		opponent_slot_labels[slot_index].text = "Enemy Slot %d\nIcon • Lv?" % [slot_index + 1]
-		opponent_slot_labels[slot_index].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	opponent_title_label.text = "Opponent Ritual Board (Hostile)"
+	opponent_title_label.modulate = Color(0.76, 0.70, 0.82, 0.96)
+	for tile_index in opponent_tile_panels.size():
+		var tile_panel: Panel = opponent_tile_panels[tile_index]
+		var tile_style: StyleBoxFlat = StyleBoxFlat.new()
+		tile_style.bg_color = Color(0.07, 0.06, 0.10, 0.93)
+		tile_style.border_width_left = 2
+		tile_style.border_width_top = 2
+		tile_style.border_width_right = 2
+		tile_style.border_width_bottom = 2
+		tile_style.border_color = Color(0.38, 0.22, 0.46, 0.83)
+		tile_style.corner_radius_top_left = 8
+		tile_style.corner_radius_top_right = 8
+		tile_style.corner_radius_bottom_left = 8
+		tile_style.corner_radius_bottom_right = 8
+		tile_panel.add_theme_stylebox_override("panel", tile_style)
+		var void_underglow: ColorRect = ColorRect.new()
+		void_underglow.anchors_preset = Control.PRESET_FULL_RECT
+		void_underglow.offset_left = 6.0
+		void_underglow.offset_top = 6.0
+		void_underglow.offset_right = -6.0
+		void_underglow.offset_bottom = -6.0
+		void_underglow.color = Color(0.49, 0.21, 0.62, 0.14)
+		void_underglow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile_panel.add_child(void_underglow)
+		tile_panel.move_child(void_underglow, 0)
+	for label_index in opponent_tile_labels.size():
+		var tile_label: Label = opponent_tile_labels[label_index]
+		var lane_id: int = int(label_index / BOARD_COLUMNS) + 1
+		var col_id: int = (label_index % BOARD_COLUMNS) + 1
+		tile_label.modulate = Color(0.80, 0.77, 0.89, 0.90)
+		tile_label.text = "L%d•C%d" % [lane_id, col_id]
+		tile_label.add_theme_font_size_override("font_size", 12)
+		tile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		tile_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 func _style_center_strip() -> void:
 	var strip_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -592,7 +607,7 @@ func _style_bottom_controls() -> void:
 
 func _style_enemy_lanes() -> void:
 	enemy_lane_box.add_theme_constant_override("separation", 4)
-	enemy_title_label.text = "Contested Battle Strip"
+	enemy_title_label.text = "Path Progress ⇒ Gate"
 	enemy_title_label.modulate = Color(0.86, 0.82, 0.92, 1.0)
 	for lane_index in enemy_panels.size():
 		var lane_panel: Panel = enemy_panels[lane_index]
