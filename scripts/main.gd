@@ -125,44 +125,54 @@ var support_feedback_lines: Array[String] = []
 var lane_portal_core_rects: Array[ColorRect] = []
 var lane_portal_ring_rects: Array[ColorRect] = []
 
-@onready var summon_button: Button = $TopBar/TopRow/SummonButton
+@onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
 @onready var background_rect: ColorRect = $Background
-@onready var board_panel: Panel = $Board
-@onready var opponent_board_panel: Panel = $OpponentBoard
-@onready var center_strip_panel: Panel = $CenterStrip
+@onready var board_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/Board
+@onready var opponent_board_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard
+@onready var center_strip_panel: Panel = $BattlefieldStack/CenterStrip
 @onready var wave_label: Label = $TopBar/TopRow/WaveLabel
 @onready var gate_label: Label = $TopBar/TopRow/GateLabel
 @onready var board_power_label: Label = $TopBar/TopRow/BoardPowerLabel
 @onready var loss_label: Label = $LossLabel
-@onready var tile_grid: GridContainer = $Board/BoardMargin/BoardContent/TileGrid
-@onready var board_label: Label = $Board/BoardMargin/BoardContent/BoardLabel
-@onready var enemy_lane_box: VBoxContainer = $EnemyLane
-@onready var enemy_title_label: Label = $EnemyLane/EnemyTitle
+@onready var tile_grid: GridContainer = $BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid
+@onready var board_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/BoardLabel
+@onready var enemy_lane_box: VBoxContainer = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane
+@onready var enemy_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/EnemyTitle
 @onready var unit_detail_label: Label = $UnitDetailPanel/UnitDetailLabel
 @onready var unit_detail_panel: Panel = $UnitDetailPanel
 @onready var enemy_labels: Array[Label] = [
-	$EnemyLane/Enemy1/Enemy1Label,
-	$EnemyLane/Enemy2/Enemy2Label,
-	$EnemyLane/Enemy3/Enemy3Label
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy1/Enemy1Label,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy2/Enemy2Label,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy3/Enemy3Label
 ]
 @onready var enemy_panels: Array[Panel] = [
-	$EnemyLane/Enemy1,
-	$EnemyLane/Enemy2,
-	$EnemyLane/Enemy3
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy1,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy2,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/EnemyLane/Enemy3
 ]
 @onready var top_bar_panel: Panel = $TopBar
 @onready var top_row: HBoxContainer = $TopBar/TopRow
-@onready var opponent_title_label: Label = $OpponentBoard/OpponentMargin/OpponentContent/OpponentLabel
+@onready var bottom_controls_panel: Panel = $BottomControls
+@onready var bottom_row: HBoxContainer = $BottomControls/BottomRow
+@onready var mana_label: Label = $BottomControls/BottomRow/ManaLabel
+@onready var roulette_button: Button = $BottomControls/BottomRow/RouletteButton
+@onready var enemy_strip_panel: Panel = $BattlefieldStack/EnemyStrip
+@onready var player_strip_panel: Panel = $BattlefieldStack/PlayerStrip
+@onready var enemy_spawn_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemySpawn
+@onready var enemy_gate_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyGate
+@onready var player_spawn_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerSpawn
+@onready var player_gate_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerGate
+@onready var opponent_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentLabel
 @onready var opponent_slot_panels: Array[Panel] = [
-	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1,
-	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2,
-	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3
 ]
 @onready var opponent_slot_labels: Array[Label] = [
-	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1/OppSlot1Label,
-	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2/OppSlot2Label,
-	$OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3/OppSlot3Label
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot1/OppSlot1Label,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot2/OppSlot2Label,
+	$BattlefieldStack/EnemyStrip/EnemyFlow/EnemyCenter/OpponentBoard/OpponentMargin/OpponentContent/OpponentStrip/OppSlot3/OppSlot3Label
 ]
 
 func _ready() -> void:
@@ -304,10 +314,12 @@ func _ready() -> void:
 func _apply_dark_fantasy_theme() -> void:
 	background_rect.color = Color(0.05, 0.05, 0.07, 1.0)
 	_apply_background_atmosphere()
+	_style_battlefield_strips()
 	_style_board_panel()
 	_style_opponent_board()
 	_style_center_strip()
 	_style_top_bar()
+	_style_bottom_controls()
 	_style_enemy_lanes()
 	_style_unit_detail_panel()
 	_style_status_labels()
@@ -375,6 +387,61 @@ func _apply_background_atmosphere() -> void:
 	ritual_ambience.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(ritual_ambience)
 	move_child(ritual_ambience, get_child_count() - 1)
+
+func _style_battlefield_strips() -> void:
+	var enemy_strip_style: StyleBoxFlat = StyleBoxFlat.new()
+	enemy_strip_style.bg_color = Color(0.08, 0.06, 0.11, 0.95)
+	enemy_strip_style.border_width_left = 2
+	enemy_strip_style.border_width_top = 2
+	enemy_strip_style.border_width_right = 2
+	enemy_strip_style.border_width_bottom = 2
+	enemy_strip_style.border_color = Color(0.56, 0.26, 0.58, 0.88)
+	enemy_strip_style.corner_radius_top_left = 16
+	enemy_strip_style.corner_radius_top_right = 16
+	enemy_strip_style.corner_radius_bottom_left = 16
+	enemy_strip_style.corner_radius_bottom_right = 16
+	enemy_strip_style.shadow_size = 12
+	enemy_strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
+	enemy_strip_style.shadow_offset = Vector2(0.0, 5.0)
+	enemy_strip_panel.add_theme_stylebox_override("panel", enemy_strip_style)
+
+	var player_strip_style: StyleBoxFlat = StyleBoxFlat.new()
+	player_strip_style.bg_color = Color(0.06, 0.08, 0.10, 0.96)
+	player_strip_style.border_width_left = 2
+	player_strip_style.border_width_top = 2
+	player_strip_style.border_width_right = 2
+	player_strip_style.border_width_bottom = 2
+	player_strip_style.border_color = Color(0.34, 0.42, 0.49, 0.88)
+	player_strip_style.corner_radius_top_left = 16
+	player_strip_style.corner_radius_top_right = 16
+	player_strip_style.corner_radius_bottom_left = 16
+	player_strip_style.corner_radius_bottom_right = 16
+	player_strip_style.shadow_size = 12
+	player_strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.42)
+	player_strip_style.shadow_offset = Vector2(0.0, 5.0)
+	player_strip_panel.add_theme_stylebox_override("panel", player_strip_style)
+
+	_style_spawn_or_gate_panel(enemy_spawn_panel, Color(0.18, 0.06, 0.14, 0.96), Color(0.68, 0.24, 0.51, 0.90))
+	_style_spawn_or_gate_panel(enemy_gate_panel, Color(0.11, 0.04, 0.12, 0.96), Color(0.74, 0.33, 0.58, 0.92))
+	_style_spawn_or_gate_panel(player_spawn_panel, Color(0.08, 0.11, 0.13, 0.96), Color(0.42, 0.54, 0.63, 0.90))
+	_style_spawn_or_gate_panel(player_gate_panel, Color(0.08, 0.10, 0.15, 0.96), Color(0.52, 0.66, 0.78, 0.93))
+
+func _style_spawn_or_gate_panel(target_panel: Panel, bg_color: Color, border_color: Color) -> void:
+	var target_style: StyleBoxFlat = StyleBoxFlat.new()
+	target_style.bg_color = bg_color
+	target_style.border_width_left = 2
+	target_style.border_width_top = 2
+	target_style.border_width_right = 2
+	target_style.border_width_bottom = 2
+	target_style.border_color = border_color
+	target_style.corner_radius_top_left = 12
+	target_style.corner_radius_top_right = 12
+	target_style.corner_radius_bottom_left = 12
+	target_style.corner_radius_bottom_right = 12
+	target_style.shadow_size = 8
+	target_style.shadow_color = Color(0.0, 0.0, 0.0, 0.35)
+	target_style.shadow_offset = Vector2(0.0, 3.0)
+	target_panel.add_theme_stylebox_override("panel", target_style)
 
 func _style_board_panel() -> void:
 	var board_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -457,7 +524,7 @@ func _style_center_strip() -> void:
 
 func _style_top_bar() -> void:
 	var top_style: StyleBoxFlat = StyleBoxFlat.new()
-	top_style.bg_color = Color(0.09, 0.07, 0.12, 0.96)
+	top_style.bg_color = Color(0.09, 0.07, 0.12, 0.92)
 	top_style.border_width_left = 2
 	top_style.border_width_top = 2
 	top_style.border_width_right = 2
@@ -468,27 +535,60 @@ func _style_top_bar() -> void:
 	top_style.corner_radius_bottom_left = 10
 	top_style.corner_radius_bottom_right = 10
 	top_bar_panel.add_theme_stylebox_override("panel", top_style)
-	top_row.add_theme_constant_override("separation", 20)
+	top_row.add_theme_constant_override("separation", 28)
 	wave_label.modulate = Color(0.88, 0.87, 0.94, 1.0)
 	gate_label.modulate = Color(0.93, 0.84, 0.97, 1.0)
 	board_power_label.modulate = Color(0.78, 0.87, 0.90, 1.0)
 
+func _style_bottom_controls() -> void:
+	var controls_style: StyleBoxFlat = StyleBoxFlat.new()
+	controls_style.bg_color = Color(0.10, 0.09, 0.14, 0.94)
+	controls_style.border_width_left = 2
+	controls_style.border_width_top = 2
+	controls_style.border_width_right = 2
+	controls_style.border_width_bottom = 2
+	controls_style.border_color = Color(0.52, 0.38, 0.66, 0.88)
+	controls_style.corner_radius_top_left = 14
+	controls_style.corner_radius_top_right = 14
+	controls_style.corner_radius_bottom_left = 14
+	controls_style.corner_radius_bottom_right = 14
+	bottom_controls_panel.add_theme_stylebox_override("panel", controls_style)
+	bottom_row.add_theme_constant_override("separation", 16)
+
 	var summon_style: StyleBoxFlat = StyleBoxFlat.new()
-	summon_style.bg_color = Color(0.23, 0.12, 0.30, 1.0)
+	summon_style.bg_color = Color(0.30, 0.12, 0.38, 1.0)
 	summon_style.border_width_left = 2
 	summon_style.border_width_top = 2
 	summon_style.border_width_right = 2
 	summon_style.border_width_bottom = 2
-	summon_style.border_color = Color(0.63, 0.46, 0.81, 0.95)
-	summon_style.corner_radius_top_left = 8
-	summon_style.corner_radius_top_right = 8
-	summon_style.corner_radius_bottom_left = 8
-	summon_style.corner_radius_bottom_right = 8
+	summon_style.border_color = Color(0.73, 0.54, 0.88, 0.95)
+	summon_style.corner_radius_top_left = 10
+	summon_style.corner_radius_top_right = 10
+	summon_style.corner_radius_bottom_left = 10
+	summon_style.corner_radius_bottom_right = 10
 	summon_button.add_theme_stylebox_override("normal", summon_style)
 	summon_button.add_theme_stylebox_override("hover", summon_style)
 	summon_button.add_theme_stylebox_override("pressed", summon_style)
 	summon_button.text = "Invoke Unit"
-	summon_button.modulate = Color(0.95, 0.92, 1.0, 1.0)
+	summon_button.modulate = Color(0.98, 0.95, 1.0, 1.0)
+
+	var roulette_style: StyleBoxFlat = StyleBoxFlat.new()
+	roulette_style.bg_color = Color(0.14, 0.14, 0.19, 1.0)
+	roulette_style.border_width_left = 2
+	roulette_style.border_width_top = 2
+	roulette_style.border_width_right = 2
+	roulette_style.border_width_bottom = 2
+	roulette_style.border_color = Color(0.45, 0.50, 0.62, 0.90)
+	roulette_style.corner_radius_top_left = 10
+	roulette_style.corner_radius_top_right = 10
+	roulette_style.corner_radius_bottom_left = 10
+	roulette_style.corner_radius_bottom_right = 10
+	roulette_button.add_theme_stylebox_override("normal", roulette_style)
+	roulette_button.add_theme_stylebox_override("hover", roulette_style)
+	roulette_button.add_theme_stylebox_override("pressed", roulette_style)
+	roulette_button.text = "Ritual Skill"
+	roulette_button.modulate = Color(0.92, 0.94, 0.98, 1.0)
+	mana_label.modulate = Color(0.81, 0.91, 0.99, 1.0)
 
 func _style_enemy_lanes() -> void:
 	enemy_lane_box.add_theme_constant_override("separation", 4)
