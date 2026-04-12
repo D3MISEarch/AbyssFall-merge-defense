@@ -114,7 +114,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "March Route\nSpawn ⇒"
+text = "Border Lane\nSpawn ⇒ U"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -386,7 +386,7 @@ theme_override_constants/separation = 5
 
 [node name="EnemyTitle" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath"]
 layout_mode = 2
-text = "Route to Gate ⇒"
+text = "U-Lane Status ⇒ Gate"
 
 [node name="Enemy1" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/EnemyRightPath"]
 custom_minimum_size = Vector2(0, 30)
@@ -508,7 +508,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "March Route\nSpawn ⇒"
+text = "Border Lane\nSpawn ⇒ U"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -754,7 +754,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Route to Gate ⇒"
+text = "U Exit Lane\n⇒ Core"
 horizontal_alignment = 1
 vertical_alignment = 1
 
