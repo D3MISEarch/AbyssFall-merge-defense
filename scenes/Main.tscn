@@ -483,9 +483,31 @@ text = "Summon Unit"
 layout_mode = 2
 offset_left = 30.0
 offset_top = 640.0
-offset_right = 1230.0
+offset_right = 820.0
 offset_bottom = 700.0
 text = "Press Summon Unit to cycle placeholder units."
+vertical_alignment = 1
+
+[node name="UnitDetailPanel" type="Panel" parent="."]
+layout_mode = 2
+offset_left = 850.0
+offset_top = 640.0
+offset_right = 1230.0
+offset_bottom = 760.0
+
+[node name="UnitDetailLabel" type="Label" parent="UnitDetailPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+text = "Tile Details"
+autowrap_mode = 3
 vertical_alignment = 1
 
 [node name="LossLabel" type="Label" parent="."]

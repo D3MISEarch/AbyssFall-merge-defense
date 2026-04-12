@@ -12,6 +12,12 @@ const ADVANCE_INTERVAL_SECONDS := 1.0
 const BASE_GATE_HP := 100
 
 const UNIT_ROTATION := ["Lane Guard", "Hunter", "Cleave Bot", "Banner"]
+const ROLE_TAGS := {
+	"lane": "LANE",
+	"single": "FOCUS",
+	"cleave": "AOE",
+	"support": "SUP"
+}
 const UNIT_DEFINITIONS := {
 	"Lane Guard": {
 		"role": "lane",
@@ -65,6 +71,7 @@ var enemy_lanes: Array[Array] = []
 @onready var board_power_label: Label = $TopBar/TopRow/BoardPowerLabel
 @onready var loss_label: Label = $LossLabel
 @onready var tile_grid: GridContainer = $Board/BoardMargin/BoardContent/TileGrid
+@onready var unit_detail_label: Label = $UnitDetailPanel/UnitDetailLabel
 @onready var enemy_labels: Array[Label] = [
 	$EnemyLane/Enemy1/Enemy1Label,
 	$EnemyLane/Enemy2/Enemy2Label,
@@ -88,6 +95,14 @@ func _ready() -> void:
 		tile_panels.append(panel)
 		var label := panel.get_node("TileLabel") as Label
 		tile_labels.append(label)
+		label.anchors_preset = Control.PRESET_FULL_RECT
+		label.offset_left = 8.0
+		label.offset_top = 8.0
+		label.offset_right = -8.0
+		label.offset_bottom = -8.0
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(_on_tile_gui_input.bind(i))
 
@@ -99,6 +114,7 @@ func _ready() -> void:
 	_update_enemy_lane_ui()
 	loss_label.visible = false
 	status_label.text = "Prototype loaded. Summon units and hold the gate."
+	_update_selection_detail()
 
 func _process(delta: float) -> void:
 	if game_over:
@@ -146,18 +162,21 @@ func _on_tile_clicked(tile_index: int) -> void:
 	if _is_tile_empty(tile_index):
 		selected_tile_index = -1
 		status_label.text = "Selection cleared."
+		_update_selection_detail()
 		_render_board()
 		return
 
 	if selected_tile_index == -1:
 		selected_tile_index = tile_index
 		status_label.text = "Selected tile %d: %s." % [tile_index + 1, _format_unit(board_units[tile_index])]
+		_update_selection_detail()
 		_render_board()
 		return
 
 	if selected_tile_index == tile_index:
 		selected_tile_index = -1
 		status_label.text = "Selection cleared."
+		_update_selection_detail()
 		_render_board()
 		return
 
@@ -170,18 +189,21 @@ func _attempt_merge(from_index: int, to_index: int) -> void:
 	if from_unit["name"] != to_unit["name"]:
 		status_label.text = "Invalid merge: unit names do not match."
 		selected_tile_index = -1
+		_update_selection_detail()
 		_render_board()
 		return
 
 	if from_unit["level"] != to_unit["level"]:
 		status_label.text = "Invalid merge: unit levels do not match."
 		selected_tile_index = -1
+		_update_selection_detail()
 		_render_board()
 		return
 
 	if int(to_unit["level"]) >= MAX_LEVEL:
 		status_label.text = "Invalid merge: %s is already at max level." % _format_unit(to_unit)
 		selected_tile_index = -1
+		_update_selection_detail()
 		_render_board()
 		return
 
@@ -189,6 +211,7 @@ func _attempt_merge(from_index: int, to_index: int) -> void:
 	board_units[to_index] = {"name": to_unit["name"], "level": int(to_unit["level"]) + 1}
 	status_label.text = "Merged into %s on tile %d." % [_format_unit(board_units[to_index]), to_index + 1]
 	selected_tile_index = -1
+	_update_selection_detail()
 	_render_board()
 
 func _spawn_enemy() -> void:
@@ -311,7 +334,7 @@ func _trigger_loss() -> void:
 func _render_board() -> void:
 	for i in board_units.size():
 		var occupied := not _is_tile_empty(i)
-		tile_labels[i].text = _format_unit(board_units[i]) if occupied else EMPTY_TILE_TEXT
+		tile_labels[i].text = _format_tile_unit(board_units[i]) if occupied else EMPTY_TILE_TEXT
 
 		if i == selected_tile_index:
 			tile_panels[i].self_modulate = Color(0.92, 0.75, 0.32, 1.0)
@@ -432,6 +455,14 @@ func _format_unit(unit: Dictionary) -> String:
 	var effect_text := _get_unit_effect_text(unit)
 	return "%s Lv%d | %s | %d ATK | %s" % [unit["name"], int(unit["level"]), role_label, damage, effect_text]
 
+func _format_tile_unit(unit: Dictionary) -> String:
+	var role_tag := _get_unit_role_tag(unit)
+	var role_line := " %s" % role_tag if role_tag != "" else ""
+	return "%s\nLv%d  %d ATK%s" % [unit["name"], int(unit["level"]), _get_unit_base_damage(unit), role_line]
+
+func _get_unit_role_tag(unit: Dictionary) -> String:
+	return str(ROLE_TAGS.get(_get_unit_role(unit), ""))
+
 func _get_unit_effect_text(unit: Dictionary) -> String:
 	var role := _get_unit_role(unit)
 	if role == "lane":
@@ -444,3 +475,17 @@ func _get_unit_effect_text(unit: Dictionary) -> String:
 	if role == "support":
 		return "+%d/lv buff" % int(_get_unit_stat(unit, "lane_buff_per_level", 0))
 	return "No effect"
+
+func _update_selection_detail() -> void:
+	if selected_tile_index == -1 or _is_tile_empty(selected_tile_index):
+		unit_detail_label.text = "Tile Details\nSelect a unit tile to view role and effect."
+		return
+
+	var unit := board_units[selected_tile_index]
+	var role_label := str(_get_unit_definition(unit).get("label", "Role"))
+	unit_detail_label.text = "Tile %d • %s\nRole: %s\nEffect: %s" % [
+		selected_tile_index + 1,
+		_format_unit(unit),
+		role_label,
+		_get_unit_effect_text(unit)
+	]
