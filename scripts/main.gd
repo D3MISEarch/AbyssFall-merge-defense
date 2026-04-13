@@ -32,6 +32,12 @@ const ROLE_ICONS: Dictionary = {
 	"support": "◉"
 }
 const HOSTILE_ICON_SET: Array[String] = ["☠", "◈", "✢", "⬣", "✥"]
+const PLAYER_MONSTER_ICON_SET: Array[String] = ["⬤", "☠", "◉", "◆"]
+const OPPONENT_MONSTER_ICON_SET: Array[String] = ["☠", "◈", "✢", "⬣"]
+const PLAYER_MONSTER_COLOR: Color = Color(0.18, 0.26, 0.32, 0.96)
+const OPPONENT_MONSTER_COLOR: Color = Color(0.32, 0.12, 0.28, 0.97)
+const PLAYER_MONSTER_EDGE: Color = Color(0.58, 0.82, 0.92, 0.95)
+const OPPONENT_MONSTER_EDGE: Color = Color(0.89, 0.53, 0.79, 0.95)
 const UNIT_DEFINITIONS: Dictionary = {
 	"Lane Guard": {
 		"role": "lane",
@@ -143,10 +149,12 @@ var opponent_tile_icon_labels: Array[Label] = []
 var opponent_tile_glow_rects: Array[ColorRect] = []
 var route_visual_layers: Array[Control] = []
 var strip_ambience_layers: Array[Control] = []
+var lane_monster_visuals: Array[Control] = []
 var combat_fx_layer: Control
 var gate_flash_overlays: Dictionary = {}
 var player_lane_target_panels: Array[Panel] = []
 var player_lane_target_labels: Array[Label] = []
+var opponent_core_hp: int = BASE_GATE_HP
 
 @onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -442,6 +450,7 @@ func _apply_dark_fantasy_theme() -> void:
 func _on_battlefield_strip_resized() -> void:
 	_build_strip_ambience()
 	call_deferred("_build_u_route_overlays")
+	call_deferred("_update_lane_monster_positions")
 
 func _build_u_route_overlays() -> void:
 	_clear_route_overlays()
@@ -1241,6 +1250,7 @@ func _process(delta: float) -> void:
 	if advance_timer >= ADVANCE_INTERVAL_SECONDS:
 		advance_timer -= ADVANCE_INTERVAL_SECONDS
 		_tick_enemy_loop()
+	_update_lane_monster_positions()
 
 func _on_summon_pressed() -> void:
 	if game_over:
@@ -1341,16 +1351,22 @@ func _spawn_enemy() -> void:
 		"hp": enemy_hp,
 		"max_hp": enemy_hp,
 		"damage": enemy_damage,
-		"progress": 0
+		"progress": 0,
+		"lane": lane_index,
+		"is_hostile_strip": false
 	}
+	enemy["visual"] = _create_lane_monster_visual(false, lane_index, enemy)
 	enemy_lanes[lane_index].append(enemy)
 	var opponent_enemy: Dictionary = {
 		"name": "W%d Shade" % wave_number,
 		"hp": enemy_hp,
 		"max_hp": enemy_hp,
 		"damage": enemy_damage,
-		"progress": 0
+		"progress": 0,
+		"lane": lane_index,
+		"is_hostile_strip": true
 	}
+	opponent_enemy["visual"] = _create_lane_monster_visual(true, lane_index, opponent_enemy)
 	opponent_lanes[lane_index].append(opponent_enemy)
 	spawned_enemies_total += 1
 
@@ -1358,8 +1374,9 @@ func _spawn_enemy() -> void:
 		wave_number += 1
 		_update_wave_ui()
 
-	status_label.text = "Enemy spawned in lane %d." % [lane_index + 1]
+	status_label.text = "Monsters spawned from both portals in lane %d." % [lane_index + 1]
 	_update_enemy_lane_ui()
+	_update_lane_monster_positions()
 
 func _tick_enemy_loop() -> void:
 	_apply_board_auto_damage()
@@ -1446,6 +1463,7 @@ func _damage_front_enemy(lane_index: int, damage: int, support_contributed: bool
 		_show_support_aura_feedback(lane_index)
 
 	if int(enemy["hp"]) <= 0:
+		_remove_lane_monster_visual(enemy)
 		enemy_lanes[lane_index].remove_at(front_index)
 		status_label.text = "Lane %d enemy defeated by %d damage." % [lane_index + 1, damage]
 	else:
@@ -1460,6 +1478,7 @@ func _damage_front_enemy_in_lanes(lanes: Array[Array], lane_index: int, damage: 
 	var enemy: Dictionary = lanes[lane_index][front_index]
 	enemy["hp"] = int(enemy["hp"]) - damage
 	if int(enemy["hp"]) <= 0:
+		_remove_lane_monster_visual(enemy)
 		lanes[lane_index].remove_at(front_index)
 	else:
 		lanes[lane_index][front_index] = enemy
@@ -1478,6 +1497,7 @@ func _damage_secondary_enemy(lane_index: int, damage: int, support_contributed: 
 		_show_support_aura_feedback(lane_index)
 
 	if int(enemy["hp"]) <= 0:
+		_remove_lane_monster_visual(enemy)
 		enemy_lanes[lane_index].remove_at(secondary_index)
 		status_label.text = "Lane %d cleave splash defeated an enemy." % [lane_index + 1]
 	else:
@@ -1495,6 +1515,7 @@ func _advance_enemies_toward_gate() -> void:
 			if int(enemy["progress"]) >= LANE_LENGTH:
 				var gate_damage: int = int(enemy["damage"])
 				gate_hp = max(0, gate_hp - gate_damage)
+				_remove_lane_monster_visual(enemy)
 				enemy_lanes[lane_index].remove_at(enemy_index)
 				status_label.text = "The gate was hit from lane %d for %d!" % [lane_index + 1, gate_damage]
 				_show_gate_hit_feedback(gate_damage)
@@ -1513,7 +1534,11 @@ func _advance_opponent_enemies() -> void:
 			var enemy: Dictionary = opponent_lanes[lane_index][enemy_index]
 			enemy["progress"] = int(enemy["progress"]) + 1
 			if int(enemy["progress"]) >= LANE_LENGTH:
+				var core_damage: int = int(enemy["damage"])
+				opponent_core_hp = max(0, opponent_core_hp - core_damage)
+				_remove_lane_monster_visual(enemy)
 				opponent_lanes[lane_index].remove_at(enemy_index)
+				status_label.text = "Hostile core was struck from top lane %d for %d." % [lane_index + 1, core_damage]
 			else:
 				opponent_lanes[lane_index][enemy_index] = enemy
 
@@ -2072,7 +2097,7 @@ func _spawn_projectile_feedback(owner: String, tile_index: int, lane_index: int,
 	if combat_fx_layer == null:
 		return
 	var source_panel: Panel = _get_source_panel_for_owner(owner, tile_index)
-	var lane_target_panel: Control = _get_lane_target_for_owner(owner, lane_index)
+	var lane_target_panel: Control = _get_lane_target_monster(owner, lane_index)
 	if source_panel == null or lane_target_panel == null:
 		return
 	var source_center: Vector2 = _get_control_center_in(combat_fx_layer, source_panel)
@@ -2108,6 +2133,151 @@ func _get_control_center_in(local_root: Control, target: Control) -> Vector2:
 	var local_position: Vector2 = _global_to_control_space(local_root, global_rect.position)
 	return local_position + (global_rect.size * 0.5)
 
+func _create_lane_monster_visual(is_hostile_strip: bool, lane_index: int, enemy: Dictionary) -> Control:
+	var strip_panel: Panel = player_strip_panel
+	if is_hostile_strip:
+		strip_panel = enemy_strip_panel
+	if strip_panel == null:
+		return null
+	var monster_panel: Panel = Panel.new()
+	monster_panel.size = Vector2(30.0, 30.0)
+	monster_panel.pivot_offset = monster_panel.size * 0.5
+	monster_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	monster_panel.z_index = 12
+	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
+	panel_style.bg_color = OPPONENT_MONSTER_COLOR if is_hostile_strip else PLAYER_MONSTER_COLOR
+	panel_style.border_width_left = 2
+	panel_style.border_width_top = 2
+	panel_style.border_width_right = 2
+	panel_style.border_width_bottom = 2
+	panel_style.border_color = OPPONENT_MONSTER_EDGE if is_hostile_strip else PLAYER_MONSTER_EDGE
+	panel_style.corner_radius_top_left = 15
+	panel_style.corner_radius_top_right = 15
+	panel_style.corner_radius_bottom_left = 15
+	panel_style.corner_radius_bottom_right = 15
+	panel_style.shadow_size = 6
+	panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.42)
+	panel_style.shadow_offset = Vector2(0.0, 2.0)
+	monster_panel.add_theme_stylebox_override("panel", panel_style)
+	strip_panel.add_child(monster_panel)
+	strip_panel.move_child(monster_panel, strip_panel.get_child_count() - 1)
+	lane_monster_visuals.append(monster_panel)
+
+	var glyph_label: Label = Label.new()
+	glyph_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	glyph_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	glyph_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	glyph_label.add_theme_font_size_override("font_size", 20)
+	glyph_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if is_hostile_strip:
+		glyph_label.text = OPPONENT_MONSTER_ICON_SET[lane_index % OPPONENT_MONSTER_ICON_SET.size()]
+		glyph_label.modulate = Color(0.97, 0.78, 0.93, 0.96)
+	else:
+		glyph_label.text = PLAYER_MONSTER_ICON_SET[lane_index % PLAYER_MONSTER_ICON_SET.size()]
+		glyph_label.modulate = Color(0.80, 0.93, 0.99, 0.96)
+	monster_panel.add_child(glyph_label)
+	var initial_position: Vector2 = _get_lane_point_for_progress(is_hostile_strip, lane_index, 0.0)
+	monster_panel.position = initial_position - (monster_panel.size * 0.5)
+	return monster_panel
+
+func _remove_lane_monster_visual(enemy: Dictionary) -> void:
+	var visual_variant: Variant = enemy.get("visual", null)
+	var visual: Control = visual_variant as Control
+	if visual == null:
+		return
+	lane_monster_visuals.erase(visual)
+	if is_instance_valid(visual):
+		visual.queue_free()
+
+func _update_lane_monster_positions() -> void:
+	var interp_alpha: float = clamp(advance_timer / ADVANCE_INTERVAL_SECONDS, 0.0, 1.0)
+	_update_lane_set_visuals(enemy_lanes, false, interp_alpha)
+	_update_lane_set_visuals(opponent_lanes, true, interp_alpha)
+
+func _update_lane_set_visuals(lanes: Array[Array], is_hostile_strip: bool, interp_alpha: float) -> void:
+	for lane_index in lanes.size():
+		var lane_enemies: Array = lanes[lane_index]
+		for enemy_data in lane_enemies:
+			var enemy: Dictionary = enemy_data
+			var visual_variant: Variant = enemy.get("visual", null)
+			var visual: Control = visual_variant as Control
+			if visual == null:
+				continue
+			var progress_value: float = float(int(enemy["progress"])) + interp_alpha
+			var progress_ratio: float = clamp(progress_value / float(LANE_LENGTH), 0.0, 1.0)
+			var point: Vector2 = _get_lane_point_for_progress(is_hostile_strip, lane_index, progress_ratio)
+			visual.position = point - (visual.size * 0.5)
+
+func _get_lane_point_for_progress(is_hostile_strip: bool, lane_index: int, progress_ratio: float) -> Vector2:
+	var path_points: Array[Vector2] = _get_lane_path_points(is_hostile_strip)
+	if path_points.size() < 2:
+		return Vector2.ZERO
+	var segment_count: int = path_points.size() - 1
+	var scaled: float = clamp(progress_ratio, 0.0, 1.0) * float(segment_count)
+	var segment_index: int = min(segment_count - 1, int(floor(scaled)))
+	var segment_alpha: float = scaled - float(segment_index)
+	var start_point: Vector2 = path_points[segment_index]
+	var end_point: Vector2 = path_points[segment_index + 1]
+	var lane_spread: float = (float(lane_index) - 1.0) * 12.0
+	var base_position: Vector2 = start_point.lerp(end_point, segment_alpha)
+	return base_position + Vector2(0.0, lane_spread)
+
+func _get_lane_path_points(is_hostile_strip: bool) -> Array[Vector2]:
+	var strip_panel: Panel = player_strip_panel
+	var spawn_panel: Panel = player_spawn_panel
+	var board_target: Panel = board_panel
+	var gate_panel: Panel = player_gate_panel
+	if is_hostile_strip:
+		strip_panel = enemy_strip_panel
+		spawn_panel = enemy_spawn_panel
+		board_target = opponent_board_panel
+		gate_panel = enemy_gate_panel
+	if strip_panel == null or spawn_panel == null or board_target == null or gate_panel == null:
+		return []
+	var spawn_rect: Rect2 = _rect_in_local_space(strip_panel, spawn_panel)
+	var board_rect: Rect2 = _rect_in_local_space(strip_panel, board_target)
+	var gate_rect: Rect2 = _rect_in_local_space(strip_panel, gate_panel)
+	var left_x: float = board_rect.position.x - 18.0
+	var right_x: float = board_rect.position.x + board_rect.size.x + 18.0
+	if is_hostile_strip:
+		var top_y: float = board_rect.position.y + 10.0
+		var bottom_y: float = board_rect.position.y + board_rect.size.y - 10.0
+		var hostile_spawn_y: float = spawn_rect.position.y + 14.0
+		var hostile_gate_y: float = gate_rect.position.y + 14.0
+		return [
+			Vector2(spawn_rect.position.x + spawn_rect.size.x - 10.0, hostile_spawn_y),
+			Vector2(left_x, hostile_spawn_y),
+			Vector2(left_x, top_y),
+			Vector2(left_x, bottom_y),
+			Vector2(right_x, bottom_y),
+			Vector2(right_x, top_y),
+			Vector2(gate_rect.position.x + 10.0, hostile_gate_y)
+		]
+	var player_bottom_y: float = board_rect.position.y + board_rect.size.y - 10.0
+	var player_top_y: float = board_rect.position.y + 10.0
+	var player_spawn_y: float = spawn_rect.position.y + spawn_rect.size.y - 14.0
+	var player_gate_y: float = gate_rect.position.y + gate_rect.size.y - 14.0
+	return [
+		Vector2(spawn_rect.position.x + spawn_rect.size.x - 10.0, player_spawn_y),
+		Vector2(left_x, player_spawn_y),
+		Vector2(left_x, player_bottom_y),
+		Vector2(left_x, player_top_y),
+		Vector2(right_x, player_top_y),
+		Vector2(right_x, player_bottom_y),
+		Vector2(gate_rect.position.x + 10.0, player_gate_y)
+	]
+
+func _get_front_monster_visual(lanes: Array[Array], lane_index: int) -> Control:
+	if lane_index < 0 or lane_index >= lanes.size():
+		return null
+	var lane_enemies: Array = lanes[lane_index]
+	if lane_enemies.is_empty():
+		return null
+	var front_index: int = _get_front_enemy_index(lane_enemies)
+	var enemy: Dictionary = lane_enemies[front_index]
+	var visual_variant: Variant = enemy.get("visual", null)
+	return visual_variant as Control
+
 func _get_source_panel_for_owner(owner: String, tile_index: int) -> Panel:
 	if owner == "opponent":
 		if tile_index < 0 or tile_index >= opponent_tile_panels.size():
@@ -2117,14 +2287,10 @@ func _get_source_panel_for_owner(owner: String, tile_index: int) -> Panel:
 		return null
 	return tile_panels[tile_index]
 
-func _get_lane_target_for_owner(owner: String, lane_index: int) -> Control:
+func _get_lane_target_monster(owner: String, lane_index: int) -> Control:
 	if owner == "opponent":
-		if lane_index < 0 or lane_index >= enemy_panels.size():
-			return null
-		return enemy_panels[lane_index]
-	if lane_index < 0 or lane_index >= player_lane_target_panels.size():
-		return null
-	return player_lane_target_panels[lane_index]
+		return _get_front_monster_visual(opponent_lanes, lane_index)
+	return _get_front_monster_visual(enemy_lanes, lane_index)
 
 func _decorate_spawn_gate_identity() -> void:
 	_add_identity_overlay(player_spawn_panel, Color(0.42, 0.66, 0.73, 0.26), "◌")
