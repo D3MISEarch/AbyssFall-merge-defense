@@ -49,22 +49,22 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
 [node name="TopCard1" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
-custom_minimum_size = Vector2(108, 54)
+custom_minimum_size = Vector2(118, 58)
 layout_mode = 2
 text = "🛡 Lv1 4"
 
 [node name="TopCard2" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
-custom_minimum_size = Vector2(108, 54)
+custom_minimum_size = Vector2(118, 58)
 layout_mode = 2
 text = "➤ Lv1 5"
 
 [node name="TopCard3" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
-custom_minimum_size = Vector2(108, 54)
+custom_minimum_size = Vector2(118, 58)
 layout_mode = 2
 text = "✦ Lv1 6"
 
 [node name="TopCard4" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
-custom_minimum_size = Vector2(108, 54)
+custom_minimum_size = Vector2(118, 58)
 layout_mode = 2
 text = "◉ Lv1 7"
 
@@ -107,15 +107,15 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = 96.0
+offset_top = 92.0
 offset_right = -20.0
-offset_bottom = -228.0
+offset_bottom = -218.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 8
 
 [node name="EnemyStrip" type="Panel" parent="BattlefieldStack"]
-custom_minimum_size = Vector2(0, 224)
+custom_minimum_size = Vector2(0, 244)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -124,16 +124,16 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="EnemySpawn" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(126, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -149,7 +149,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EnemyLeftPath" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
-custom_minimum_size = Vector2(120, 0)
+custom_minimum_size = Vector2(92, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -196,11 +196,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 5
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 6
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 5
 
 [node name="OppTile01" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile01"]
@@ -215,7 +215,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile02" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile02"]
@@ -230,7 +230,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile03" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile03"]
@@ -245,7 +245,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile04" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile04"]
@@ -260,7 +260,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile05" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile05"]
@@ -275,7 +275,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile06" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile06"]
@@ -290,7 +290,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile07" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile07"]
@@ -305,7 +305,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile08" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile08"]
@@ -320,7 +320,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile09" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile09"]
@@ -335,7 +335,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile10" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile10"]
@@ -350,7 +350,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile11" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile11"]
@@ -365,7 +365,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile12" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile12"]
@@ -380,7 +380,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile13" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile13"]
@@ -395,7 +395,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile14" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile14"]
@@ -410,7 +410,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OppTile15" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid"]
-custom_minimum_size = Vector2(108, 58)
+custom_minimum_size = Vector2(112, 66)
 layout_mode = 2
 
 [node name="OppTileLabel" type="Label" parent="BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid/OppTile15"]
@@ -426,7 +426,7 @@ vertical_alignment = 1
 
 [node name="EnemyRightPath" type="VBoxContainer" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
 layout_mode = 2
-custom_minimum_size = Vector2(220, 0)
+custom_minimum_size = Vector2(180, 0)
 size_flags_vertical = 3
 theme_override_constants/separation = 5
 
@@ -477,7 +477,7 @@ text = "Lane 3"
 vertical_alignment = 1
 
 [node name="EnemyGate" type="Panel" parent="BattlefieldStack/EnemyStrip/EnemyFlow"]
-custom_minimum_size = Vector2(166, 0)
+custom_minimum_size = Vector2(142, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -493,7 +493,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CenterStrip" type="Panel" parent="BattlefieldStack"]
-custom_minimum_size = Vector2(0, 92)
+custom_minimum_size = Vector2(0, 84)
 layout_mode = 2
 
 [node name="CenterContent" type="VBoxContainer" parent="BattlefieldStack/CenterStrip"]
@@ -541,7 +541,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PlayerStrip" type="Panel" parent="BattlefieldStack"]
-custom_minimum_size = Vector2(0, 292)
+custom_minimum_size = Vector2(0, 320)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -550,16 +550,16 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="PlayerSpawn" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(126, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -576,7 +576,7 @@ vertical_alignment = 1
 
 
 [node name="PlayerLeftPath" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
-custom_minimum_size = Vector2(120, 0)
+custom_minimum_size = Vector2(92, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -622,11 +622,11 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_vertical = 3
 columns = 5
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 6
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 5
 
 [node name="Tile01" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile01"]
@@ -639,7 +639,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile02" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile02"]
@@ -652,7 +652,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile03" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile03"]
@@ -665,7 +665,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile04" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile04"]
@@ -678,7 +678,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile05" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile05"]
@@ -691,7 +691,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile06" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile06"]
@@ -704,7 +704,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile07" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile07"]
@@ -717,7 +717,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile08" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile08"]
@@ -730,7 +730,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile09" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile09"]
@@ -743,7 +743,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile10" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile10"]
@@ -756,7 +756,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile11" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile11"]
@@ -769,7 +769,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile12" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile12"]
@@ -782,7 +782,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile13" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile13"]
@@ -795,7 +795,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile14" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile14"]
@@ -808,7 +808,7 @@ grow_vertical = 2
 text = "Empty"
 
 [node name="Tile15" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid"]
-custom_minimum_size = Vector2(108, 78)
+custom_minimum_size = Vector2(112, 86)
 layout_mode = 2
 
 [node name="TileLabel" type="Label" parent="BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid/Tile15"]
@@ -822,7 +822,7 @@ text = "Empty"
 
 
 [node name="PlayerRightPath" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
-custom_minimum_size = Vector2(120, 0)
+custom_minimum_size = Vector2(92, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -838,7 +838,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PlayerGate" type="Panel" parent="BattlefieldStack/PlayerStrip/PlayerFlow"]
-custom_minimum_size = Vector2(166, 0)
+custom_minimum_size = Vector2(142, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -860,9 +860,9 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -160.0
+offset_top = -178.0
 offset_right = -20.0
-offset_bottom = -92.0
+offset_bottom = -96.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -877,29 +877,29 @@ offset_right = -12.0
 offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="ManaLabel" type="Label" parent="BottomControls/BottomRow"]
-custom_minimum_size = Vector2(140, 0)
+custom_minimum_size = Vector2(172, 62)
 layout_mode = 2
 text = "✶ 10/10"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SummonButton" type="Button" parent="BottomControls/BottomRow"]
-custom_minimum_size = Vector2(248, 54)
+custom_minimum_size = Vector2(272, 62)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Invoke"
 
 [node name="RouletteButton" type="Button" parent="BottomControls/BottomRow"]
-custom_minimum_size = Vector2(148, 54)
+custom_minimum_size = Vector2(164, 62)
 layout_mode = 2
 text = "Hero"
 
 [node name="UtilityButton" type="Button" parent="BottomControls/BottomRow"]
-custom_minimum_size = Vector2(84, 54)
+custom_minimum_size = Vector2(96, 62)
 layout_mode = 2
 text = "☰"
 
@@ -910,7 +910,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -86.0
+offset_top = -90.0
 offset_right = -20.0
 offset_bottom = -20.0
 grow_horizontal = 2
@@ -930,25 +930,25 @@ grow_vertical = 2
 theme_override_constants/separation = 6
 
 [node name="BottomCard1" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
-custom_minimum_size = Vector2(110, 44)
+custom_minimum_size = Vector2(116, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "🛡 Lv1 4"
 
 [node name="BottomCard2" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
-custom_minimum_size = Vector2(110, 44)
+custom_minimum_size = Vector2(116, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "➤ Lv1 5"
 
 [node name="BottomCard3" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
-custom_minimum_size = Vector2(110, 44)
+custom_minimum_size = Vector2(116, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "✦ Lv1 6"
 
 [node name="BottomCard4" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
-custom_minimum_size = Vector2(110, 44)
+custom_minimum_size = Vector2(116, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "◉ Lv1 7"
