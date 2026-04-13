@@ -24,6 +24,14 @@ const UNIT_SHORT_NAMES: Dictionary = {
 	"Cleave Bot": "Cleave",
 	"Banner": "Banner"
 }
+
+const ROLE_ICONS: Dictionary = {
+	"lane": "🛡",
+	"single": "➤",
+	"cleave": "✦",
+	"support": "◉"
+}
+const HOSTILE_ICON_SET: Array[String] = ["☠", "◈", "✢", "⬣", "✥"]
 const UNIT_DEFINITIONS: Dictionary = {
 	"Lane Guard": {
 		"role": "lane",
@@ -103,6 +111,10 @@ var next_unit: int = 0
 var board_units: Array[Dictionary] = []
 var tile_panels: Array[Panel] = []
 var tile_labels: Array[Label] = []
+var tile_icon_glow_rects: Array[ColorRect] = []
+var tile_icon_labels: Array[Label] = []
+var tile_level_badge_rects: Array[ColorRect] = []
+var tile_level_badge_labels: Array[Label] = []
 var tile_aura_underlay_rects: Array[ColorRect] = []
 var tile_aura_glow_rects: Array[ColorRect] = []
 var tile_aura_core_rects: Array[ColorRect] = []
@@ -126,8 +138,12 @@ var lane_portal_core_rects: Array[ColorRect] = []
 var lane_portal_ring_rects: Array[ColorRect] = []
 var opponent_tile_panels: Array[Panel] = []
 var opponent_tile_labels: Array[Label] = []
+var opponent_tile_icon_labels: Array[Label] = []
+var opponent_tile_glow_rects: Array[ColorRect] = []
 var route_visual_layers: Array[Control] = []
 var strip_ambience_layers: Array[Control] = []
+var combat_fx_layer: Control
+var gate_flash_overlays: Dictionary = {}
 
 @onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -190,6 +206,12 @@ func _ready() -> void:
 	enemy_lanes.resize(LANE_COUNT)
 	for lane_index in LANE_COUNT:
 		enemy_lanes[lane_index] = []
+
+	combat_fx_layer = Control.new()
+	combat_fx_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	combat_fx_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(combat_fx_layer)
+	move_child(combat_fx_layer, get_child_count() - 1)
 
 	for i in tile_grid.get_child_count():
 		var tile: Node = tile_grid.get_child(i)
@@ -293,16 +315,60 @@ func _ready() -> void:
 		aura_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(aura_marker)
 		tile_aura_marker_labels.append(aura_marker)
+		var icon_glow: ColorRect = ColorRect.new()
+		icon_glow.anchors_preset = Control.PRESET_FULL_RECT
+		icon_glow.offset_left = 18.0
+		icon_glow.offset_top = 12.0
+		icon_glow.offset_right = -18.0
+		icon_glow.offset_bottom = -54.0
+		icon_glow.color = Color(0.55, 0.70, 0.92, 0.0)
+		icon_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(icon_glow)
+		tile_icon_glow_rects.append(icon_glow)
+		var icon_label: Label = Label.new()
+		icon_label.anchors_preset = Control.PRESET_FULL_RECT
+		icon_label.offset_left = 6.0
+		icon_label.offset_top = 8.0
+		icon_label.offset_right = -6.0
+		icon_label.offset_bottom = -44.0
+		icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		icon_label.add_theme_font_size_override("font_size", 30)
+		icon_label.text = ""
+		icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(icon_label)
+		tile_icon_labels.append(icon_label)
+		var level_badge: ColorRect = ColorRect.new()
+		level_badge.position = Vector2(72.0, 6.0)
+		level_badge.size = Vector2(28.0, 18.0)
+		level_badge.color = Color(0.78, 0.68, 0.33, 0.0)
+		level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(level_badge)
+		tile_level_badge_rects.append(level_badge)
+		var level_label: Label = Label.new()
+		level_label.anchors_preset = Control.PRESET_FULL_RECT
+		level_label.offset_left = 74.0
+		level_label.offset_top = 6.0
+		level_label.offset_right = -2.0
+		level_label.offset_bottom = -34.0
+		level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		level_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		level_label.add_theme_font_size_override("font_size", 11)
+		level_label.modulate = Color(0.08, 0.08, 0.08, 0.0)
+		level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(level_label)
+		tile_level_badge_labels.append(level_label)
 		var label: Label = panel.get_node("TileLabel") as Label
 		tile_labels.append(label)
 		label.anchors_preset = Control.PRESET_FULL_RECT
 		label.offset_left = 8.0
-		label.offset_top = 8.0
+		label.offset_top = 52.0
 		label.offset_right = -8.0
-		label.offset_bottom = -8.0
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		label.offset_bottom = -6.0
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.add_theme_font_size_override("font_size", 11)
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(_on_tile_gui_input.bind(i))
 
@@ -312,6 +378,29 @@ func _ready() -> void:
 		if panel == null:
 			continue
 		opponent_tile_panels.append(panel)
+		var hostile_glow: ColorRect = ColorRect.new()
+		hostile_glow.anchors_preset = Control.PRESET_FULL_RECT
+		hostile_glow.offset_left = 8.0
+		hostile_glow.offset_top = 8.0
+		hostile_glow.offset_right = -8.0
+		hostile_glow.offset_bottom = -8.0
+		hostile_glow.color = Color(0.58, 0.24, 0.70, 0.18)
+		hostile_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(hostile_glow)
+		opponent_tile_glow_rects.append(hostile_glow)
+		var icon_label: Label = Label.new()
+		icon_label.anchors_preset = Control.PRESET_FULL_RECT
+		icon_label.offset_left = 4.0
+		icon_label.offset_top = 4.0
+		icon_label.offset_right = -4.0
+		icon_label.offset_bottom = -18.0
+		icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		icon_label.add_theme_font_size_override("font_size", 24)
+		icon_label.modulate = Color(0.84, 0.71, 0.90, 0.85)
+		icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(icon_label)
+		opponent_tile_icon_labels.append(icon_label)
 		var label: Label = panel.get_node("OppTileLabel") as Label
 		if label != null:
 			opponent_tile_labels.append(label)
@@ -781,6 +870,7 @@ func _style_battlefield_strips() -> void:
 	_style_spawn_or_gate_panel(player_left_path_panel, Color(0.08, 0.10, 0.13, 0.92), Color(0.36, 0.48, 0.61, 0.84))
 	_style_spawn_or_gate_panel(player_right_path_panel, Color(0.08, 0.10, 0.13, 0.92), Color(0.41, 0.57, 0.67, 0.86))
 	_style_lane_identity_labels()
+	_decorate_spawn_gate_identity()
 
 func _style_spawn_or_gate_panel(target_panel: Panel, bg_color: Color, border_color: Color) -> void:
 	var target_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -865,10 +955,13 @@ func _style_opponent_board() -> void:
 		var lane_id: int = int(label_index / BOARD_COLUMNS) + 1
 		var col_id: int = (label_index % BOARD_COLUMNS) + 1
 		tile_label.modulate = Color(0.80, 0.77, 0.89, 0.90)
-		tile_label.text = "L%d•C%d" % [lane_id, col_id]
+		tile_label.text = "Hostile\nL%d•C%d" % [lane_id, col_id]
 		tile_label.add_theme_font_size_override("font_size", 12)
 		tile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		tile_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		tile_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		if label_index < opponent_tile_icon_labels.size():
+			var hostile_icon: String = HOSTILE_ICON_SET[label_index % HOSTILE_ICON_SET.size()]
+			opponent_tile_icon_labels[label_index].text = hostile_icon
 
 func _style_center_strip() -> void:
 	var strip_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -1261,6 +1354,7 @@ func _apply_board_auto_damage() -> void:
 					if hunter_execute_bonus > 0:
 						support_contributed = true
 
+			_spawn_projectile_feedback(tile_index, lane_index, role)
 			_damage_front_enemy(lane_index, damage, support_contributed)
 			if role == "cleave":
 				var splash_ratio: float = float(_get_unit_stat(unit, "splash_ratio", 0.0))
@@ -1338,7 +1432,8 @@ func _trigger_loss() -> void:
 func _render_board() -> void:
 	for i in board_units.size():
 		var occupied: bool = not _is_tile_empty(i)
-		tile_labels[i].text = _format_tile_unit(board_units[i]) if occupied else EMPTY_TILE_TEXT
+		tile_labels[i].text = _format_tile_compact_label(board_units[i]) if occupied else "Vacant"
+		_update_tile_visual_identity(i, occupied)
 		_update_tile_buff_aura(i, occupied)
 
 		if i == selected_tile_index:
@@ -1777,6 +1872,7 @@ func _show_gate_hit_feedback(damage: int) -> void:
 	bar_tween.tween_property(top_bar_panel, "self_modulate", Color(1.0, 0.63, 0.63, 1.0), 0.12)
 	bar_tween.tween_property(top_bar_panel, "self_modulate", Color(1.0, 1.0, 1.0, 1.0), 0.24)
 	_spawn_floating_text(gate_label, "-%d HP" % damage, Color(1.0, 0.45, 0.45, 1.0), Vector2(24.0, 0.0), 16)
+	_flash_gate_core(player_gate_panel)
 
 func _spawn_lane_popup(lane_index: int, text: String, color: Color, is_secondary_hit: bool) -> void:
 	if lane_index < 0 or lane_index >= enemy_labels.size():
@@ -1822,6 +1918,136 @@ func _show_support_aura_feedback(lane_index: int) -> void:
 		return
 	var lane_panel: Panel = enemy_panels[lane_index]
 	_spawn_floating_text(lane_panel, "AURA +%d" % lane_bonus, SUPPORT_AURA_TILE_COLOR, Vector2(10.0, 8.0), 13)
+
+func _update_tile_visual_identity(tile_index: int, occupied: bool) -> void:
+	if tile_index < 0 or tile_index >= tile_icon_labels.size():
+		return
+	if tile_index >= tile_icon_glow_rects.size() or tile_index >= tile_level_badge_rects.size() or tile_index >= tile_level_badge_labels.size():
+		return
+	var icon_label: Label = tile_icon_labels[tile_index]
+	var icon_glow: ColorRect = tile_icon_glow_rects[tile_index]
+	var level_badge: ColorRect = tile_level_badge_rects[tile_index]
+	var level_label: Label = tile_level_badge_labels[tile_index]
+	if not occupied:
+		icon_label.text = ""
+		icon_glow.color = Color(0.56, 0.67, 0.92, 0.0)
+		level_badge.color = Color(0.78, 0.68, 0.33, 0.0)
+		level_label.text = ""
+		level_label.modulate = Color(0.08, 0.08, 0.08, 0.0)
+		return
+	var unit: Dictionary = board_units[tile_index]
+	var role: String = _get_unit_role(unit)
+	var icon_color: Color = Color(0.78, 0.89, 0.98, 1.0)
+	var glow_color: Color = Color(0.28, 0.44, 0.69, 0.36)
+	if role == "support":
+		icon_color = Color(0.91, 0.79, 0.99, 1.0)
+		glow_color = Color(0.56, 0.33, 0.76, 0.44)
+	elif role == "cleave":
+		icon_color = Color(0.98, 0.82, 0.58, 1.0)
+		glow_color = Color(0.75, 0.48, 0.20, 0.40)
+	icon_label.text = _get_unit_icon(unit)
+	icon_label.modulate = icon_color
+	icon_glow.color = glow_color
+	var level_value: int = int(unit["level"])
+	level_badge.color = Color(0.86, 0.78, 0.41, 0.95)
+	level_label.text = "L%d" % level_value
+	level_label.modulate = Color(0.08, 0.08, 0.08, 1.0)
+
+func _get_unit_icon(unit: Dictionary) -> String:
+	var role: String = _get_unit_role(unit)
+	var icon_variant: Variant = ROLE_ICONS.get(role, "◆")
+	return str(icon_variant)
+
+func _format_tile_compact_label(unit: Dictionary) -> String:
+	var role_tag: String = _get_unit_role_tag(unit)
+	var short_name: String = _get_unit_short_name(unit)
+	if _get_unit_role(unit) == "support":
+		var support_level: int = int(unit["level"])
+		var lane_buff_total: int = int(_get_unit_stat(unit, "lane_buff_base", 0))
+		lane_buff_total += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * support_level
+		return "%s • %s\nAura +%d" % [short_name, role_tag, lane_buff_total]
+	return "%s • %s\nATK %d" % [short_name, role_tag, _get_unit_base_damage(unit)]
+
+func _spawn_projectile_feedback(tile_index: int, lane_index: int, role: String) -> void:
+	if combat_fx_layer == null:
+		return
+	if tile_index < 0 or tile_index >= tile_panels.size():
+		return
+	if lane_index < 0 or lane_index >= enemy_panels.size():
+		return
+	var source_center: Vector2 = _get_control_center_in(combat_fx_layer, tile_panels[tile_index])
+	var target_center: Vector2 = _get_control_center_in(combat_fx_layer, enemy_panels[lane_index])
+	var direction: Vector2 = target_center - source_center
+	var travel_distance: float = direction.length()
+	if travel_distance < 8.0:
+		return
+	var projectile: ColorRect = ColorRect.new()
+	projectile.size = Vector2(max(24.0, travel_distance * 0.24), 3.0)
+	projectile.position = source_center
+	projectile.pivot_offset = Vector2(0.0, 1.5)
+	projectile.rotation = direction.angle()
+	projectile.color = Color(0.82, 0.90, 1.0, 0.90)
+	if role == "support":
+		projectile.color = Color(0.84, 0.66, 0.97, 0.90)
+	elif role == "cleave":
+		projectile.color = Color(0.97, 0.73, 0.48, 0.92)
+	projectile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	combat_fx_layer.add_child(projectile)
+	var tween: Tween = create_tween()
+	tween.tween_property(projectile, "position", target_center, 0.18)
+	tween.parallel().tween_property(projectile, "modulate:a", 0.0, 0.18)
+	tween.finished.connect(func() -> void:
+		if is_instance_valid(projectile):
+			projectile.queue_free()
+	)
+
+func _get_control_center_in(local_root: Control, target: Control) -> Vector2:
+	var global_rect: Rect2 = target.get_global_rect()
+	var local_position: Vector2 = local_root.to_local(global_rect.position)
+	return local_position + (global_rect.size * 0.5)
+
+func _decorate_spawn_gate_identity() -> void:
+	_add_identity_overlay(player_spawn_panel, Color(0.42, 0.66, 0.73, 0.26), "◌")
+	_add_identity_overlay(player_gate_panel, Color(0.57, 0.82, 0.88, 0.24), "✥")
+	_add_identity_overlay(enemy_spawn_panel, Color(0.65, 0.24, 0.48, 0.30), "✶")
+	_add_identity_overlay(enemy_gate_panel, Color(0.78, 0.25, 0.51, 0.30), "☬")
+
+func _add_identity_overlay(panel: Panel, tint: Color, glyph: String) -> void:
+	var haze: ColorRect = ColorRect.new()
+	haze.anchors_preset = Control.PRESET_FULL_RECT
+	haze.offset_left = 8.0
+	haze.offset_top = 8.0
+	haze.offset_right = -8.0
+	haze.offset_bottom = -8.0
+	haze.color = tint
+	haze.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(haze)
+	panel.move_child(haze, 0)
+	var sigil: Label = Label.new()
+	sigil.anchors_preset = Control.PRESET_FULL_RECT
+	sigil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sigil.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	sigil.text = glyph
+	sigil.modulate = Color(1.0, 1.0, 1.0, 0.30)
+	sigil.add_theme_font_size_override("font_size", 36)
+	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(sigil)
+	if panel == player_gate_panel:
+		gate_flash_overlays["player_gate"] = haze
+
+func _flash_gate_core(gate_panel: Panel) -> void:
+	if gate_panel != player_gate_panel:
+		return
+	var overlay_variant: Variant = gate_flash_overlays.get("player_gate", null)
+	if overlay_variant == null:
+		return
+	var overlay: ColorRect = overlay_variant as ColorRect
+	if overlay == null:
+		return
+	var base_color: Color = overlay.color
+	var tween: Tween = create_tween()
+	tween.tween_property(overlay, "color", Color(1.0, 0.45, 0.52, 0.52), 0.08)
+	tween.tween_property(overlay, "color", base_color, 0.22)
 
 func _set_lane_panel_base_visual(lane_index: int) -> void:
 	if lane_index < 0 or lane_index >= enemy_panels.size():
