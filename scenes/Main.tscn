@@ -25,9 +25,9 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 20.0
-offset_top = 16.0
+offset_top = 12.0
 offset_right = -20.0
-offset_bottom = 68.0
+offset_bottom = 86.0
 grow_horizontal = 2
 
 [node name="TopRow" type="HBoxContainer" parent="TopBar"]
@@ -35,25 +35,71 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
+offset_left = 10.0
 offset_top = 8.0
-offset_right = -12.0
+offset_right = -10.0
 offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
+theme_override_constants/separation = 8
 
-[node name="WaveLabel" type="Label" parent="TopBar/TopRow"]
+[node name="TopUpgradeCards" type="HBoxContainer" parent="TopBar/TopRow"]
 layout_mode = 2
-text = "Wave: 1"
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
-[node name="GateLabel" type="Label" parent="TopBar/TopRow"]
+[node name="TopCard1" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
+custom_minimum_size = Vector2(108, 54)
 layout_mode = 2
-text = "Gate HP: 100"
+text = "🛡 Lv1 4"
 
-[node name="BoardPowerLabel" type="Label" parent="TopBar/TopRow"]
+[node name="TopCard2" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
+custom_minimum_size = Vector2(108, 54)
 layout_mode = 2
-text = "Board Power: 0"
+text = "➤ Lv1 5"
+
+[node name="TopCard3" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
+custom_minimum_size = Vector2(108, 54)
+layout_mode = 2
+text = "✦ Lv1 6"
+
+[node name="TopCard4" type="Button" parent="TopBar/TopRow/TopUpgradeCards"]
+custom_minimum_size = Vector2(108, 54)
+layout_mode = 2
+text = "◉ Lv1 7"
+
+[node name="TopStats" type="VBoxContainer" parent="TopBar/TopRow"]
+custom_minimum_size = Vector2(148, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="WaveLabel" type="Label" parent="TopBar/TopRow/TopStats"]
+layout_mode = 2
+text = "🌊 1"
+
+[node name="GateLabel" type="Label" parent="TopBar/TopRow/TopStats"]
+layout_mode = 2
+text = "❤ 100"
+
+[node name="BoardPowerLabel" type="Label" parent="TopBar/TopRow/TopStats"]
+layout_mode = 2
+text = "⚔ 0"
+
+[node name="HeroPanel" type="Panel" parent="TopBar/TopRow"]
+custom_minimum_size = Vector2(144, 0)
+layout_mode = 2
+
+[node name="HeroLabel" type="Label" parent="TopBar/TopRow/HeroPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "🜂 Hero
+Vesper"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="BattlefieldStack" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -61,9 +107,9 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = 84.0
+offset_top = 96.0
 offset_right = -20.0
-offset_bottom = -156.0
+offset_bottom = -228.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 14
@@ -447,16 +493,49 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CenterStrip" type="Panel" parent="BattlefieldStack"]
-custom_minimum_size = Vector2(0, 74)
+custom_minimum_size = Vector2(0, 92)
 layout_mode = 2
 
-[node name="CenterLabel" type="Label" parent="BattlefieldStack/CenterStrip"]
+[node name="CenterContent" type="VBoxContainer" parent="BattlefieldStack/CenterStrip"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="BattleInfoRow" type="HBoxContainer" parent="BattlefieldStack/CenterStrip/CenterContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="LifeInfoLabel" type="Label" parent="BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow"]
+layout_mode = 2
+text = "❤ 100 | ☠ 100"
+
+[node name="WaveInfoLabel" type="Label" parent="BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow"]
+layout_mode = 2
+text = "🌊 1"
+
+[node name="TimerInfoLabel" type="Label" parent="BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow"]
+layout_mode = 2
+text = "⏱ 2.0"
+
+[node name="BossInfoLabel" type="Label" parent="BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow"]
+layout_mode = 2
+text = "👑 0"
+
+[node name="PressureInfoLabel" type="Label" parent="BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow"]
+layout_mode = 2
+text = "☣ 0"
+
+[node name="CenterLabel" type="Label" parent="BattlefieldStack/CenterStrip/CenterContent"]
+layout_mode = 2
 text = "Abyssal Divide"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -781,9 +860,9 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -132.0
+offset_top = -160.0
 offset_right = -20.0
-offset_bottom = -20.0
+offset_bottom = -92.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -792,40 +871,96 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = 12.0
-offset_right = -14.0
-offset_bottom = -12.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 alignment = 1
 
-[node name="SummonButton" type="Button" parent="BottomControls/BottomRow"]
-custom_minimum_size = Vector2(260, 74)
-layout_mode = 2
-text = "Invoke"
-
 [node name="ManaLabel" type="Label" parent="BottomControls/BottomRow"]
-custom_minimum_size = Vector2(170, 0)
+custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
-text = "Mana: 10/10"
+text = "✶ 10/10"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RouletteButton" type="Button" parent="BottomControls/BottomRow"]
-custom_minimum_size = Vector2(170, 74)
+[node name="SummonButton" type="Button" parent="BottomControls/BottomRow"]
+custom_minimum_size = Vector2(248, 54)
 layout_mode = 2
-text = "Ritual Skill"
+size_flags_horizontal = 3
+text = "Invoke"
+
+[node name="RouletteButton" type="Button" parent="BottomControls/BottomRow"]
+custom_minimum_size = Vector2(148, 54)
+layout_mode = 2
+text = "Hero"
+
+[node name="UtilityButton" type="Button" parent="BottomControls/BottomRow"]
+custom_minimum_size = Vector2(84, 54)
+layout_mode = 2
+text = "☰"
+
+[node name="BottomUpgradeRow" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -86.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="BottomUpgradeCards" type="HBoxContainer" parent="BottomUpgradeRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="BottomCard1" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🛡 Lv1 4"
+
+[node name="BottomCard2" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "➤ Lv1 5"
+
+[node name="BottomCard3" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "✦ Lv1 6"
+
+[node name="BottomCard4" type="Button" parent="BottomUpgradeRow/BottomUpgradeCards"]
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "◉ Lv1 7"
 
 [node name="StatusLabel" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 24.0
-offset_top = 674.0
+offset_top = 646.0
 offset_right = -24.0
-offset_bottom = 708.0
+offset_bottom = 680.0
 grow_horizontal = 2
 text = "Status"
 horizontal_alignment = 1
@@ -838,9 +973,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -242.0
-offset_top = -172.0
+offset_top = -196.0
 offset_right = 242.0
-offset_bottom = -134.0
+offset_bottom = -158.0
 grow_horizontal = 2
 grow_vertical = 0
 
