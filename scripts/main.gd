@@ -186,10 +186,17 @@ var opponent_core_hp: int = BASE_GATE_HP
 ]
 @onready var top_bar_panel: Panel = $TopBar
 @onready var top_row: HBoxContainer = $TopBar/TopRow
+@onready var top_upgrade_cards: HBoxContainer = $TopBar/TopRow/TopUpgradeCards
+@onready var top_stats_box: VBoxContainer = $TopBar/TopRow/TopStats
+@onready var hero_panel: Panel = $TopBar/TopRow/HeroPanel
+@onready var hero_label: Label = $TopBar/TopRow/HeroPanel/HeroLabel
 @onready var bottom_controls_panel: Panel = $BottomControls
 @onready var bottom_row: HBoxContainer = $BottomControls/BottomRow
 @onready var mana_label: Label = $BottomControls/BottomRow/ManaLabel
 @onready var roulette_button: Button = $BottomControls/BottomRow/RouletteButton
+@onready var utility_button: Button = $BottomControls/BottomRow/UtilityButton
+@onready var bottom_upgrade_row: Panel = $BottomUpgradeRow
+@onready var bottom_upgrade_cards: HBoxContainer = $BottomUpgradeRow/BottomUpgradeCards
 @onready var enemy_strip_panel: Panel = $BattlefieldStack/EnemyStrip
 @onready var player_strip_panel: Panel = $BattlefieldStack/PlayerStrip
 @onready var enemy_spawn_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemySpawn
@@ -200,6 +207,7 @@ var opponent_core_hp: int = BASE_GATE_HP
 @onready var player_left_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerLeftPath
 @onready var player_right_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerRightPath
 @onready var center_label: Label = $BattlefieldStack/CenterStrip/CenterContent/CenterLabel
+@onready var battle_info_row: HBoxContainer = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow
 @onready var life_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/LifeInfoLabel
 @onready var wave_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/WaveInfoLabel
 @onready var timer_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/TimerInfoLabel
@@ -214,6 +222,18 @@ var opponent_core_hp: int = BASE_GATE_HP
 @onready var player_right_path_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerRightPath/PlayerRightPathLabel
 @onready var opponent_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentLabel
 @onready var opponent_tile_grid: GridContainer = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid
+@onready var top_upgrade_buttons: Array[Button] = [
+	$TopBar/TopRow/TopUpgradeCards/TopCard1,
+	$TopBar/TopRow/TopUpgradeCards/TopCard2,
+	$TopBar/TopRow/TopUpgradeCards/TopCard3,
+	$TopBar/TopRow/TopUpgradeCards/TopCard4
+]
+@onready var bottom_upgrade_buttons: Array[Button] = [
+	$BottomUpgradeRow/BottomUpgradeCards/BottomCard1,
+	$BottomUpgradeRow/BottomUpgradeCards/BottomCard2,
+	$BottomUpgradeRow/BottomUpgradeCards/BottomCard3,
+	$BottomUpgradeRow/BottomUpgradeCards/BottomCard4
+]
 
 func _ready() -> void:
 	_apply_dark_fantasy_theme()
@@ -453,6 +473,7 @@ func _apply_dark_fantasy_theme() -> void:
 	_style_center_strip()
 	_style_top_bar()
 	_style_bottom_controls()
+	_style_upgrade_rows()
 	_style_enemy_lanes()
 	_style_unit_detail_panel()
 	_style_status_labels()
@@ -1001,30 +1022,30 @@ func _style_board_panel() -> void:
 func _style_opponent_board() -> void:
 	var opponent_style: StyleBoxFlat = StyleBoxFlat.new()
 	opponent_style.bg_color = Color(0.06, 0.06, 0.09, 0.94)
-	opponent_style.border_width_left = 2
-	opponent_style.border_width_top = 2
-	opponent_style.border_width_right = 2
-	opponent_style.border_width_bottom = 2
-	opponent_style.border_color = Color(0.42, 0.25, 0.51, 0.84)
+	opponent_style.border_width_left = 4
+	opponent_style.border_width_top = 4
+	opponent_style.border_width_right = 4
+	opponent_style.border_width_bottom = 4
+	opponent_style.border_color = Color(0.48, 0.28, 0.58, 0.92)
 	opponent_style.corner_radius_top_left = 12
 	opponent_style.corner_radius_top_right = 12
 	opponent_style.corner_radius_bottom_left = 12
 	opponent_style.corner_radius_bottom_right = 12
-	opponent_style.shadow_size = 8
-	opponent_style.shadow_color = Color(0.0, 0.0, 0.0, 0.34)
-	opponent_style.shadow_offset = Vector2(0.0, 3.0)
+	opponent_style.shadow_size = 12
+	opponent_style.shadow_color = Color(0.0, 0.0, 0.0, 0.48)
+	opponent_style.shadow_offset = Vector2(0.0, 4.0)
 	opponent_board_panel.add_theme_stylebox_override("panel", opponent_style)
-	opponent_title_label.text = "Opponent Ritual Board (Hostile)"
+	opponent_title_label.text = "⛧ Hostile Ritual Board"
 	opponent_title_label.modulate = Color(0.76, 0.70, 0.82, 0.96)
 	for tile_index in opponent_tile_panels.size():
 		var tile_panel: Panel = opponent_tile_panels[tile_index]
 		var tile_style: StyleBoxFlat = StyleBoxFlat.new()
 		tile_style.bg_color = Color(0.07, 0.06, 0.10, 0.93)
-		tile_style.border_width_left = 2
-		tile_style.border_width_top = 2
-		tile_style.border_width_right = 2
-		tile_style.border_width_bottom = 2
-		tile_style.border_color = Color(0.38, 0.22, 0.46, 0.83)
+		tile_style.border_width_left = 3
+		tile_style.border_width_top = 3
+		tile_style.border_width_right = 3
+		tile_style.border_width_bottom = 3
+		tile_style.border_color = Color(0.44, 0.26, 0.53, 0.88)
 		tile_style.corner_radius_top_left = 8
 		tile_style.corner_radius_top_right = 8
 		tile_style.corner_radius_bottom_left = 8
@@ -1061,21 +1082,28 @@ func _style_center_strip() -> void:
 	strip_style.border_width_right = 4
 	strip_style.border_width_bottom = 4
 	strip_style.border_color = Color(0.49, 0.31, 0.66, 0.93)
-	strip_style.corner_radius_top_left = 10
-	strip_style.corner_radius_top_right = 10
-	strip_style.corner_radius_bottom_left = 10
-	strip_style.corner_radius_bottom_right = 10
-	strip_style.shadow_size = 9
+	strip_style.corner_radius_top_left = 14
+	strip_style.corner_radius_top_right = 14
+	strip_style.corner_radius_bottom_left = 14
+	strip_style.corner_radius_bottom_right = 14
+	strip_style.shadow_size = 12
 	strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
 	strip_style.shadow_offset = Vector2(0.0, 2.0)
 	center_strip_panel.add_theme_stylebox_override("panel", strip_style)
+	battle_info_row.add_theme_constant_override("separation", 12)
 	center_label.text = "Abyssal Fault • Corrupted Ground"
 	center_label.modulate = Color(0.85, 0.74, 0.92, 0.95)
+	life_info_label.text = "❤ 100  ⚔ 100"
+	wave_info_label.text = "🌊 W1"
+	timer_info_label.text = "⏱ 2.0s"
+	boss_info_label.text = "👑 0/3"
+	pressure_info_label.text = "☣ 0%"
 	var strip_labels: Array[Label] = [life_info_label, wave_info_label, timer_info_label, boss_info_label, pressure_info_label]
 	for info_label in strip_labels:
-		info_label.add_theme_font_size_override("font_size", 14)
+		info_label.add_theme_font_size_override("font_size", 15)
+		info_label.add_theme_constant_override("outline_size", 1)
 		info_label.modulate = Color(0.90, 0.86, 0.96, 0.97)
-	center_label.add_theme_font_size_override("font_size", 12)
+	center_label.add_theme_font_size_override("font_size", 13)
 
 func _style_lane_identity_labels() -> void:
 	enemy_spawn_label.text = "◉ Rift"
@@ -1106,7 +1134,23 @@ func _style_top_bar() -> void:
 	top_style.corner_radius_bottom_left = 10
 	top_style.corner_radius_bottom_right = 10
 	top_bar_panel.add_theme_stylebox_override("panel", top_style)
-	top_row.add_theme_constant_override("separation", 10)
+	top_row.add_theme_constant_override("separation", 14)
+	top_upgrade_cards.add_theme_constant_override("separation", 8)
+	top_stats_box.add_theme_constant_override("separation", 4)
+	var hero_style: StyleBoxFlat = StyleBoxFlat.new()
+	hero_style.bg_color = Color(0.12, 0.09, 0.18, 0.98)
+	hero_style.border_width_left = 2
+	hero_style.border_width_top = 2
+	hero_style.border_width_right = 2
+	hero_style.border_width_bottom = 2
+	hero_style.border_color = Color(0.62, 0.43, 0.78, 0.92)
+	hero_style.corner_radius_top_left = 12
+	hero_style.corner_radius_top_right = 12
+	hero_style.corner_radius_bottom_left = 12
+	hero_style.corner_radius_bottom_right = 12
+	hero_panel.add_theme_stylebox_override("panel", hero_style)
+	hero_label.add_theme_font_size_override("font_size", 14)
+	hero_label.modulate = Color(0.94, 0.89, 0.98, 0.98)
 	wave_label.modulate = Color(0.88, 0.87, 0.94, 1.0)
 	gate_label.modulate = Color(0.93, 0.84, 0.97, 1.0)
 	board_power_label.modulate = Color(0.78, 0.87, 0.90, 1.0)
@@ -1127,7 +1171,11 @@ func _style_bottom_controls() -> void:
 	controls_style.corner_radius_bottom_left = 14
 	controls_style.corner_radius_bottom_right = 14
 	bottom_controls_panel.add_theme_stylebox_override("panel", controls_style)
-	bottom_row.add_theme_constant_override("separation", 16)
+	bottom_row.add_theme_constant_override("separation", 12)
+	summon_button.custom_minimum_size = Vector2(272.0, 62.0)
+	roulette_button.custom_minimum_size = Vector2(164.0, 62.0)
+	utility_button.custom_minimum_size = Vector2(96.0, 62.0)
+	mana_label.custom_minimum_size = Vector2(172.0, 62.0)
 
 	var summon_style: StyleBoxFlat = StyleBoxFlat.new()
 	summon_style.bg_color = Color(0.30, 0.12, 0.38, 1.0)
@@ -1145,6 +1193,7 @@ func _style_bottom_controls() -> void:
 	summon_button.add_theme_stylebox_override("pressed", summon_style)
 	summon_button.text = "⛧ Invoke"
 	summon_button.modulate = Color(0.98, 0.95, 1.0, 1.0)
+	summon_button.add_theme_font_size_override("font_size", 20)
 
 	var roulette_style: StyleBoxFlat = StyleBoxFlat.new()
 	roulette_style.bg_color = Color(0.14, 0.14, 0.19, 1.0)
@@ -1162,15 +1211,59 @@ func _style_bottom_controls() -> void:
 	roulette_button.add_theme_stylebox_override("pressed", roulette_style)
 	roulette_button.text = "✦ Hero"
 	roulette_button.modulate = Color(0.92, 0.94, 0.98, 1.0)
+	roulette_button.add_theme_font_size_override("font_size", 18)
 	mana_label.modulate = Color(0.81, 0.91, 0.99, 1.0)
-	mana_label.text = "✶ 10/10"
-	var utility_button_node: Node = bottom_row.get_node_or_null("UtilityButton")
-	var utility_button: Button = utility_button_node as Button
-	if utility_button != null:
-		utility_button.add_theme_stylebox_override("normal", roulette_style)
-		utility_button.add_theme_stylebox_override("hover", roulette_style)
-		utility_button.add_theme_stylebox_override("pressed", roulette_style)
-		utility_button.modulate = Color(0.86, 0.90, 0.95, 1.0)
+	mana_label.text = "✶ Mana 10/10"
+	mana_label.add_theme_font_size_override("font_size", 20)
+	utility_button.add_theme_stylebox_override("normal", roulette_style)
+	utility_button.add_theme_stylebox_override("hover", roulette_style)
+	utility_button.add_theme_stylebox_override("pressed", roulette_style)
+	utility_button.modulate = Color(0.86, 0.90, 0.95, 1.0)
+	utility_button.add_theme_font_size_override("font_size", 20)
+
+func _style_upgrade_rows() -> void:
+	var upgrade_row_style: StyleBoxFlat = StyleBoxFlat.new()
+	upgrade_row_style.bg_color = Color(0.10, 0.09, 0.14, 0.94)
+	upgrade_row_style.border_width_left = 2
+	upgrade_row_style.border_width_top = 2
+	upgrade_row_style.border_width_right = 2
+	upgrade_row_style.border_width_bottom = 2
+	upgrade_row_style.border_color = Color(0.46, 0.34, 0.62, 0.88)
+	upgrade_row_style.corner_radius_top_left = 12
+	upgrade_row_style.corner_radius_top_right = 12
+	upgrade_row_style.corner_radius_bottom_left = 12
+	upgrade_row_style.corner_radius_bottom_right = 12
+	bottom_upgrade_row.add_theme_stylebox_override("panel", upgrade_row_style)
+	bottom_upgrade_cards.add_theme_constant_override("separation", 8)
+	for top_card in top_upgrade_buttons:
+		_style_upgrade_card(top_card, true)
+	for bottom_card in bottom_upgrade_buttons:
+		_style_upgrade_card(bottom_card, false)
+
+func _style_upgrade_card(card_button: Button, is_top_row: bool) -> void:
+	var card_style: StyleBoxFlat = StyleBoxFlat.new()
+	card_style.bg_color = Color(0.15, 0.13, 0.22, 0.98)
+	card_style.border_width_left = 2
+	card_style.border_width_top = 2
+	card_style.border_width_right = 2
+	card_style.border_width_bottom = 2
+	card_style.border_color = Color(0.62, 0.48, 0.78, 0.92)
+	card_style.corner_radius_top_left = 10
+	card_style.corner_radius_top_right = 10
+	card_style.corner_radius_bottom_left = 10
+	card_style.corner_radius_bottom_right = 10
+	card_style.shadow_size = 7
+	card_style.shadow_color = Color(0.0, 0.0, 0.0, 0.35)
+	card_style.shadow_offset = Vector2(0.0, 2.0)
+	card_button.add_theme_stylebox_override("normal", card_style)
+	card_button.add_theme_stylebox_override("hover", card_style)
+	card_button.add_theme_stylebox_override("pressed", card_style)
+	card_button.add_theme_font_size_override("font_size", 15)
+	card_button.modulate = Color(0.95, 0.92, 0.99, 1.0)
+	if is_top_row:
+		card_button.custom_minimum_size = Vector2(118.0, 58.0)
+	else:
+		card_button.custom_minimum_size = Vector2(116.0, 50.0)
 
 func _style_enemy_lanes() -> void:
 	enemy_lane_box.add_theme_constant_override("separation", 4)
