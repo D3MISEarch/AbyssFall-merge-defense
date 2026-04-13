@@ -127,6 +127,7 @@ var lane_portal_ring_rects: Array[ColorRect] = []
 var opponent_tile_panels: Array[Panel] = []
 var opponent_tile_labels: Array[Label] = []
 var route_visual_layers: Array[Control] = []
+var strip_ambience_layers: Array[Control] = []
 
 @onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -169,6 +170,14 @@ var route_visual_layers: Array[Control] = []
 @onready var player_gate_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerGate
 @onready var player_left_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerLeftPath
 @onready var player_right_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerRightPath
+@onready var center_label: Label = $BattlefieldStack/CenterStrip/CenterLabel
+@onready var enemy_spawn_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemySpawn/EnemySpawnLabel
+@onready var enemy_gate_label_text: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyGate/EnemyGateLabel
+@onready var player_spawn_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerSpawn/PlayerSpawnLabel
+@onready var player_gate_label_text: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerGate/PlayerGateLabel
+@onready var enemy_left_path_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyLeftPath/EnemyLeftPathLabel
+@onready var player_left_path_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerLeftPath/PlayerLeftPathLabel
+@onready var player_right_path_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerRightPath/PlayerRightPathLabel
 @onready var opponent_title_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentLabel
 @onready var opponent_tile_grid: GridContainer = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin/OpponentContent/OpponentTileGrid
 
@@ -335,6 +344,7 @@ func _apply_dark_fantasy_theme() -> void:
 	_style_status_labels()
 
 func _on_battlefield_strip_resized() -> void:
+	_build_strip_ambience()
 	call_deferred("_build_u_route_overlays")
 
 func _build_u_route_overlays() -> void:
@@ -656,46 +666,110 @@ func _apply_background_atmosphere() -> void:
 	add_child(ritual_ambience)
 	move_child(ritual_ambience, get_child_count() - 1)
 
+func _build_strip_ambience() -> void:
+	for ambience_layer in strip_ambience_layers:
+		if is_instance_valid(ambience_layer):
+			ambience_layer.queue_free()
+	strip_ambience_layers.clear()
+	_add_strip_ambience(enemy_strip_panel, true)
+	_add_strip_ambience(player_strip_panel, false)
+
+func _add_strip_ambience(strip_panel: Panel, is_hostile_strip: bool) -> void:
+	var ambience_layer: Control = Control.new()
+	ambience_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	ambience_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	strip_panel.add_child(ambience_layer)
+	strip_panel.move_child(ambience_layer, 0)
+	strip_ambience_layers.append(ambience_layer)
+
+	var slab_shadow: ColorRect = ColorRect.new()
+	slab_shadow.anchors_preset = Control.PRESET_FULL_RECT
+	slab_shadow.offset_left = 8.0
+	slab_shadow.offset_top = 10.0
+	slab_shadow.offset_right = -8.0
+	slab_shadow.offset_bottom = -10.0
+	slab_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slab_shadow.color = Color(0.05, 0.06, 0.07, 0.48)
+	ambience_layer.add_child(slab_shadow)
+
+	var slab_core: ColorRect = ColorRect.new()
+	slab_core.anchors_preset = Control.PRESET_FULL_RECT
+	slab_core.offset_left = 14.0
+	slab_core.offset_top = 16.0
+	slab_core.offset_right = -14.0
+	slab_core.offset_bottom = -16.0
+	slab_core.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slab_core.color = Color(0.09, 0.11, 0.12, 0.44)
+	if is_hostile_strip:
+		slab_core.color = Color(0.10, 0.07, 0.13, 0.50)
+	ambience_layer.add_child(slab_core)
+
+	var grime_band: ColorRect = ColorRect.new()
+	grime_band.anchors_preset = Control.PRESET_FULL_RECT
+	grime_band.offset_left = 10.0
+	grime_band.offset_top = 14.0
+	grime_band.offset_right = -10.0
+	grime_band.offset_bottom = -110.0
+	grime_band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grime_band.color = Color(0.02, 0.03, 0.03, 0.38)
+	if is_hostile_strip:
+		grime_band.color = Color(0.11, 0.04, 0.11, 0.34)
+	ambience_layer.add_child(grime_band)
+
+	var void_fog: ColorRect = ColorRect.new()
+	void_fog.anchors_preset = Control.PRESET_FULL_RECT
+	void_fog.offset_left = 24.0
+	void_fog.offset_top = 96.0
+	void_fog.offset_right = -24.0
+	void_fog.offset_bottom = -20.0
+	void_fog.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	void_fog.color = Color(0.17, 0.22, 0.23, 0.16)
+	if is_hostile_strip:
+		void_fog.color = Color(0.28, 0.12, 0.34, 0.18)
+	ambience_layer.add_child(void_fog)
+
 func _style_battlefield_strips() -> void:
 	var enemy_strip_style: StyleBoxFlat = StyleBoxFlat.new()
-	enemy_strip_style.bg_color = Color(0.08, 0.06, 0.11, 0.95)
-	enemy_strip_style.border_width_left = 2
-	enemy_strip_style.border_width_top = 2
-	enemy_strip_style.border_width_right = 2
-	enemy_strip_style.border_width_bottom = 2
-	enemy_strip_style.border_color = Color(0.56, 0.26, 0.58, 0.88)
+	enemy_strip_style.bg_color = Color(0.06, 0.05, 0.09, 0.97)
+	enemy_strip_style.border_width_left = 4
+	enemy_strip_style.border_width_top = 4
+	enemy_strip_style.border_width_right = 4
+	enemy_strip_style.border_width_bottom = 4
+	enemy_strip_style.border_color = Color(0.46, 0.20, 0.52, 0.92)
 	enemy_strip_style.corner_radius_top_left = 16
 	enemy_strip_style.corner_radius_top_right = 16
 	enemy_strip_style.corner_radius_bottom_left = 16
 	enemy_strip_style.corner_radius_bottom_right = 16
-	enemy_strip_style.shadow_size = 12
-	enemy_strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
-	enemy_strip_style.shadow_offset = Vector2(0.0, 5.0)
+	enemy_strip_style.shadow_size = 16
+	enemy_strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.58)
+	enemy_strip_style.shadow_offset = Vector2(0.0, 6.0)
 	enemy_strip_panel.add_theme_stylebox_override("panel", enemy_strip_style)
 
 	var player_strip_style: StyleBoxFlat = StyleBoxFlat.new()
-	player_strip_style.bg_color = Color(0.06, 0.08, 0.10, 0.96)
-	player_strip_style.border_width_left = 2
-	player_strip_style.border_width_top = 2
-	player_strip_style.border_width_right = 2
-	player_strip_style.border_width_bottom = 2
-	player_strip_style.border_color = Color(0.34, 0.42, 0.49, 0.88)
+	player_strip_style.bg_color = Color(0.05, 0.07, 0.09, 0.97)
+	player_strip_style.border_width_left = 4
+	player_strip_style.border_width_top = 4
+	player_strip_style.border_width_right = 4
+	player_strip_style.border_width_bottom = 4
+	player_strip_style.border_color = Color(0.27, 0.39, 0.47, 0.93)
 	player_strip_style.corner_radius_top_left = 16
 	player_strip_style.corner_radius_top_right = 16
 	player_strip_style.corner_radius_bottom_left = 16
 	player_strip_style.corner_radius_bottom_right = 16
-	player_strip_style.shadow_size = 12
-	player_strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.42)
-	player_strip_style.shadow_offset = Vector2(0.0, 5.0)
+	player_strip_style.shadow_size = 16
+	player_strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.50)
+	player_strip_style.shadow_offset = Vector2(0.0, 6.0)
 	player_strip_panel.add_theme_stylebox_override("panel", player_strip_style)
+	_build_strip_ambience()
 
-	_style_spawn_or_gate_panel(enemy_spawn_panel, Color(0.18, 0.06, 0.14, 0.96), Color(0.68, 0.24, 0.51, 0.90))
-	_style_spawn_or_gate_panel(enemy_gate_panel, Color(0.11, 0.04, 0.12, 0.96), Color(0.74, 0.33, 0.58, 0.92))
-	_style_spawn_or_gate_panel(player_spawn_panel, Color(0.08, 0.11, 0.13, 0.96), Color(0.42, 0.54, 0.63, 0.90))
-	_style_spawn_or_gate_panel(player_gate_panel, Color(0.08, 0.10, 0.15, 0.96), Color(0.52, 0.66, 0.78, 0.93))
-	_style_spawn_or_gate_panel(enemy_left_path_panel, Color(0.10, 0.06, 0.12, 0.90), Color(0.58, 0.24, 0.54, 0.80))
-	_style_spawn_or_gate_panel(player_left_path_panel, Color(0.09, 0.11, 0.14, 0.90), Color(0.40, 0.50, 0.63, 0.80))
-	_style_spawn_or_gate_panel(player_right_path_panel, Color(0.09, 0.11, 0.14, 0.90), Color(0.46, 0.58, 0.69, 0.84))
+	_style_spawn_or_gate_panel(enemy_spawn_panel, Color(0.16, 0.05, 0.13, 0.96), Color(0.67, 0.20, 0.49, 0.92))
+	_style_spawn_or_gate_panel(enemy_gate_panel, Color(0.09, 0.03, 0.11, 0.96), Color(0.75, 0.25, 0.57, 0.94))
+	_style_spawn_or_gate_panel(player_spawn_panel, Color(0.06, 0.10, 0.12, 0.96), Color(0.39, 0.56, 0.64, 0.91))
+	_style_spawn_or_gate_panel(player_gate_panel, Color(0.07, 0.10, 0.15, 0.96), Color(0.46, 0.68, 0.77, 0.94))
+	_style_spawn_or_gate_panel(enemy_left_path_panel, Color(0.09, 0.05, 0.11, 0.92), Color(0.54, 0.20, 0.48, 0.84))
+	_style_spawn_or_gate_panel(player_left_path_panel, Color(0.08, 0.10, 0.13, 0.92), Color(0.36, 0.48, 0.61, 0.84))
+	_style_spawn_or_gate_panel(player_right_path_panel, Color(0.08, 0.10, 0.13, 0.92), Color(0.41, 0.57, 0.67, 0.86))
+	_style_lane_identity_labels()
 
 func _style_spawn_or_gate_panel(target_panel: Panel, bg_color: Color, border_color: Color) -> void:
 	var target_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -716,21 +790,21 @@ func _style_spawn_or_gate_panel(target_panel: Panel, bg_color: Color, border_col
 
 func _style_board_panel() -> void:
 	var board_style: StyleBoxFlat = StyleBoxFlat.new()
-	board_style.bg_color = Color(0.06, 0.07, 0.09, 0.96)
-	board_style.border_width_left = 3
-	board_style.border_width_top = 3
-	board_style.border_width_right = 3
-	board_style.border_width_bottom = 3
-	board_style.border_color = Color(0.29, 0.26, 0.33, 0.88)
+	board_style.bg_color = Color(0.05, 0.06, 0.08, 0.97)
+	board_style.border_width_left = 5
+	board_style.border_width_top = 5
+	board_style.border_width_right = 5
+	board_style.border_width_bottom = 5
+	board_style.border_color = Color(0.28, 0.26, 0.32, 0.93)
 	board_style.corner_radius_top_left = 12
 	board_style.corner_radius_top_right = 12
 	board_style.corner_radius_bottom_left = 12
 	board_style.corner_radius_bottom_right = 12
-	board_style.shadow_size = 10
-	board_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
-	board_style.shadow_offset = Vector2(0.0, 4.0)
+	board_style.shadow_size = 14
+	board_style.shadow_color = Color(0.0, 0.0, 0.0, 0.58)
+	board_style.shadow_offset = Vector2(0.0, 5.0)
 	board_panel.add_theme_stylebox_override("panel", board_style)
-	board_label.text = "Player Ritual Board (Interactive)"
+	board_label.text = "Player Ritual Slab"
 	board_label.modulate = Color(0.83, 0.81, 0.89, 1.0)
 
 func _style_opponent_board() -> void:
@@ -787,17 +861,38 @@ func _style_opponent_board() -> void:
 
 func _style_center_strip() -> void:
 	var strip_style: StyleBoxFlat = StyleBoxFlat.new()
-	strip_style.bg_color = Color(0.08, 0.05, 0.12, 0.92)
-	strip_style.border_width_left = 2
-	strip_style.border_width_top = 2
-	strip_style.border_width_right = 2
-	strip_style.border_width_bottom = 2
-	strip_style.border_color = Color(0.56, 0.38, 0.71, 0.90)
+	strip_style.bg_color = Color(0.07, 0.04, 0.10, 0.94)
+	strip_style.border_width_left = 4
+	strip_style.border_width_top = 4
+	strip_style.border_width_right = 4
+	strip_style.border_width_bottom = 4
+	strip_style.border_color = Color(0.49, 0.31, 0.66, 0.93)
 	strip_style.corner_radius_top_left = 10
 	strip_style.corner_radius_top_right = 10
 	strip_style.corner_radius_bottom_left = 10
 	strip_style.corner_radius_bottom_right = 10
+	strip_style.shadow_size = 9
+	strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
+	strip_style.shadow_offset = Vector2(0.0, 2.0)
 	center_strip_panel.add_theme_stylebox_override("panel", strip_style)
+	center_label.text = "Abyssal Fault • Corrupted Ground"
+	center_label.modulate = Color(0.85, 0.74, 0.92, 0.95)
+
+func _style_lane_identity_labels() -> void:
+	enemy_spawn_label.text = "Rift Breach\nSpawn"
+	enemy_gate_label_text.text = "Hostile Core"
+	player_spawn_label.text = "Sanctum Spawn"
+	player_gate_label_text.text = "Gate Core"
+	enemy_left_path_label.text = "Corrupted Rim\nSpawn ⇒ U"
+	player_left_path_label.text = "Outer Lane\nSpawn ⇒ U"
+	player_right_path_label.text = "U Route ⇒\nGate"
+	enemy_spawn_label.modulate = Color(0.91, 0.74, 0.86, 0.95)
+	enemy_gate_label_text.modulate = Color(0.95, 0.72, 0.89, 0.96)
+	player_spawn_label.modulate = Color(0.80, 0.90, 0.94, 0.96)
+	player_gate_label_text.modulate = Color(0.85, 0.95, 0.99, 0.96)
+	enemy_left_path_label.modulate = Color(0.80, 0.67, 0.86, 0.92)
+	player_left_path_label.modulate = Color(0.73, 0.83, 0.90, 0.92)
+	player_right_path_label.modulate = Color(0.77, 0.86, 0.93, 0.94)
 
 func _style_top_bar() -> void:
 	var top_style: StyleBoxFlat = StyleBoxFlat.new()
