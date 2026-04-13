@@ -150,6 +150,8 @@ var opponent_tile_glow_rects: Array[ColorRect] = []
 var route_visual_layers: Array[Control] = []
 var strip_ambience_layers: Array[Control] = []
 var lane_monster_visuals: Array[Control] = []
+var hostile_monster_layer: Control
+var player_monster_layer: Control
 var combat_fx_layer: Control
 var gate_flash_overlays: Dictionary = {}
 var player_lane_target_panels: Array[Panel] = []
@@ -226,6 +228,8 @@ func _ready() -> void:
 	combat_fx_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(combat_fx_layer)
 	move_child(combat_fx_layer, get_child_count() - 1)
+
+	_ensure_monster_layers()
 
 	for i in tile_grid.get_child_count():
 		var tile: Node = tile_grid.get_child(i)
@@ -449,6 +453,7 @@ func _apply_dark_fantasy_theme() -> void:
 
 func _on_battlefield_strip_resized() -> void:
 	_build_strip_ambience()
+	_ensure_monster_layers()
 	call_deferred("_build_u_route_overlays")
 	call_deferred("_update_lane_monster_positions")
 
@@ -639,8 +644,27 @@ func _rect_in_local_space(local_root: Control, target: Control) -> Rect2:
 	return Rect2(local_position, target_rect.size)
 
 func _global_to_control_space(local_root: Control, global_position: Vector2) -> Vector2:
-	var local_root_rect: Rect2 = local_root.get_global_rect()
-	return global_position - local_root_rect.position
+	var inverse_transform: Transform2D = local_root.get_global_transform_with_canvas().affine_inverse()
+	return inverse_transform * global_position
+
+func _ensure_monster_layers() -> void:
+	hostile_monster_layer = _ensure_strip_monster_layer(enemy_strip_panel, hostile_monster_layer, "HostileMonsterLayer")
+	player_monster_layer = _ensure_strip_monster_layer(player_strip_panel, player_monster_layer, "PlayerMonsterLayer")
+
+func _ensure_strip_monster_layer(strip_panel: Panel, existing_layer: Control, layer_name: String) -> Control:
+	if strip_panel == null:
+		return null
+	if is_instance_valid(existing_layer):
+		existing_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		return existing_layer
+	var layer: Control = Control.new()
+	layer.name = layer_name
+	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.z_index = 6
+	strip_panel.add_child(layer)
+	strip_panel.move_child(layer, strip_panel.get_child_count() - 1)
+	return layer
 
 func _build_player_lane_targets() -> void:
 	for target_panel in player_lane_target_panels:
@@ -2135,15 +2159,20 @@ func _get_control_center_in(local_root: Control, target: Control) -> Vector2:
 
 func _create_lane_monster_visual(is_hostile_strip: bool, lane_index: int, enemy: Dictionary) -> Control:
 	var strip_panel: Panel = player_strip_panel
+	var layer_host: Control = player_monster_layer
 	if is_hostile_strip:
 		strip_panel = enemy_strip_panel
+		layer_host = hostile_monster_layer
 	if strip_panel == null:
 		return null
+	if layer_host == null:
+		return null
 	var monster_panel: Panel = Panel.new()
-	monster_panel.size = Vector2(30.0, 30.0)
+	monster_panel.custom_minimum_size = Vector2(40.0, 40.0)
+	monster_panel.size = Vector2(40.0, 40.0)
 	monster_panel.pivot_offset = monster_panel.size * 0.5
 	monster_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	monster_panel.z_index = 12
+	monster_panel.z_index = 10
 	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
 	panel_style.bg_color = OPPONENT_MONSTER_COLOR if is_hostile_strip else PLAYER_MONSTER_COLOR
 	panel_style.border_width_left = 2
@@ -2155,26 +2184,37 @@ func _create_lane_monster_visual(is_hostile_strip: bool, lane_index: int, enemy:
 	panel_style.corner_radius_top_right = 15
 	panel_style.corner_radius_bottom_left = 15
 	panel_style.corner_radius_bottom_right = 15
-	panel_style.shadow_size = 6
-	panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.42)
+	panel_style.shadow_size = 10
+	panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.55)
 	panel_style.shadow_offset = Vector2(0.0, 2.0)
 	monster_panel.add_theme_stylebox_override("panel", panel_style)
-	strip_panel.add_child(monster_panel)
-	strip_panel.move_child(monster_panel, strip_panel.get_child_count() - 1)
+	layer_host.add_child(monster_panel)
+	layer_host.move_child(monster_panel, layer_host.get_child_count() - 1)
 	lane_monster_visuals.append(monster_panel)
+
+	var core: ColorRect = ColorRect.new()
+	core.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	core.offset_left = 8.0
+	core.offset_top = 8.0
+	core.offset_right = -8.0
+	core.offset_bottom = -8.0
+	core.color = Color(0.10, 0.10, 0.12, 0.82)
+	core.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	monster_panel.add_child(core)
 
 	var glyph_label: Label = Label.new()
 	glyph_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	glyph_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	glyph_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	glyph_label.add_theme_font_size_override("font_size", 20)
+	glyph_label.add_theme_font_size_override("font_size", 24)
+	glyph_label.add_theme_constant_override("outline_size", 2)
 	glyph_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if is_hostile_strip:
 		glyph_label.text = OPPONENT_MONSTER_ICON_SET[lane_index % OPPONENT_MONSTER_ICON_SET.size()]
-		glyph_label.modulate = Color(0.97, 0.78, 0.93, 0.96)
+		glyph_label.modulate = Color(0.99, 0.82, 0.95, 1.0)
 	else:
 		glyph_label.text = PLAYER_MONSTER_ICON_SET[lane_index % PLAYER_MONSTER_ICON_SET.size()]
-		glyph_label.modulate = Color(0.80, 0.93, 0.99, 0.96)
+		glyph_label.modulate = Color(0.85, 0.97, 1.0, 1.0)
 	monster_panel.add_child(glyph_label)
 	var initial_position: Vector2 = _get_lane_point_for_progress(is_hostile_strip, lane_index, 0.0)
 	monster_panel.position = initial_position - (monster_panel.size * 0.5)
