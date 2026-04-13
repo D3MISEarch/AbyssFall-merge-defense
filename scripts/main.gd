@@ -133,6 +133,7 @@ var game_over: bool = false
 var spawn_timer: float = 0.0
 var advance_timer: float = 0.0
 var enemy_lanes: Array[Array] = []
+var opponent_lanes: Array[Array] = []
 var support_feedback_lines: Array[String] = []
 var lane_portal_core_rects: Array[ColorRect] = []
 var lane_portal_ring_rects: Array[ColorRect] = []
@@ -144,6 +145,8 @@ var route_visual_layers: Array[Control] = []
 var strip_ambience_layers: Array[Control] = []
 var combat_fx_layer: Control
 var gate_flash_overlays: Dictionary = {}
+var player_lane_target_panels: Array[Panel] = []
+var player_lane_target_labels: Array[Label] = []
 
 @onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -206,6 +209,9 @@ func _ready() -> void:
 	enemy_lanes.resize(LANE_COUNT)
 	for lane_index in LANE_COUNT:
 		enemy_lanes[lane_index] = []
+	opponent_lanes.resize(LANE_COUNT)
+	for lane_index in LANE_COUNT:
+		opponent_lanes[lane_index] = []
 
 	combat_fx_layer = Control.new()
 	combat_fx_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -404,6 +410,7 @@ func _ready() -> void:
 		var label: Label = panel.get_node("OppTileLabel") as Label
 		if label != null:
 			opponent_tile_labels.append(label)
+	_build_player_lane_targets()
 
 	_style_tile_panels_base()
 	summon_button.pressed.connect(_on_summon_pressed)
@@ -619,8 +626,52 @@ func _build_strip_u_route(
 
 func _rect_in_local_space(local_root: Control, target: Control) -> Rect2:
 	var target_rect: Rect2 = target.get_global_rect()
-	var local_position: Vector2 = local_root.to_local(target_rect.position)
+	var local_position: Vector2 = _global_to_control_space(local_root, target_rect.position)
 	return Rect2(local_position, target_rect.size)
+
+func _global_to_control_space(local_root: Control, global_position: Vector2) -> Vector2:
+	var local_root_rect: Rect2 = local_root.get_global_rect()
+	return global_position - local_root_rect.position
+
+func _build_player_lane_targets() -> void:
+	for target_panel in player_lane_target_panels:
+		if is_instance_valid(target_panel):
+			target_panel.queue_free()
+	player_lane_target_panels.clear()
+	player_lane_target_labels.clear()
+	var lane_host: VBoxContainer = VBoxContainer.new()
+	lane_host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	lane_host.add_theme_constant_override("separation", 6)
+	lane_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	player_right_path_panel.add_child(lane_host)
+	for lane_index in LANE_COUNT:
+		var lane_panel: Panel = Panel.new()
+		lane_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		lane_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var lane_style: StyleBoxFlat = StyleBoxFlat.new()
+		lane_style.bg_color = Color(0.20, 0.28, 0.36, 0.35)
+		lane_style.border_width_left = 1
+		lane_style.border_width_top = 1
+		lane_style.border_width_right = 1
+		lane_style.border_width_bottom = 1
+		lane_style.border_color = Color(0.52, 0.72, 0.84, 0.45)
+		lane_style.corner_radius_top_left = 8
+		lane_style.corner_radius_top_right = 8
+		lane_style.corner_radius_bottom_left = 8
+		lane_style.corner_radius_bottom_right = 8
+		lane_panel.add_theme_stylebox_override("panel", lane_style)
+		lane_host.add_child(lane_panel)
+		player_lane_target_panels.append(lane_panel)
+		var lane_label: Label = Label.new()
+		lane_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		lane_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lane_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lane_label.text = "Player Lane %d" % [lane_index + 1]
+		lane_label.modulate = Color(0.76, 0.88, 0.98, 0.58)
+		lane_label.add_theme_font_size_override("font_size", 11)
+		lane_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lane_panel.add_child(lane_label)
+		player_lane_target_labels.append(lane_label)
 
 func _add_route_segment(
 	host: Control,
@@ -1293,6 +1344,14 @@ func _spawn_enemy() -> void:
 		"progress": 0
 	}
 	enemy_lanes[lane_index].append(enemy)
+	var opponent_enemy: Dictionary = {
+		"name": "W%d Shade" % wave_number,
+		"hp": enemy_hp,
+		"max_hp": enemy_hp,
+		"damage": enemy_damage,
+		"progress": 0
+	}
+	opponent_lanes[lane_index].append(opponent_enemy)
 	spawned_enemies_total += 1
 
 	if spawned_enemies_total % 6 == 0:
@@ -1304,7 +1363,9 @@ func _spawn_enemy() -> void:
 
 func _tick_enemy_loop() -> void:
 	_apply_board_auto_damage()
+	_apply_opponent_auto_damage()
 	_advance_enemies_toward_gate()
+	_advance_opponent_enemies()
 	_update_enemy_lane_ui()
 
 func _apply_board_auto_damage() -> void:
@@ -1354,13 +1415,23 @@ func _apply_board_auto_damage() -> void:
 					if hunter_execute_bonus > 0:
 						support_contributed = true
 
-			_spawn_projectile_feedback(tile_index, lane_index, role)
+			_spawn_projectile_feedback("player", tile_index, lane_index, role)
 			_damage_front_enemy(lane_index, damage, support_contributed)
 			if role == "cleave":
 				var splash_ratio: float = float(_get_unit_stat(unit, "splash_ratio", 0.0))
 				var splash_damage: int = int(round(float(damage) * splash_ratio))
 				_damage_secondary_enemy(lane_index, splash_damage, support_contributed)
 	_update_support_feedback_ui()
+
+func _apply_opponent_auto_damage() -> void:
+	for lane_index in LANE_COUNT:
+		if opponent_lanes[lane_index].is_empty():
+			continue
+		var attacker_index: int = lane_index
+		if attacker_index >= opponent_tile_panels.size():
+			attacker_index = lane_index % max(1, opponent_tile_panels.size())
+		_spawn_projectile_feedback("opponent", attacker_index, lane_index, "single")
+		_damage_front_enemy_in_lanes(opponent_lanes, lane_index, 2 + wave_number)
 
 func _damage_front_enemy(lane_index: int, damage: int, support_contributed: bool) -> void:
 	if damage <= 0 or enemy_lanes[lane_index].is_empty():
@@ -1379,6 +1450,19 @@ func _damage_front_enemy(lane_index: int, damage: int, support_contributed: bool
 		status_label.text = "Lane %d enemy defeated by %d damage." % [lane_index + 1, damage]
 	else:
 		enemy_lanes[lane_index][front_index] = enemy
+
+func _damage_front_enemy_in_lanes(lanes: Array[Array], lane_index: int, damage: int) -> void:
+	if damage <= 0 or lane_index < 0 or lane_index >= lanes.size():
+		return
+	if lanes[lane_index].is_empty():
+		return
+	var front_index: int = _get_front_enemy_index(lanes[lane_index])
+	var enemy: Dictionary = lanes[lane_index][front_index]
+	enemy["hp"] = int(enemy["hp"]) - damage
+	if int(enemy["hp"]) <= 0:
+		lanes[lane_index].remove_at(front_index)
+	else:
+		lanes[lane_index][front_index] = enemy
 
 func _damage_secondary_enemy(lane_index: int, damage: int, support_contributed: bool) -> void:
 	if damage <= 0 or enemy_lanes[lane_index].size() < 2:
@@ -1420,6 +1504,18 @@ func _advance_enemies_toward_gate() -> void:
 	_update_gate_ui()
 	if gate_hp <= 0:
 		_trigger_loss()
+
+func _advance_opponent_enemies() -> void:
+	for lane_index in LANE_COUNT:
+		if opponent_lanes[lane_index].is_empty():
+			continue
+		for enemy_index in range(opponent_lanes[lane_index].size() - 1, -1, -1):
+			var enemy: Dictionary = opponent_lanes[lane_index][enemy_index]
+			enemy["progress"] = int(enemy["progress"]) + 1
+			if int(enemy["progress"]) >= LANE_LENGTH:
+				opponent_lanes[lane_index].remove_at(enemy_index)
+			else:
+				opponent_lanes[lane_index][enemy_index] = enemy
 
 func _trigger_loss() -> void:
 	if game_over:
@@ -1584,6 +1680,8 @@ func _update_enemy_lane_ui() -> void:
 			if lane_index < support_feedback_lines.size():
 				clear_line += " | " + support_feedback_lines[lane_index]
 			enemy_labels[lane_index].text = clear_line
+			if lane_index < player_lane_target_labels.size():
+				player_lane_target_labels[lane_index].text = "Player Lane %d • Clear" % [lane_index + 1]
 			continue
 
 		var segments: Array[String] = []
@@ -1596,6 +1694,8 @@ func _update_enemy_lane_ui() -> void:
 		if lane_index < support_feedback_lines.size():
 			lane_line += " | " + support_feedback_lines[lane_index]
 		enemy_labels[lane_index].text = lane_line
+		if lane_index < player_lane_target_labels.size():
+			player_lane_target_labels[lane_index].text = "Player Lane %d • %d mobs" % [lane_index + 1, enemy_lanes[lane_index].size()]
 
 func _get_front_enemy_index(lane_enemies: Array) -> int:
 	var selected_index: int = 0
@@ -1968,15 +2068,15 @@ func _format_tile_compact_label(unit: Dictionary) -> String:
 		return "%s • %s\nAura +%d" % [short_name, role_tag, lane_buff_total]
 	return "%s • %s\nATK %d" % [short_name, role_tag, _get_unit_base_damage(unit)]
 
-func _spawn_projectile_feedback(tile_index: int, lane_index: int, role: String) -> void:
+func _spawn_projectile_feedback(owner: String, tile_index: int, lane_index: int, role: String) -> void:
 	if combat_fx_layer == null:
 		return
-	if tile_index < 0 or tile_index >= tile_panels.size():
+	var source_panel: Panel = _get_source_panel_for_owner(owner, tile_index)
+	var lane_target_panel: Control = _get_lane_target_for_owner(owner, lane_index)
+	if source_panel == null or lane_target_panel == null:
 		return
-	if lane_index < 0 or lane_index >= enemy_panels.size():
-		return
-	var source_center: Vector2 = _get_control_center_in(combat_fx_layer, tile_panels[tile_index])
-	var target_center: Vector2 = _get_control_center_in(combat_fx_layer, enemy_panels[lane_index])
+	var source_center: Vector2 = _get_control_center_in(combat_fx_layer, source_panel)
+	var target_center: Vector2 = _get_control_center_in(combat_fx_layer, lane_target_panel)
 	var direction: Vector2 = target_center - source_center
 	var travel_distance: float = direction.length()
 	if travel_distance < 8.0:
@@ -1991,6 +2091,8 @@ func _spawn_projectile_feedback(tile_index: int, lane_index: int, role: String) 
 		projectile.color = Color(0.84, 0.66, 0.97, 0.90)
 	elif role == "cleave":
 		projectile.color = Color(0.97, 0.73, 0.48, 0.92)
+	if owner == "opponent":
+		projectile.color = Color(0.94, 0.52, 0.78, 0.90)
 	projectile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	combat_fx_layer.add_child(projectile)
 	var tween: Tween = create_tween()
@@ -2003,8 +2105,26 @@ func _spawn_projectile_feedback(tile_index: int, lane_index: int, role: String) 
 
 func _get_control_center_in(local_root: Control, target: Control) -> Vector2:
 	var global_rect: Rect2 = target.get_global_rect()
-	var local_position: Vector2 = local_root.to_local(global_rect.position)
+	var local_position: Vector2 = _global_to_control_space(local_root, global_rect.position)
 	return local_position + (global_rect.size * 0.5)
+
+func _get_source_panel_for_owner(owner: String, tile_index: int) -> Panel:
+	if owner == "opponent":
+		if tile_index < 0 or tile_index >= opponent_tile_panels.size():
+			return null
+		return opponent_tile_panels[tile_index]
+	if tile_index < 0 or tile_index >= tile_panels.size():
+		return null
+	return tile_panels[tile_index]
+
+func _get_lane_target_for_owner(owner: String, lane_index: int) -> Control:
+	if owner == "opponent":
+		if lane_index < 0 or lane_index >= enemy_panels.size():
+			return null
+		return enemy_panels[lane_index]
+	if lane_index < 0 or lane_index >= player_lane_target_panels.size():
+		return null
+	return player_lane_target_panels[lane_index]
 
 func _decorate_spawn_gate_identity() -> void:
 	_add_identity_overlay(player_spawn_panel, Color(0.42, 0.66, 0.73, 0.26), "◌")
