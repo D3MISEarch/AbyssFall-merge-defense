@@ -198,6 +198,12 @@ var selected_bottom_upgrade: int = 0
 @onready var top_stats_box: VBoxContainer = $TopBar/TopRow/TopStats
 @onready var hero_panel: Panel = $TopBar/TopRow/HeroPanel
 @onready var hero_label: Label = $TopBar/TopRow/HeroPanel/HeroLabel
+@onready var battlefield_stack: VBoxContainer = $BattlefieldStack
+@onready var enemy_flow: HBoxContainer = $BattlefieldStack/EnemyStrip/EnemyFlow
+@onready var player_flow: HBoxContainer = $BattlefieldStack/PlayerStrip/PlayerFlow
+@onready var board_margin: MarginContainer = $BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin
+@onready var opponent_margin: MarginContainer = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard/OpponentMargin
+@onready var center_content: VBoxContainer = $BattlefieldStack/CenterStrip/CenterContent
 @onready var bottom_controls_panel: Panel = $BottomControls
 @onready var bottom_row: HBoxContainer = $BottomControls/BottomRow
 @onready var mana_label: Label = $BottomControls/BottomRow/ManaLabel
@@ -471,6 +477,8 @@ func _ready() -> void:
 	_update_selection_detail()
 	enemy_strip_panel.resized.connect(_on_battlefield_strip_resized)
 	player_strip_panel.resized.connect(_on_battlefield_strip_resized)
+	resized.connect(_on_main_resized)
+	_apply_responsive_layout()
 	call_deferred("_build_u_route_overlays")
 
 func _apply_dark_fantasy_theme() -> void:
@@ -486,6 +494,91 @@ func _apply_dark_fantasy_theme() -> void:
 	_style_enemy_lanes()
 	_style_unit_detail_panel()
 	_style_status_labels()
+
+func _on_main_resized() -> void:
+	_apply_responsive_layout()
+
+func _apply_responsive_layout() -> void:
+	var viewport_size: Vector2 = get_viewport_rect().size
+	var viewport_width: float = viewport_size.x
+	var viewport_height: float = viewport_size.y
+	var outer_margin: float = clamp(viewport_width * 0.018, 10.0, 20.0)
+	var inner_margin: float = clamp(viewport_width * 0.010, 6.0, 12.0)
+	var top_bar_height: float = clamp(viewport_height * 0.090, 78.0, 118.0)
+	var controls_height: float = clamp(viewport_height * 0.088, 72.0, 102.0)
+	var upgrades_height: float = clamp(viewport_height * 0.078, 66.0, 94.0)
+	var bottom_gap: float = clamp(viewport_height * 0.012, 10.0, 18.0)
+	var section_gap: float = clamp(viewport_height * 0.010, 6.0, 12.0)
+
+	top_bar_panel.offset_left = outer_margin
+	top_bar_panel.offset_top = inner_margin
+	top_bar_panel.offset_right = -outer_margin
+	top_bar_panel.offset_bottom = top_bar_panel.offset_top + top_bar_height
+
+	bottom_upgrade_row.offset_left = outer_margin
+	bottom_upgrade_row.offset_right = -outer_margin
+	bottom_upgrade_row.offset_bottom = -bottom_gap
+	bottom_upgrade_row.offset_top = bottom_upgrade_row.offset_bottom - upgrades_height
+
+	bottom_controls_panel.offset_left = outer_margin
+	bottom_controls_panel.offset_right = -outer_margin
+	bottom_controls_panel.offset_bottom = bottom_upgrade_row.offset_top - section_gap
+	bottom_controls_panel.offset_top = bottom_controls_panel.offset_bottom - controls_height
+
+	battlefield_stack.offset_left = outer_margin
+	battlefield_stack.offset_right = -outer_margin
+	battlefield_stack.offset_top = top_bar_panel.offset_bottom + section_gap
+	battlefield_stack.offset_bottom = bottom_controls_panel.offset_top - section_gap
+	battlefield_stack.add_theme_constant_override("separation", int(section_gap))
+
+	var stack_height: float = battlefield_stack.size.y
+	var enemy_target_height: float = clamp(stack_height * 0.39, 250.0, 520.0)
+	var center_target_height: float = clamp(stack_height * 0.12, 66.0, 102.0)
+	var player_target_height: float = clamp(stack_height * 0.43, 286.0, 620.0)
+	enemy_strip_panel.custom_minimum_size = Vector2(0.0, enemy_target_height)
+	center_strip_panel.custom_minimum_size = Vector2(0.0, center_target_height)
+	player_strip_panel.custom_minimum_size = Vector2(0.0, player_target_height)
+
+	var side_column_width: float = clamp(viewport_width * 0.120, 76.0, 132.0)
+	var side_lane_width: float = clamp(viewport_width * 0.086, 64.0, 102.0)
+	var gate_column_width: float = clamp(viewport_width * 0.128, 92.0, 146.0)
+	var lane_info_width: float = clamp(viewport_width * 0.155, 126.0, 194.0)
+	enemy_spawn_panel.custom_minimum_size = Vector2(side_column_width, 0.0)
+	player_spawn_panel.custom_minimum_size = Vector2(side_column_width, 0.0)
+	enemy_left_path_panel.custom_minimum_size = Vector2(side_lane_width, 0.0)
+	player_left_path_panel.custom_minimum_size = Vector2(side_lane_width, 0.0)
+	player_right_path_panel.custom_minimum_size = Vector2(side_lane_width, 0.0)
+	enemy_gate_panel.custom_minimum_size = Vector2(gate_column_width, 0.0)
+	player_gate_panel.custom_minimum_size = Vector2(gate_column_width, 0.0)
+	enemy_lane_box.custom_minimum_size = Vector2(lane_info_width, 0.0)
+
+	enemy_flow.add_theme_constant_override("separation", int(clamp(viewport_width * 0.008, 6.0, 10.0)))
+	player_flow.add_theme_constant_override("separation", int(clamp(viewport_width * 0.008, 6.0, 10.0)))
+	board_margin.add_theme_constant_override("margin_left", int(inner_margin))
+	board_margin.add_theme_constant_override("margin_top", int(inner_margin))
+	board_margin.add_theme_constant_override("margin_right", int(inner_margin))
+	board_margin.add_theme_constant_override("margin_bottom", int(inner_margin))
+	opponent_margin.add_theme_constant_override("margin_left", int(inner_margin))
+	opponent_margin.add_theme_constant_override("margin_top", int(inner_margin))
+	opponent_margin.add_theme_constant_override("margin_right", int(inner_margin))
+	opponent_margin.add_theme_constant_override("margin_bottom", int(inner_margin))
+	center_content.add_theme_constant_override("separation", int(clamp(section_gap * 0.55, 4.0, 8.0)))
+
+	var card_width: float = clamp((viewport_width - (outer_margin * 2.0) - 44.0) / 4.0, 108.0, 176.0)
+	for card_button in top_upgrade_buttons:
+		card_button.custom_minimum_size = Vector2(card_width, clamp(upgrades_height - 22.0, 46.0, 74.0))
+	for card_button in bottom_upgrade_buttons:
+		card_button.custom_minimum_size = Vector2(card_width, clamp(upgrades_height - 20.0, 48.0, 76.0))
+
+	var tile_width: float = clamp(viewport_width * 0.102, 86.0, 126.0)
+	var player_tile_height: float = clamp(viewport_height * 0.098, 88.0, 132.0)
+	var opponent_tile_height: float = clamp(viewport_height * 0.088, 78.0, 118.0)
+	for tile_panel in tile_panels:
+		tile_panel.custom_minimum_size = Vector2(tile_width, player_tile_height)
+	for tile_panel in opponent_tile_panels:
+		tile_panel.custom_minimum_size = Vector2(tile_width, opponent_tile_height)
+
+	call_deferred("_on_battlefield_strip_resized")
 
 func _on_battlefield_strip_resized() -> void:
 	_build_strip_ambience()
@@ -1011,50 +1104,50 @@ func _style_spawn_or_gate_panel(target_panel: Panel, bg_color: Color, border_col
 
 func _style_board_panel() -> void:
 	var board_style: StyleBoxFlat = StyleBoxFlat.new()
-	board_style.bg_color = Color(0.05, 0.06, 0.08, 0.97)
-	board_style.border_width_left = 5
-	board_style.border_width_top = 5
-	board_style.border_width_right = 5
-	board_style.border_width_bottom = 5
-	board_style.border_color = Color(0.34, 0.34, 0.40, 0.95)
+	board_style.bg_color = Color(0.04, 0.05, 0.08, 0.98)
+	board_style.border_width_left = 6
+	board_style.border_width_top = 6
+	board_style.border_width_right = 6
+	board_style.border_width_bottom = 6
+	board_style.border_color = Color(0.40, 0.43, 0.52, 0.97)
 	board_style.corner_radius_top_left = 12
 	board_style.corner_radius_top_right = 12
 	board_style.corner_radius_bottom_left = 12
 	board_style.corner_radius_bottom_right = 12
-	board_style.shadow_size = 18
-	board_style.shadow_color = Color(0.0, 0.0, 0.0, 0.58)
+	board_style.shadow_size = 22
+	board_style.shadow_color = Color(0.0, 0.0, 0.0, 0.66)
 	board_style.shadow_offset = Vector2(0.0, 5.0)
 	board_panel.add_theme_stylebox_override("panel", board_style)
 	board_label.text = "Player Ritual Slab"
-	board_label.modulate = Color(0.83, 0.81, 0.89, 1.0)
+	board_label.modulate = Color(0.89, 0.88, 0.96, 1.0)
 
 func _style_opponent_board() -> void:
 	var opponent_style: StyleBoxFlat = StyleBoxFlat.new()
-	opponent_style.bg_color = Color(0.07, 0.05, 0.10, 0.96)
-	opponent_style.border_width_left = 4
-	opponent_style.border_width_top = 4
-	opponent_style.border_width_right = 4
-	opponent_style.border_width_bottom = 4
-	opponent_style.border_color = Color(0.48, 0.28, 0.58, 0.92)
+	opponent_style.bg_color = Color(0.08, 0.04, 0.11, 0.98)
+	opponent_style.border_width_left = 6
+	opponent_style.border_width_top = 6
+	opponent_style.border_width_right = 6
+	opponent_style.border_width_bottom = 6
+	opponent_style.border_color = Color(0.64, 0.34, 0.74, 0.95)
 	opponent_style.corner_radius_top_left = 12
 	opponent_style.corner_radius_top_right = 12
 	opponent_style.corner_radius_bottom_left = 12
 	opponent_style.corner_radius_bottom_right = 12
-	opponent_style.shadow_size = 12
-	opponent_style.shadow_color = Color(0.0, 0.0, 0.0, 0.48)
+	opponent_style.shadow_size = 18
+	opponent_style.shadow_color = Color(0.0, 0.0, 0.0, 0.62)
 	opponent_style.shadow_offset = Vector2(0.0, 4.0)
 	opponent_board_panel.add_theme_stylebox_override("panel", opponent_style)
 	opponent_title_label.text = "⛧ Hostile Ritual Board"
-	opponent_title_label.modulate = Color(0.76, 0.70, 0.82, 0.96)
+	opponent_title_label.modulate = Color(0.90, 0.78, 0.96, 0.98)
 	for tile_index in opponent_tile_panels.size():
 		var tile_panel: Panel = opponent_tile_panels[tile_index]
 		var tile_style: StyleBoxFlat = StyleBoxFlat.new()
-		tile_style.bg_color = Color(0.07, 0.06, 0.10, 0.93)
+		tile_style.bg_color = Color(0.08, 0.06, 0.12, 0.95)
 		tile_style.border_width_left = 2
 		tile_style.border_width_top = 2
 		tile_style.border_width_right = 2
 		tile_style.border_width_bottom = 2
-		tile_style.border_color = Color(0.44, 0.26, 0.53, 0.88)
+		tile_style.border_color = Color(0.58, 0.33, 0.68, 0.92)
 		tile_style.corner_radius_top_left = 8
 		tile_style.corner_radius_top_right = 8
 		tile_style.corner_radius_bottom_left = 8
@@ -1066,7 +1159,7 @@ func _style_opponent_board() -> void:
 		void_underglow.offset_top = 6.0
 		void_underglow.offset_right = -6.0
 		void_underglow.offset_bottom = -6.0
-		void_underglow.color = Color(0.49, 0.21, 0.62, 0.14)
+		void_underglow.color = Color(0.58, 0.25, 0.72, 0.20)
 		void_underglow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tile_panel.add_child(void_underglow)
 		tile_panel.move_child(void_underglow, 0)
@@ -1074,9 +1167,9 @@ func _style_opponent_board() -> void:
 		var tile_label: Label = opponent_tile_labels[label_index]
 		var lane_id: int = int(label_index / BOARD_COLUMNS) + 1
 		var col_id: int = (label_index % BOARD_COLUMNS) + 1
-		tile_label.modulate = Color(0.80, 0.77, 0.89, 0.90)
+		tile_label.modulate = Color(0.91, 0.85, 0.98, 0.95)
 		tile_label.text = "L%d•%d" % [lane_id, col_id]
-		tile_label.add_theme_font_size_override("font_size", 11)
+		tile_label.add_theme_font_size_override("font_size", 12)
 		tile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		tile_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		if label_index < opponent_tile_icon_labels.size():
