@@ -120,6 +120,7 @@ var board_units: Array[Dictionary] = []
 var tile_panels: Array[Panel] = []
 var tile_labels: Array[Label] = []
 var tile_icon_glow_rects: Array[ColorRect] = []
+var tile_icon_plate_rects: Array[ColorRect] = []
 var tile_icon_labels: Array[Label] = []
 var tile_level_badge_rects: Array[ColorRect] = []
 var tile_level_badge_labels: Array[Label] = []
@@ -149,6 +150,7 @@ var opponent_tile_panels: Array[Panel] = []
 var opponent_tile_labels: Array[Label] = []
 var opponent_tile_icon_labels: Array[Label] = []
 var opponent_tile_glow_rects: Array[ColorRect] = []
+var opponent_tile_plate_rects: Array[ColorRect] = []
 var route_visual_layers: Array[Control] = []
 var strip_ambience_layers: Array[Control] = []
 var lane_monster_visuals: Array[Control] = []
@@ -382,6 +384,16 @@ func _ready() -> void:
 		icon_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(icon_glow)
 		tile_icon_glow_rects.append(icon_glow)
+		var icon_plate: ColorRect = ColorRect.new()
+		icon_plate.anchors_preset = Control.PRESET_FULL_RECT
+		icon_plate.offset_left = 12.0
+		icon_plate.offset_top = 10.0
+		icon_plate.offset_right = -12.0
+		icon_plate.offset_bottom = -52.0
+		icon_plate.color = Color(0.11, 0.14, 0.18, 0.0)
+		icon_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(icon_plate)
+		tile_icon_plate_rects.append(icon_plate)
 		var icon_label: Label = Label.new()
 		icon_label.anchors_preset = Control.PRESET_FULL_RECT
 		icon_label.offset_left = 6.0
@@ -390,7 +402,8 @@ func _ready() -> void:
 		icon_label.offset_bottom = -46.0
 		icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		icon_label.add_theme_font_size_override("font_size", 32)
+		icon_label.add_theme_font_size_override("font_size", 42)
+		icon_label.add_theme_constant_override("outline_size", 2)
 		icon_label.text = ""
 		icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(icon_label)
@@ -445,6 +458,16 @@ func _ready() -> void:
 		hostile_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(hostile_glow)
 		opponent_tile_glow_rects.append(hostile_glow)
+		var hostile_plate: ColorRect = ColorRect.new()
+		hostile_plate.anchors_preset = Control.PRESET_FULL_RECT
+		hostile_plate.offset_left = 10.0
+		hostile_plate.offset_top = 8.0
+		hostile_plate.offset_right = -10.0
+		hostile_plate.offset_bottom = -20.0
+		hostile_plate.color = Color(0.26, 0.12, 0.30, 0.28)
+		hostile_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(hostile_plate)
+		opponent_tile_plate_rects.append(hostile_plate)
 		var icon_label: Label = Label.new()
 		icon_label.anchors_preset = Control.PRESET_FULL_RECT
 		icon_label.offset_left = 4.0
@@ -453,7 +476,8 @@ func _ready() -> void:
 		icon_label.offset_bottom = -18.0
 		icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		icon_label.add_theme_font_size_override("font_size", 24)
+		icon_label.add_theme_font_size_override("font_size", 30)
+		icon_label.add_theme_constant_override("outline_size", 2)
 		icon_label.modulate = Color(0.84, 0.71, 0.90, 0.85)
 		icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(icon_label)
@@ -1147,7 +1171,7 @@ func _style_opponent_board() -> void:
 		tile_style.border_width_top = 2
 		tile_style.border_width_right = 2
 		tile_style.border_width_bottom = 2
-		tile_style.border_color = Color(0.58, 0.33, 0.68, 0.92)
+		tile_style.border_color = Color(0.42, 0.25, 0.51, 0.76)
 		tile_style.corner_radius_top_left = 8
 		tile_style.corner_radius_top_right = 8
 		tile_style.corner_radius_bottom_left = 8
@@ -1173,8 +1197,8 @@ func _style_opponent_board() -> void:
 		tile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		tile_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		if label_index < opponent_tile_icon_labels.size():
-			var hostile_icon: String = HOSTILE_ICON_SET[label_index % HOSTILE_ICON_SET.size()]
-			opponent_tile_icon_labels[label_index].text = hostile_icon
+			opponent_tile_icon_labels[label_index].text = ""
+	_update_opponent_board_presence()
 
 func _style_center_strip() -> void:
 	var strip_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -1445,12 +1469,12 @@ func _style_tile_panels_base() -> void:
 	for tile_index in tile_panels.size():
 		var panel: Panel = tile_panels[tile_index]
 		var tile_style: StyleBoxFlat = StyleBoxFlat.new()
-		tile_style.bg_color = Color(0.07, 0.08, 0.10, 0.97)
+		tile_style.bg_color = Color(0.06, 0.07, 0.09, 0.97)
 		tile_style.border_width_left = 2
 		tile_style.border_width_top = 2
 		tile_style.border_width_right = 2
 		tile_style.border_width_bottom = 2
-		tile_style.border_color = Color(0.30, 0.28, 0.32, 0.88)
+		tile_style.border_color = Color(0.24, 0.23, 0.27, 0.80)
 		tile_style.corner_radius_top_left = 10
 		tile_style.corner_radius_top_right = 10
 		tile_style.corner_radius_bottom_left = 10
@@ -1828,7 +1852,7 @@ func _trigger_loss() -> void:
 func _render_board() -> void:
 	for i in board_units.size():
 		var occupied: bool = not _is_tile_empty(i)
-		tile_labels[i].text = _format_tile_compact_label(board_units[i]) if occupied else "Vacant"
+		tile_labels[i].text = _format_tile_compact_label(board_units[i]) if occupied else "Vacant tile"
 		_update_tile_visual_identity(i, occupied)
 		_update_tile_buff_aura(i, occupied)
 
@@ -1841,6 +1865,7 @@ func _render_board() -> void:
 				tile_panels[i].self_modulate = SUPPORT_PANEL_COLOR
 			else:
 				tile_panels[i].self_modulate = ATTACK_PANEL_COLOR
+	_update_opponent_board_presence()
 	_update_board_power_ui()
 
 func _update_tile_buff_aura(tile_index: int, occupied: bool) -> void:
@@ -2020,6 +2045,7 @@ func _update_enemy_lane_ui() -> void:
 		enemy_labels[lane_index].text = lane_line
 		if lane_index < player_lane_target_labels.size():
 			player_lane_target_labels[lane_index].text = "Player Lane %d • %d mobs" % [lane_index + 1, enemy_lanes[lane_index].size()]
+	_update_opponent_board_presence()
 
 func _get_front_enemy_index(lane_enemies: Array) -> int:
 	var selected_index: int = 0
@@ -2346,36 +2372,143 @@ func _show_support_aura_feedback(lane_index: int) -> void:
 func _update_tile_visual_identity(tile_index: int, occupied: bool) -> void:
 	if tile_index < 0 or tile_index >= tile_icon_labels.size():
 		return
-	if tile_index >= tile_icon_glow_rects.size() or tile_index >= tile_level_badge_rects.size() or tile_index >= tile_level_badge_labels.size():
+	if tile_index >= tile_icon_glow_rects.size():
+		return
+	if tile_index >= tile_icon_plate_rects.size():
+		return
+	if tile_index >= tile_level_badge_rects.size() or tile_index >= tile_level_badge_labels.size():
+		return
+	if tile_index >= tile_panels.size():
 		return
 	var icon_label: Label = tile_icon_labels[tile_index]
 	var icon_glow: ColorRect = tile_icon_glow_rects[tile_index]
+	var icon_plate: ColorRect = tile_icon_plate_rects[tile_index]
 	var level_badge: ColorRect = tile_level_badge_rects[tile_index]
 	var level_label: Label = tile_level_badge_labels[tile_index]
+	var tile_style: StyleBoxFlat = StyleBoxFlat.new()
+	tile_style.corner_radius_top_left = 10
+	tile_style.corner_radius_top_right = 10
+	tile_style.corner_radius_bottom_left = 10
+	tile_style.corner_radius_bottom_right = 10
+	tile_style.shadow_offset = Vector2(0.0, 2.0)
+	tile_style.border_width_left = 2
+	tile_style.border_width_top = 2
+	tile_style.border_width_right = 2
+	tile_style.border_width_bottom = 2
 	if not occupied:
 		icon_label.text = ""
 		icon_glow.color = Color(0.56, 0.67, 0.92, 0.0)
+		icon_plate.color = Color(0.11, 0.14, 0.18, 0.0)
 		level_badge.color = Color(0.78, 0.68, 0.33, 0.0)
 		level_label.text = ""
 		level_label.modulate = Color(0.08, 0.08, 0.08, 0.0)
+		tile_style.bg_color = Color(0.06, 0.07, 0.09, 0.97)
+		tile_style.border_color = Color(0.24, 0.23, 0.27, 0.74)
+		tile_style.shadow_size = 2
+		tile_style.shadow_color = Color(0.0, 0.0, 0.0, 0.16)
+		tile_panels[tile_index].add_theme_stylebox_override("panel", tile_style)
 		return
 	var unit: Dictionary = board_units[tile_index]
 	var role: String = _get_unit_role(unit)
 	var icon_color: Color = Color(0.78, 0.89, 0.98, 1.0)
-	var glow_color: Color = Color(0.28, 0.44, 0.69, 0.36)
+	var glow_color: Color = Color(0.28, 0.44, 0.69, 0.52)
+	var plate_color: Color = Color(0.12, 0.18, 0.24, 0.88)
+	var tile_bg: Color = Color(0.10, 0.15, 0.21, 0.98)
+	var tile_border: Color = Color(0.58, 0.77, 0.91, 0.95)
 	if role == "support":
 		icon_color = Color(0.91, 0.79, 0.99, 1.0)
-		glow_color = Color(0.56, 0.33, 0.76, 0.44)
+		glow_color = Color(0.56, 0.33, 0.76, 0.62)
+		plate_color = Color(0.19, 0.12, 0.25, 0.90)
+		tile_bg = Color(0.14, 0.10, 0.20, 0.98)
+		tile_border = Color(0.80, 0.64, 0.93, 0.96)
 	elif role == "cleave":
 		icon_color = Color(0.98, 0.82, 0.58, 1.0)
-		glow_color = Color(0.75, 0.48, 0.20, 0.40)
+		glow_color = Color(0.75, 0.48, 0.20, 0.58)
+		plate_color = Color(0.24, 0.16, 0.10, 0.90)
+		tile_bg = Color(0.18, 0.12, 0.09, 0.98)
+		tile_border = Color(0.94, 0.69, 0.42, 0.95)
+	elif role == "lane":
+		tile_bg = Color(0.10, 0.15, 0.20, 0.98)
+		tile_border = Color(0.56, 0.77, 0.91, 0.96)
+	elif role == "single":
+		tile_bg = Color(0.12, 0.14, 0.19, 0.98)
+		tile_border = Color(0.76, 0.86, 0.96, 0.95)
 	icon_label.text = _get_unit_icon(unit)
 	icon_label.modulate = icon_color
 	icon_glow.color = glow_color
+	icon_plate.color = plate_color
+	tile_style.bg_color = tile_bg
+	tile_style.border_color = tile_border
+	tile_style.shadow_size = 9
+	tile_style.shadow_color = Color(tile_border.r, tile_border.g, tile_border.b, 0.34)
+	tile_panels[tile_index].add_theme_stylebox_override("panel", tile_style)
 	var level_value: int = int(unit["level"])
 	level_badge.color = Color(0.86, 0.78, 0.41, 0.95)
 	level_label.text = "L%d" % level_value
 	level_label.modulate = Color(0.08, 0.08, 0.08, 1.0)
+
+func _update_opponent_board_presence() -> void:
+	if opponent_tile_panels.is_empty():
+		return
+	var occupied_tiles: Array[bool] = []
+	occupied_tiles.resize(opponent_tile_panels.size())
+	for tile_idx in occupied_tiles.size():
+		occupied_tiles[tile_idx] = false
+	for lane_index in opponent_lanes.size():
+		var lane_enemies: Array = opponent_lanes[lane_index]
+		for enemy_data in lane_enemies:
+			var enemy: Dictionary = enemy_data
+			var progress_value: int = int(enemy.get("progress", 0))
+			var column: int = int(floor((float(progress_value) / float(LANE_LENGTH)) * float(BOARD_COLUMNS)))
+			column = int(clamp(column, 0, BOARD_COLUMNS - 1))
+			var tile_index: int = lane_index * BOARD_COLUMNS + column
+			if tile_index >= 0 and tile_index < occupied_tiles.size():
+				occupied_tiles[tile_index] = true
+	for tile_index in opponent_tile_panels.size():
+		_update_single_opponent_tile_presence(tile_index, occupied_tiles[tile_index])
+
+func _update_single_opponent_tile_presence(tile_index: int, occupied: bool) -> void:
+	if tile_index < 0:
+		return
+	if tile_index >= opponent_tile_panels.size():
+		return
+	if tile_index >= opponent_tile_glow_rects.size():
+		return
+	if tile_index >= opponent_tile_plate_rects.size():
+		return
+	if tile_index >= opponent_tile_icon_labels.size():
+		return
+	var tile_panel: Panel = opponent_tile_panels[tile_index]
+	var hostile_glow: ColorRect = opponent_tile_glow_rects[tile_index]
+	var hostile_plate: ColorRect = opponent_tile_plate_rects[tile_index]
+	var icon_label: Label = opponent_tile_icon_labels[tile_index]
+	var tile_style: StyleBoxFlat = StyleBoxFlat.new()
+	tile_style.corner_radius_top_left = 8
+	tile_style.corner_radius_top_right = 8
+	tile_style.corner_radius_bottom_left = 8
+	tile_style.corner_radius_bottom_right = 8
+	tile_style.border_width_left = 2
+	tile_style.border_width_top = 2
+	tile_style.border_width_right = 2
+	tile_style.border_width_bottom = 2
+	if not occupied:
+		tile_style.bg_color = Color(0.08, 0.06, 0.12, 0.88)
+		tile_style.border_color = Color(0.40, 0.24, 0.48, 0.62)
+		hostile_glow.color = Color(0.58, 0.24, 0.70, 0.14)
+		hostile_plate.color = Color(0.24, 0.12, 0.29, 0.20)
+		icon_label.text = ""
+		tile_panel.add_theme_stylebox_override("panel", tile_style)
+		return
+	tile_style.bg_color = Color(0.18, 0.08, 0.22, 0.97)
+	tile_style.border_color = Color(0.86, 0.52, 0.90, 0.94)
+	tile_style.shadow_size = 7
+	tile_style.shadow_color = Color(0.80, 0.34, 0.86, 0.38)
+	tile_style.shadow_offset = Vector2(0.0, 2.0)
+	hostile_glow.color = Color(0.83, 0.38, 0.88, 0.44)
+	hostile_plate.color = Color(0.34, 0.14, 0.40, 0.78)
+	icon_label.text = HOSTILE_ICON_SET[tile_index % HOSTILE_ICON_SET.size()]
+	icon_label.modulate = Color(0.98, 0.86, 0.99, 0.96)
+	tile_panel.add_theme_stylebox_override("panel", tile_style)
 
 func _get_unit_icon(unit: Dictionary) -> String:
 	var role: String = _get_unit_role(unit)
