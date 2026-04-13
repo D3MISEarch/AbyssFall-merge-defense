@@ -164,9 +164,9 @@ var opponent_core_hp: int = BASE_GATE_HP
 @onready var board_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/Board
 @onready var opponent_board_panel: Panel = $BattlefieldStack/EnemyStrip/EnemyFlow/OpponentBoard
 @onready var center_strip_panel: Panel = $BattlefieldStack/CenterStrip
-@onready var wave_label: Label = $TopBar/TopRow/WaveLabel
-@onready var gate_label: Label = $TopBar/TopRow/GateLabel
-@onready var board_power_label: Label = $TopBar/TopRow/BoardPowerLabel
+@onready var wave_label: Label = $TopBar/TopRow/TopStats/WaveLabel
+@onready var gate_label: Label = $TopBar/TopRow/TopStats/GateLabel
+@onready var board_power_label: Label = $TopBar/TopRow/TopStats/BoardPowerLabel
 @onready var loss_label: Label = $LossLabel
 @onready var tile_grid: GridContainer = $BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/TileGrid
 @onready var board_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/Board/BoardMargin/BoardContent/BoardLabel
@@ -199,7 +199,12 @@ var opponent_core_hp: int = BASE_GATE_HP
 @onready var player_gate_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerGate
 @onready var player_left_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerLeftPath
 @onready var player_right_path_panel: Panel = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerRightPath
-@onready var center_label: Label = $BattlefieldStack/CenterStrip/CenterLabel
+@onready var center_label: Label = $BattlefieldStack/CenterStrip/CenterContent/CenterLabel
+@onready var life_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/LifeInfoLabel
+@onready var wave_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/WaveInfoLabel
+@onready var timer_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/TimerInfoLabel
+@onready var boss_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/BossInfoLabel
+@onready var pressure_info_label: Label = $BattlefieldStack/CenterStrip/CenterContent/BattleInfoRow/PressureInfoLabel
 @onready var enemy_spawn_label: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemySpawn/EnemySpawnLabel
 @onready var enemy_gate_label_text: Label = $BattlefieldStack/EnemyStrip/EnemyFlow/EnemyGate/EnemyGateLabel
 @onready var player_spawn_label: Label = $BattlefieldStack/PlayerStrip/PlayerFlow/PlayerSpawn/PlayerSpawnLabel
@@ -430,6 +435,7 @@ func _ready() -> void:
 	_update_gate_ui()
 	_update_wave_ui()
 	_update_board_power_ui()
+	_update_battle_info_strip()
 	_update_enemy_lane_ui()
 	loss_label.visible = false
 	status_label.text = "Prototype loaded. Summon units and hold the gate."
@@ -1065,15 +1071,20 @@ func _style_center_strip() -> void:
 	center_strip_panel.add_theme_stylebox_override("panel", strip_style)
 	center_label.text = "Abyssal Fault • Corrupted Ground"
 	center_label.modulate = Color(0.85, 0.74, 0.92, 0.95)
+	var strip_labels: Array[Label] = [life_info_label, wave_info_label, timer_info_label, boss_info_label, pressure_info_label]
+	for info_label in strip_labels:
+		info_label.add_theme_font_size_override("font_size", 14)
+		info_label.modulate = Color(0.90, 0.86, 0.96, 0.97)
+	center_label.add_theme_font_size_override("font_size", 12)
 
 func _style_lane_identity_labels() -> void:
-	enemy_spawn_label.text = "Rift Breach\nSpawn"
-	enemy_gate_label_text.text = "Hostile Core"
-	player_spawn_label.text = "Sanctum Spawn"
-	player_gate_label_text.text = "Gate Core"
-	enemy_left_path_label.text = "Corrupted Rim\nSpawn ⇒ U"
-	player_left_path_label.text = "Outer Lane\nSpawn ⇒ U"
-	player_right_path_label.text = "U Route ⇒\nGate"
+	enemy_spawn_label.text = "◉ Rift"
+	enemy_gate_label_text.text = "⛨ Core"
+	player_spawn_label.text = "◉ Spawn"
+	player_gate_label_text.text = "⛨ Gate"
+	enemy_left_path_label.text = "↺ Rim"
+	player_left_path_label.text = "↺ Lane"
+	player_right_path_label.text = "⇢ Exit"
 	enemy_spawn_label.modulate = Color(0.91, 0.74, 0.86, 0.95)
 	enemy_gate_label_text.modulate = Color(0.95, 0.72, 0.89, 0.96)
 	player_spawn_label.modulate = Color(0.80, 0.90, 0.94, 0.96)
@@ -1095,10 +1106,13 @@ func _style_top_bar() -> void:
 	top_style.corner_radius_bottom_left = 10
 	top_style.corner_radius_bottom_right = 10
 	top_bar_panel.add_theme_stylebox_override("panel", top_style)
-	top_row.add_theme_constant_override("separation", 28)
+	top_row.add_theme_constant_override("separation", 10)
 	wave_label.modulate = Color(0.88, 0.87, 0.94, 1.0)
 	gate_label.modulate = Color(0.93, 0.84, 0.97, 1.0)
 	board_power_label.modulate = Color(0.78, 0.87, 0.90, 1.0)
+	wave_label.add_theme_font_size_override("font_size", 13)
+	gate_label.add_theme_font_size_override("font_size", 13)
+	board_power_label.add_theme_font_size_override("font_size", 13)
 
 func _style_bottom_controls() -> void:
 	var controls_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -1129,7 +1143,7 @@ func _style_bottom_controls() -> void:
 	summon_button.add_theme_stylebox_override("normal", summon_style)
 	summon_button.add_theme_stylebox_override("hover", summon_style)
 	summon_button.add_theme_stylebox_override("pressed", summon_style)
-	summon_button.text = "Invoke Unit"
+	summon_button.text = "⛧ Invoke"
 	summon_button.modulate = Color(0.98, 0.95, 1.0, 1.0)
 
 	var roulette_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -1146,9 +1160,17 @@ func _style_bottom_controls() -> void:
 	roulette_button.add_theme_stylebox_override("normal", roulette_style)
 	roulette_button.add_theme_stylebox_override("hover", roulette_style)
 	roulette_button.add_theme_stylebox_override("pressed", roulette_style)
-	roulette_button.text = "Ritual Skill"
+	roulette_button.text = "✦ Hero"
 	roulette_button.modulate = Color(0.92, 0.94, 0.98, 1.0)
 	mana_label.modulate = Color(0.81, 0.91, 0.99, 1.0)
+	mana_label.text = "✶ 10/10"
+	var utility_button_node: Node = bottom_row.get_node_or_null("UtilityButton")
+	var utility_button: Button = utility_button_node as Button
+	if utility_button != null:
+		utility_button.add_theme_stylebox_override("normal", roulette_style)
+		utility_button.add_theme_stylebox_override("hover", roulette_style)
+		utility_button.add_theme_stylebox_override("pressed", roulette_style)
+		utility_button.modulate = Color(0.86, 0.90, 0.95, 1.0)
 
 func _style_enemy_lanes() -> void:
 	enemy_lane_box.add_theme_constant_override("separation", 4)
@@ -1274,6 +1296,7 @@ func _process(delta: float) -> void:
 	if advance_timer >= ADVANCE_INTERVAL_SECONDS:
 		advance_timer -= ADVANCE_INTERVAL_SECONDS
 		_tick_enemy_loop()
+	_update_battle_info_strip()
 	_update_lane_monster_positions()
 
 func _on_summon_pressed() -> void:
@@ -1712,13 +1735,33 @@ func _is_tile_receiving_selected_support(tile_index: int) -> bool:
 	return selected_lane == tile_lane
 
 func _update_wave_ui() -> void:
-	wave_label.text = "Wave: %d" % wave_number
+	wave_label.text = "🌊 %d" % wave_number
+	_update_battle_info_strip()
 
 func _update_gate_ui() -> void:
-	gate_label.text = "Gate HP: %d / %d" % [gate_hp, BASE_GATE_HP]
+	gate_label.text = "❤ %d" % gate_hp
+	_update_battle_info_strip()
 
 func _update_board_power_ui() -> void:
-	board_power_label.text = "Board Power: %d" % _get_board_power()
+	board_power_label.text = "⚔ %d" % _get_board_power()
+	_update_battle_info_strip()
+
+func _update_battle_info_strip() -> void:
+	var player_life: int = gate_hp
+	var opponent_life: int = opponent_core_hp
+	var timer_left: float = max(0.0, SPAWN_INTERVAL_SECONDS - spawn_timer)
+	var enemy_count: int = 0
+	var opponent_count: int = 0
+	for lane_index in LANE_COUNT:
+		enemy_count += enemy_lanes[lane_index].size()
+		opponent_count += opponent_lanes[lane_index].size()
+	var pressure: int = enemy_count + opponent_count
+	var boss_count: int = int(wave_number / 5)
+	life_info_label.text = "❤ %d | ☠ %d" % [player_life, opponent_life]
+	wave_info_label.text = "🌊 %d" % wave_number
+	timer_info_label.text = "⏱ %.1f" % timer_left
+	boss_info_label.text = "👑 %d" % boss_count
+	pressure_info_label.text = "☣ %d" % pressure
 
 func _update_enemy_lane_ui() -> void:
 	for lane_index in LANE_COUNT:
