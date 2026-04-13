@@ -112,6 +112,8 @@ const BUFF_TYPE_PRIORITY: Array[String] = [
 	BUFF_TYPE_HEALING,
 	BUFF_TYPE_VOID
 ]
+const UPGRADE_ICONS: Array[String] = ["🛡", "➤", "✦", "◉"]
+const UPGRADE_BASE_COSTS: Array[int] = [4, 5, 6, 7]
 
 var next_unit: int = 0
 var board_units: Array[Dictionary] = []
@@ -157,6 +159,12 @@ var gate_flash_overlays: Dictionary = {}
 var player_lane_target_panels: Array[Panel] = []
 var player_lane_target_labels: Array[Label] = []
 var opponent_core_hp: int = BASE_GATE_HP
+var mana_points: int = 10
+var max_mana_points: int = 10
+var top_upgrade_levels: Array[int] = [1, 1, 1, 1]
+var bottom_upgrade_levels: Array[int] = [1, 1, 1, 1]
+var selected_top_upgrade: int = 0
+var selected_bottom_upgrade: int = 0
 
 @onready var summon_button: Button = $BottomControls/BottomRow/SummonButton
 @onready var status_label: Label = $StatusLabel
@@ -278,7 +286,7 @@ func _ready() -> void:
 		ritual_glyph.offset_left = 14.0
 		ritual_glyph.offset_top = 14.0
 		ritual_glyph.offset_right = -14.0
-		ritual_glyph.offset_bottom = -88.0
+		ritual_glyph.offset_bottom = -92.0
 		ritual_glyph.color = Color(0.57, 0.35, 0.68, 0.15)
 		ritual_glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(ritual_glyph)
@@ -287,7 +295,7 @@ func _ready() -> void:
 		var ritual_crack: ColorRect = ColorRect.new()
 		ritual_crack.anchors_preset = Control.PRESET_FULL_RECT
 		ritual_crack.offset_left = 20.0
-		ritual_crack.offset_top = 76.0
+		ritual_crack.offset_top = 82.0
 		ritual_crack.offset_right = -16.0
 		ritual_crack.offset_bottom = -42.0
 		ritual_crack.color = Color(0.03, 0.04, 0.05, 0.45)
@@ -298,7 +306,7 @@ func _ready() -> void:
 		var aura_underlay: ColorRect = ColorRect.new()
 		aura_underlay.anchors_preset = Control.PRESET_FULL_RECT
 		aura_underlay.offset_left = 6.0
-		aura_underlay.offset_top = 68.0
+		aura_underlay.offset_top = 74.0
 		aura_underlay.offset_right = -6.0
 		aura_underlay.offset_bottom = -6.0
 		aura_underlay.color = Color(1.0, 1.0, 1.0, 0.0)
@@ -309,7 +317,7 @@ func _ready() -> void:
 		var aura_glow: ColorRect = ColorRect.new()
 		aura_glow.anchors_preset = Control.PRESET_FULL_RECT
 		aura_glow.offset_left = 4.0
-		aura_glow.offset_top = 56.0
+		aura_glow.offset_top = 62.0
 		aura_glow.offset_right = -4.0
 		aura_glow.offset_bottom = -4.0
 		aura_glow.color = Color(1.0, 1.0, 1.0, 0.0)
@@ -320,7 +328,7 @@ func _ready() -> void:
 		var aura_core: ColorRect = ColorRect.new()
 		aura_core.anchors_preset = Control.PRESET_FULL_RECT
 		aura_core.offset_left = 10.0
-		aura_core.offset_top = 76.0
+		aura_core.offset_top = 82.0
 		aura_core.offset_right = -10.0
 		aura_core.offset_bottom = -10.0
 		aura_core.color = Color(1.0, 1.0, 1.0, 0.0)
@@ -363,7 +371,7 @@ func _ready() -> void:
 		icon_glow.offset_left = 18.0
 		icon_glow.offset_top = 12.0
 		icon_glow.offset_right = -18.0
-		icon_glow.offset_bottom = -54.0
+		icon_glow.offset_bottom = -58.0
 		icon_glow.color = Color(0.55, 0.70, 0.92, 0.0)
 		icon_glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(icon_glow)
@@ -373,17 +381,17 @@ func _ready() -> void:
 		icon_label.offset_left = 6.0
 		icon_label.offset_top = 8.0
 		icon_label.offset_right = -6.0
-		icon_label.offset_bottom = -44.0
+		icon_label.offset_bottom = -46.0
 		icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		icon_label.add_theme_font_size_override("font_size", 30)
+		icon_label.add_theme_font_size_override("font_size", 32)
 		icon_label.text = ""
 		icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(icon_label)
 		tile_icon_labels.append(icon_label)
 		var level_badge: ColorRect = ColorRect.new()
-		level_badge.position = Vector2(72.0, 6.0)
-		level_badge.size = Vector2(28.0, 18.0)
+		level_badge.position = Vector2(74.0, 6.0)
+		level_badge.size = Vector2(30.0, 19.0)
 		level_badge.color = Color(0.78, 0.68, 0.33, 0.0)
 		level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(level_badge)
@@ -393,7 +401,7 @@ func _ready() -> void:
 		level_label.offset_left = 74.0
 		level_label.offset_top = 6.0
 		level_label.offset_right = -2.0
-		level_label.offset_bottom = -34.0
+		level_label.offset_bottom = -42.0
 		level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		level_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		level_label.add_theme_font_size_override("font_size", 11)
@@ -405,13 +413,13 @@ func _ready() -> void:
 		tile_labels.append(label)
 		label.anchors_preset = Control.PRESET_FULL_RECT
 		label.offset_left = 8.0
-		label.offset_top = 52.0
+		label.offset_top = 58.0
 		label.offset_right = -8.0
 		label.offset_bottom = -6.0
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.add_theme_font_size_override("font_size", 11)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		label.add_theme_font_size_override("font_size", 10)
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(_on_tile_gui_input.bind(i))
 
@@ -456,6 +464,7 @@ func _ready() -> void:
 	_update_wave_ui()
 	_update_board_power_ui()
 	_update_battle_info_strip()
+	_update_mana_ui()
 	_update_enemy_lane_ui()
 	loss_label.visible = false
 	status_label.text = "Prototype loaded. Summon units and hold the gate."
@@ -942,10 +951,10 @@ func _add_strip_ambience(strip_panel: Panel, is_hostile_strip: bool) -> void:
 func _style_battlefield_strips() -> void:
 	var enemy_strip_style: StyleBoxFlat = StyleBoxFlat.new()
 	enemy_strip_style.bg_color = Color(0.06, 0.05, 0.09, 0.97)
-	enemy_strip_style.border_width_left = 4
-	enemy_strip_style.border_width_top = 4
-	enemy_strip_style.border_width_right = 4
-	enemy_strip_style.border_width_bottom = 4
+	enemy_strip_style.border_width_left = 5
+	enemy_strip_style.border_width_top = 5
+	enemy_strip_style.border_width_right = 5
+	enemy_strip_style.border_width_bottom = 5
 	enemy_strip_style.border_color = Color(0.46, 0.20, 0.52, 0.92)
 	enemy_strip_style.corner_radius_top_left = 16
 	enemy_strip_style.corner_radius_top_right = 16
@@ -958,10 +967,10 @@ func _style_battlefield_strips() -> void:
 
 	var player_strip_style: StyleBoxFlat = StyleBoxFlat.new()
 	player_strip_style.bg_color = Color(0.05, 0.07, 0.09, 0.97)
-	player_strip_style.border_width_left = 4
-	player_strip_style.border_width_top = 4
-	player_strip_style.border_width_right = 4
-	player_strip_style.border_width_bottom = 4
+	player_strip_style.border_width_left = 5
+	player_strip_style.border_width_top = 5
+	player_strip_style.border_width_right = 5
+	player_strip_style.border_width_bottom = 5
 	player_strip_style.border_color = Color(0.27, 0.39, 0.47, 0.93)
 	player_strip_style.corner_radius_top_left = 16
 	player_strip_style.corner_radius_top_right = 16
@@ -1007,12 +1016,12 @@ func _style_board_panel() -> void:
 	board_style.border_width_top = 5
 	board_style.border_width_right = 5
 	board_style.border_width_bottom = 5
-	board_style.border_color = Color(0.28, 0.26, 0.32, 0.93)
+	board_style.border_color = Color(0.34, 0.34, 0.40, 0.95)
 	board_style.corner_radius_top_left = 12
 	board_style.corner_radius_top_right = 12
 	board_style.corner_radius_bottom_left = 12
 	board_style.corner_radius_bottom_right = 12
-	board_style.shadow_size = 14
+	board_style.shadow_size = 18
 	board_style.shadow_color = Color(0.0, 0.0, 0.0, 0.58)
 	board_style.shadow_offset = Vector2(0.0, 5.0)
 	board_panel.add_theme_stylebox_override("panel", board_style)
@@ -1021,7 +1030,7 @@ func _style_board_panel() -> void:
 
 func _style_opponent_board() -> void:
 	var opponent_style: StyleBoxFlat = StyleBoxFlat.new()
-	opponent_style.bg_color = Color(0.06, 0.06, 0.09, 0.94)
+	opponent_style.bg_color = Color(0.07, 0.05, 0.10, 0.96)
 	opponent_style.border_width_left = 4
 	opponent_style.border_width_top = 4
 	opponent_style.border_width_right = 4
@@ -1041,10 +1050,10 @@ func _style_opponent_board() -> void:
 		var tile_panel: Panel = opponent_tile_panels[tile_index]
 		var tile_style: StyleBoxFlat = StyleBoxFlat.new()
 		tile_style.bg_color = Color(0.07, 0.06, 0.10, 0.93)
-		tile_style.border_width_left = 3
-		tile_style.border_width_top = 3
-		tile_style.border_width_right = 3
-		tile_style.border_width_bottom = 3
+		tile_style.border_width_left = 2
+		tile_style.border_width_top = 2
+		tile_style.border_width_right = 2
+		tile_style.border_width_bottom = 2
 		tile_style.border_color = Color(0.44, 0.26, 0.53, 0.88)
 		tile_style.corner_radius_top_left = 8
 		tile_style.corner_radius_top_right = 8
@@ -1066,8 +1075,8 @@ func _style_opponent_board() -> void:
 		var lane_id: int = int(label_index / BOARD_COLUMNS) + 1
 		var col_id: int = (label_index % BOARD_COLUMNS) + 1
 		tile_label.modulate = Color(0.80, 0.77, 0.89, 0.90)
-		tile_label.text = "Hostile\nL%d•C%d" % [lane_id, col_id]
-		tile_label.add_theme_font_size_override("font_size", 12)
+		tile_label.text = "L%d•%d" % [lane_id, col_id]
+		tile_label.add_theme_font_size_override("font_size", 11)
 		tile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		tile_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		if label_index < opponent_tile_icon_labels.size():
@@ -1090,26 +1099,26 @@ func _style_center_strip() -> void:
 	strip_style.shadow_color = Color(0.0, 0.0, 0.0, 0.46)
 	strip_style.shadow_offset = Vector2(0.0, 2.0)
 	center_strip_panel.add_theme_stylebox_override("panel", strip_style)
-	battle_info_row.add_theme_constant_override("separation", 12)
-	center_label.text = "Abyssal Fault • Corrupted Ground"
+	battle_info_row.add_theme_constant_override("separation", 8)
+	center_label.text = "Abyssal Fault • Active Front"
 	center_label.modulate = Color(0.85, 0.74, 0.92, 0.95)
-	life_info_label.text = "❤ 100  ⚔ 100"
+	life_info_label.text = "❤ 100 | ☠ 100"
 	wave_info_label.text = "🌊 W1"
-	timer_info_label.text = "⏱ 2.0s"
-	boss_info_label.text = "👑 0/3"
-	pressure_info_label.text = "☣ 0%"
+	timer_info_label.text = "⏳ 2.0s"
+	boss_info_label.text = "👑 0"
+	pressure_info_label.text = "☣ 0"
 	var strip_labels: Array[Label] = [life_info_label, wave_info_label, timer_info_label, boss_info_label, pressure_info_label]
 	for info_label in strip_labels:
-		info_label.add_theme_font_size_override("font_size", 15)
+		info_label.add_theme_font_size_override("font_size", 14)
 		info_label.add_theme_constant_override("outline_size", 1)
 		info_label.modulate = Color(0.90, 0.86, 0.96, 0.97)
 	center_label.add_theme_font_size_override("font_size", 13)
 
 func _style_lane_identity_labels() -> void:
-	enemy_spawn_label.text = "◉ Rift"
+	enemy_spawn_label.text = "🜏 Rift"
 	enemy_gate_label_text.text = "⛨ Core"
-	player_spawn_label.text = "◉ Spawn"
-	player_gate_label_text.text = "⛨ Gate"
+	player_spawn_label.text = "🜂 Breach"
+	player_gate_label_text.text = "✥ Seal"
 	enemy_left_path_label.text = "↺ Rim"
 	player_left_path_label.text = "↺ Lane"
 	player_right_path_label.text = "⇢ Exit"
@@ -1172,10 +1181,10 @@ func _style_bottom_controls() -> void:
 	controls_style.corner_radius_bottom_right = 14
 	bottom_controls_panel.add_theme_stylebox_override("panel", controls_style)
 	bottom_row.add_theme_constant_override("separation", 12)
-	summon_button.custom_minimum_size = Vector2(272.0, 62.0)
-	roulette_button.custom_minimum_size = Vector2(164.0, 62.0)
-	utility_button.custom_minimum_size = Vector2(96.0, 62.0)
-	mana_label.custom_minimum_size = Vector2(172.0, 62.0)
+	summon_button.custom_minimum_size = Vector2(288.0, 64.0)
+	roulette_button.custom_minimum_size = Vector2(156.0, 64.0)
+	utility_button.custom_minimum_size = Vector2(92.0, 64.0)
+	mana_label.custom_minimum_size = Vector2(160.0, 64.0)
 
 	var summon_style: StyleBoxFlat = StyleBoxFlat.new()
 	summon_style.bg_color = Color(0.30, 0.12, 0.38, 1.0)
@@ -1191,7 +1200,7 @@ func _style_bottom_controls() -> void:
 	summon_button.add_theme_stylebox_override("normal", summon_style)
 	summon_button.add_theme_stylebox_override("hover", summon_style)
 	summon_button.add_theme_stylebox_override("pressed", summon_style)
-	summon_button.text = "⛧ Invoke"
+	summon_button.text = "⛧ Invoke Rift"
 	summon_button.modulate = Color(0.98, 0.95, 1.0, 1.0)
 	summon_button.add_theme_font_size_override("font_size", 20)
 
@@ -1209,7 +1218,7 @@ func _style_bottom_controls() -> void:
 	roulette_button.add_theme_stylebox_override("normal", roulette_style)
 	roulette_button.add_theme_stylebox_override("hover", roulette_style)
 	roulette_button.add_theme_stylebox_override("pressed", roulette_style)
-	roulette_button.text = "✦ Hero"
+	roulette_button.text = "✦ Hero Rite"
 	roulette_button.modulate = Color(0.92, 0.94, 0.98, 1.0)
 	roulette_button.add_theme_font_size_override("font_size", 18)
 	mana_label.modulate = Color(0.81, 0.91, 0.99, 1.0)
@@ -1239,6 +1248,7 @@ func _style_upgrade_rows() -> void:
 		_style_upgrade_card(top_card, true)
 	for bottom_card in bottom_upgrade_buttons:
 		_style_upgrade_card(bottom_card, false)
+	_update_upgrade_card_texts()
 
 func _style_upgrade_card(card_button: Button, is_top_row: bool) -> void:
 	var card_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -1258,12 +1268,39 @@ func _style_upgrade_card(card_button: Button, is_top_row: bool) -> void:
 	card_button.add_theme_stylebox_override("normal", card_style)
 	card_button.add_theme_stylebox_override("hover", card_style)
 	card_button.add_theme_stylebox_override("pressed", card_style)
-	card_button.add_theme_font_size_override("font_size", 15)
+	card_button.add_theme_font_size_override("font_size", 14)
 	card_button.modulate = Color(0.95, 0.92, 0.99, 1.0)
 	if is_top_row:
-		card_button.custom_minimum_size = Vector2(118.0, 58.0)
+		card_button.custom_minimum_size = Vector2(116.0, 52.0)
 	else:
-		card_button.custom_minimum_size = Vector2(116.0, 50.0)
+		card_button.custom_minimum_size = Vector2(116.0, 56.0)
+
+func _update_upgrade_card_texts() -> void:
+	for card_index in top_upgrade_buttons.size():
+		var level_value: int = top_upgrade_levels[card_index]
+		var cost_value: int = UPGRADE_BASE_COSTS[card_index] + level_value - 1
+		var icon: String = UPGRADE_ICONS[card_index % UPGRADE_ICONS.size()]
+		var is_selected: bool = card_index == selected_top_upgrade
+		var can_buy: bool = cost_value <= mana_points
+		top_upgrade_buttons[card_index].text = "%s  L%d  ⟡%d" % [icon, level_value, cost_value]
+		_apply_upgrade_state(top_upgrade_buttons[card_index], is_selected, can_buy)
+	for card_index in bottom_upgrade_buttons.size():
+		var level_value: int = bottom_upgrade_levels[card_index]
+		var cost_value: int = UPGRADE_BASE_COSTS[card_index] + level_value
+		var icon: String = UPGRADE_ICONS[card_index % UPGRADE_ICONS.size()]
+		var is_selected: bool = card_index == selected_bottom_upgrade
+		var can_buy: bool = cost_value <= mana_points
+		bottom_upgrade_buttons[card_index].text = "%s  L%d  ⟡%d" % [icon, level_value, cost_value]
+		_apply_upgrade_state(bottom_upgrade_buttons[card_index], is_selected, can_buy)
+
+func _apply_upgrade_state(card_button: Button, is_selected: bool, is_available: bool) -> void:
+	if is_selected:
+		card_button.self_modulate = Color(1.0, 0.96, 1.0, 1.0)
+		return
+	if is_available:
+		card_button.self_modulate = Color(0.92, 0.90, 0.98, 0.97)
+		return
+	card_button.self_modulate = Color(0.62, 0.61, 0.72, 0.88)
 
 func _style_enemy_lanes() -> void:
 	enemy_lane_box.add_theme_constant_override("separation", 4)
@@ -1405,9 +1442,11 @@ func _on_summon_pressed() -> void:
 	var summoned_name: String = UNIT_ROTATION[next_unit]
 	next_unit = (next_unit + 1) % UNIT_ROTATION.size()
 	board_units[empty_index] = {"name": summoned_name, "level": 1}
+	mana_points = max(0, mana_points - 1)
 	_render_board()
 	_update_support_feedback_ui()
 	_update_enemy_lane_ui()
+	_update_mana_ui()
 	status_label.text = "Summoned %s into tile %d." % [_format_unit(board_units[empty_index]), empty_index + 1]
 
 func _on_tile_gui_input(event: InputEvent, tile_index: int) -> void:
@@ -1523,6 +1562,9 @@ func _tick_enemy_loop() -> void:
 	_apply_opponent_auto_damage()
 	_advance_enemies_toward_gate()
 	_advance_opponent_enemies()
+	if mana_points < max_mana_points:
+		mana_points += 1
+	_update_mana_ui()
 	_update_enemy_lane_ui()
 
 func _apply_board_auto_damage() -> void:
@@ -1839,6 +1881,10 @@ func _update_board_power_ui() -> void:
 	board_power_label.text = "⚔ %d" % _get_board_power()
 	_update_battle_info_strip()
 
+func _update_mana_ui() -> void:
+	mana_label.text = "✶ Mana %d/%d" % [mana_points, max_mana_points]
+	_update_upgrade_card_texts()
+
 func _update_battle_info_strip() -> void:
 	var player_life: int = gate_hp
 	var opponent_life: int = opponent_core_hp
@@ -1850,11 +1896,11 @@ func _update_battle_info_strip() -> void:
 		opponent_count += opponent_lanes[lane_index].size()
 	var pressure: int = enemy_count + opponent_count
 	var boss_count: int = int(wave_number / 5)
-	life_info_label.text = "❤ %d | ☠ %d" % [player_life, opponent_life]
-	wave_info_label.text = "🌊 %d" % wave_number
-	timer_info_label.text = "⏱ %.1f" % timer_left
+	life_info_label.text = "❤ %d  ☠ %d" % [player_life, opponent_life]
+	wave_info_label.text = "🌊 W%d" % wave_number
+	timer_info_label.text = "⏳ %.1fs" % timer_left
 	boss_info_label.text = "👑 %d" % boss_count
-	pressure_info_label.text = "☣ %d" % pressure
+	pressure_info_label.text = "☣ %d  🕱 %d" % [pressure, enemy_count]
 
 func _update_enemy_lane_ui() -> void:
 	for lane_index in LANE_COUNT:
@@ -2246,12 +2292,13 @@ func _get_unit_icon(unit: Dictionary) -> String:
 func _format_tile_compact_label(unit: Dictionary) -> String:
 	var role_tag: String = _get_unit_role_tag(unit)
 	var short_name: String = _get_unit_short_name(unit)
+	var role_icon: String = _get_unit_icon(unit)
 	if _get_unit_role(unit) == "support":
 		var support_level: int = int(unit["level"])
 		var lane_buff_total: int = int(_get_unit_stat(unit, "lane_buff_base", 0))
 		lane_buff_total += int(_get_unit_stat(unit, "lane_buff_per_level", 0)) * support_level
-		return "%s • %s\nAura +%d" % [short_name, role_tag, lane_buff_total]
-	return "%s • %s\nATK %d" % [short_name, role_tag, _get_unit_base_damage(unit)]
+		return "%s %s\n+%d %s" % [role_icon, short_name, lane_buff_total, role_tag]
+	return "%s %s\nATK %d %s" % [role_icon, short_name, _get_unit_base_damage(unit), role_tag]
 
 func _spawn_projectile_feedback(owner: String, tile_index: int, lane_index: int, role: String) -> void:
 	if combat_fx_layer == null:
@@ -2267,11 +2314,11 @@ func _spawn_projectile_feedback(owner: String, tile_index: int, lane_index: int,
 	if travel_distance < 8.0:
 		return
 	var projectile: ColorRect = ColorRect.new()
-	projectile.size = Vector2(max(24.0, travel_distance * 0.24), 3.0)
+	projectile.size = Vector2(max(30.0, travel_distance * 0.30), 4.0)
 	projectile.position = source_center
-	projectile.pivot_offset = Vector2(0.0, 1.5)
+	projectile.pivot_offset = Vector2(0.0, 2.0)
 	projectile.rotation = direction.angle()
-	projectile.color = Color(0.82, 0.90, 1.0, 0.90)
+	projectile.color = Color(0.82, 0.90, 1.0, 0.94)
 	if role == "support":
 		projectile.color = Color(0.84, 0.66, 0.97, 0.90)
 	elif role == "cleave":
@@ -2280,12 +2327,42 @@ func _spawn_projectile_feedback(owner: String, tile_index: int, lane_index: int,
 		projectile.color = Color(0.94, 0.52, 0.78, 0.90)
 	projectile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	combat_fx_layer.add_child(projectile)
+	var trail: ColorRect = ColorRect.new()
+	trail.size = Vector2(projectile.size.x * 0.62, 8.0)
+	trail.position = source_center - Vector2(0.0, 2.0)
+	trail.pivot_offset = Vector2(0.0, 4.0)
+	trail.rotation = direction.angle()
+	trail.color = Color(projectile.color.r, projectile.color.g, projectile.color.b, 0.35)
+	trail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	combat_fx_layer.add_child(trail)
 	var tween: Tween = create_tween()
 	tween.tween_property(projectile, "position", target_center, 0.18)
 	tween.parallel().tween_property(projectile, "modulate:a", 0.0, 0.18)
 	tween.finished.connect(func() -> void:
+		_spawn_impact_burst(target_center, projectile.color)
 		if is_instance_valid(projectile):
 			projectile.queue_free()
+		if is_instance_valid(trail):
+			trail.queue_free()
+	)
+	var trail_tween: Tween = create_tween()
+	trail_tween.tween_property(trail, "position", target_center - Vector2(0.0, 2.0), 0.22)
+	trail_tween.parallel().tween_property(trail, "modulate:a", 0.0, 0.22)
+
+func _spawn_impact_burst(position: Vector2, tint: Color) -> void:
+	var burst: ColorRect = ColorRect.new()
+	burst.size = Vector2(20.0, 20.0)
+	burst.position = position - (burst.size * 0.5)
+	burst.color = Color(tint.r, tint.g, tint.b, 0.70)
+	burst.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	combat_fx_layer.add_child(burst)
+	var tween: Tween = create_tween()
+	tween.tween_property(burst, "size", Vector2(34.0, 34.0), 0.12)
+	tween.parallel().tween_property(burst, "position", position - Vector2(17.0, 17.0), 0.12)
+	tween.parallel().tween_property(burst, "modulate:a", 0.0, 0.12)
+	tween.finished.connect(func() -> void:
+		if is_instance_valid(burst):
+			burst.queue_free()
 	)
 
 func _get_control_center_in(local_root: Control, target: Control) -> Vector2:
@@ -2469,10 +2546,10 @@ func _get_lane_target_monster(owner: String, lane_index: int) -> Control:
 	return _get_front_monster_visual(enemy_lanes, lane_index)
 
 func _decorate_spawn_gate_identity() -> void:
-	_add_identity_overlay(player_spawn_panel, Color(0.42, 0.66, 0.73, 0.26), "◌")
-	_add_identity_overlay(player_gate_panel, Color(0.57, 0.82, 0.88, 0.24), "✥")
-	_add_identity_overlay(enemy_spawn_panel, Color(0.65, 0.24, 0.48, 0.30), "✶")
-	_add_identity_overlay(enemy_gate_panel, Color(0.78, 0.25, 0.51, 0.30), "☬")
+	_add_identity_overlay(player_spawn_panel, Color(0.38, 0.68, 0.76, 0.28), "🜂")
+	_add_identity_overlay(player_gate_panel, Color(0.57, 0.82, 0.88, 0.28), "✥")
+	_add_identity_overlay(enemy_spawn_panel, Color(0.65, 0.24, 0.48, 0.34), "🜏")
+	_add_identity_overlay(enemy_gate_panel, Color(0.78, 0.25, 0.51, 0.34), "☬")
 
 func _add_identity_overlay(panel: Panel, tint: Color, glyph: String) -> void:
 	var haze: ColorRect = ColorRect.new()
@@ -2490,10 +2567,20 @@ func _add_identity_overlay(panel: Panel, tint: Color, glyph: String) -> void:
 	sigil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sigil.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	sigil.text = glyph
-	sigil.modulate = Color(1.0, 1.0, 1.0, 0.30)
-	sigil.add_theme_font_size_override("font_size", 36)
+	sigil.modulate = Color(1.0, 1.0, 1.0, 0.34)
+	sigil.add_theme_font_size_override("font_size", 40)
 	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(sigil)
+	var ring: ColorRect = ColorRect.new()
+	ring.anchors_preset = Control.PRESET_FULL_RECT
+	ring.offset_left = 16.0
+	ring.offset_top = 16.0
+	ring.offset_right = -16.0
+	ring.offset_bottom = -16.0
+	ring.color = Color(tint.r, tint.g, tint.b, 0.18)
+	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(ring)
+	panel.move_child(ring, 1)
 	if panel == player_gate_panel:
 		gate_flash_overlays["player_gate"] = haze
 
@@ -2516,7 +2603,10 @@ func _set_lane_panel_base_visual(lane_index: int) -> void:
 		return
 	var lane_panel: Panel = enemy_panels[lane_index]
 	var lane_bonus: int = _get_lane_support_bonus(lane_index)
+	var active_enemies: int = enemy_lanes[lane_index].size()
 	if lane_bonus > 0:
 		lane_panel.self_modulate = LANE_AURA_COLOR
+	elif active_enemies > 0:
+		lane_panel.self_modulate = Color(0.86, 0.58, 0.58, 1.0)
 	else:
 		lane_panel.self_modulate = LANE_IDLE_COLOR
