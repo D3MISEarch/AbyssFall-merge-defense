@@ -396,6 +396,17 @@ func _build_strip_u_route(
 		strip_panel.size.y - lane_thickness - 6.0,
 		board_rect.position.y + board_rect.size.y + board_padding
 	)
+	var hostile_top_lane_y: float = clamp(
+		board_rect.position.y - (lane_thickness * 0.55),
+		4.0,
+		strip_panel.size.y - lane_thickness - 4.0
+	)
+	var hostile_bottom_lane_y: float = clamp(
+		board_rect.position.y + board_rect.size.y - (lane_thickness * 0.45),
+		4.0,
+		strip_panel.size.y - lane_thickness - 4.0
+	)
+	var hostile_vertical_height: float = max(42.0, (hostile_bottom_lane_y + lane_thickness) - hostile_top_lane_y)
 	var vertical_height: float = max(42.0, (bottom_lane_y + lane_thickness) - top_lane_y)
 	var horizontal_width: float = max(60.0, (right_lane_x + lane_thickness) - left_lane_x)
 	var spawn_top_entry_y: float = clamp(spawn_rect.position.y + 10.0, 4.0, strip_panel.size.y - lane_thickness - 4.0)
@@ -434,7 +445,7 @@ func _build_strip_u_route(
 		)
 		_add_route_segment(
 			strip_overlay,
-			Rect2(left_lane_x, top_lane_y, lane_thickness, vertical_height),
+			Rect2(left_lane_x, hostile_top_lane_y, lane_thickness, hostile_vertical_height),
 			lane_color,
 			edging_color,
 			glow_color,
@@ -443,7 +454,7 @@ func _build_strip_u_route(
 		)
 		_add_route_segment(
 			strip_overlay,
-			Rect2(left_lane_x, bottom_lane_y, horizontal_width, lane_thickness),
+			Rect2(left_lane_x, hostile_bottom_lane_y, horizontal_width, lane_thickness),
 			lane_color,
 			edging_color,
 			glow_color,
@@ -452,7 +463,7 @@ func _build_strip_u_route(
 		)
 		_add_route_segment(
 			strip_overlay,
-			Rect2(right_lane_x, top_lane_y, lane_thickness, vertical_height),
+			Rect2(right_lane_x, hostile_top_lane_y, lane_thickness, hostile_vertical_height),
 			lane_color,
 			edging_color,
 			glow_color,
